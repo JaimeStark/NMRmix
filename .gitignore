@@ -1,0 +1,17 @@
+.idea
+tests/
+.DS_Store
+
+.idea/.name
+
+.idea/vcs.xml
+
+.idea/NMRmix.iml
+
+.idea/modules.xml
+
+.idea/misc.xml
+
+.idea/encodings.xml
+
+*.pyc
