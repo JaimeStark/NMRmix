@@ -35,7 +35,7 @@ import os
 from core import parameters
 from gui import splash_screen, library_import
 
-__VERSION__ = "0.9 (Build 2015.11.18)"
+__VERSION__ = "0.9 (Build 2015.11.30)"
 
 def startGUI(params_object):
     app = QApplication(sys.argv)
