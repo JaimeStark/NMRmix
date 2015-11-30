@@ -124,17 +124,18 @@ class Window(QDialog):
         self.instructionLabel = QLabel(ins)
         self.instructionLabel.setStyleSheet('QLabel{qproperty-alignment: AlignCenter; font-size: 10px;}')
         self.showignoredregionsCheckBox = QCheckBox("Show Ignored Regions")
-        self.showignoredregionsCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showignoredregionsCheckBox.setToolTip("Shows the ranges set by the solvent/buffer ignore regions, if any.")
         self.showignoredregionsCheckBox.setLayoutDirection(Qt.RightToLeft)
         self.showignoredregionsCheckBox.setChecked(True)
         self.showignoredpeaksCheckBox = QCheckBox("Show Ignored Peaks")
-        self.showignoredpeaksCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showignoredpeaksCheckBox.setToolTip("Shows any compound peaks that are in the solvent/buffer ignore regions, if any.\n"
+                                                 "These peaks are ignored and are not evaluated during mixing.")
         self.showignoredpeaksCheckBox.setLayoutDirection(Qt.RightToLeft)
         self.showignoredpeaksCheckBox.setChecked(True)
         self.resetviewButton = QPushButton("Reset View")
-        self.resetviewButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.resetviewButton.setToolTip("Resets the spectrum to the default view.")
         self.savespectrumButton = QPushButton("Save Spectrum")
-        self.savespectrumButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.savespectrumButton.setToolTip("Saves the image in the spectrum window.")
 
         # Compound Peaklist Tab
         self.compoundtab3 = QWidget()
