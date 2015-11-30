@@ -38,8 +38,10 @@ class Window(QDialog):
         self.appName = QLabel("NMRmix")
         self.appName.setStyleSheet("QLabel {font-size: 24px; color: red; font-weight:bold;}")
         self.appName.setAlignment(Qt.AlignCenter)
-        self.appSubName = QLabel("<b>A tool for generating optimal small molecule mixtures</b>")
+        self.appSubName = QLabel("<b>A tool for generating optimal small molecule mixtures for "
+                                 "1D <sup>1</sup>H-NMR ligand affinity screens</b>")
         self.appSubName.setAlignment(Qt.AlignCenter)
+        self.appSubName.setWordWrap(True)
         self.versionLabel = QLabel("Version: %s\n" % self.version)
         self.versionLabel.setAlignment(Qt.AlignCenter)
         self.nmrfamLogo = QLabel()
