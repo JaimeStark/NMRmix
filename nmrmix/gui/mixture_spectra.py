@@ -18,6 +18,8 @@ matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar2
+
+from gui import compound_info
     
 class Window(QDialog):
     def __init__(self, params_object, library_object, compound_list, mixture_id, parent=None):
@@ -57,34 +59,39 @@ class Window(QDialog):
         self.canvas.mpl_connect('scroll_event', self.zooming)
         self.showroisCheckBox = QCheckBox("Show Unoverlapped ROIs")
         self.showroisCheckBox.setStyleSheet('QCheckBox{font-size: 12px;}')
-        self.showroisCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showroisCheckBox.setToolTip("Shows the regions of interest around every non-overlapped peak.\n"
+                                         "Useful for visualizing the regions that should be monitored in this mixture.")
         self.showroisCheckBox.setChecked(True)
         self.showfullroisCheckBox = QCheckBox("Show Complete ROIs")
         self.showfullroisCheckBox.setStyleSheet('QCheckBox{font-size: 12px;}')
-        self.showfullroisCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showfullroisCheckBox.setToolTip("Shows the regions of interest around every peak regardless of whether\n"
+                                             "it is overlapped or not. Useful for visualizing the magnitude of overlaps.")
         self.showignoredregionsCheckBox = QCheckBox("Show Ignored Regions")
         self.showignoredregionsCheckBox.setStyleSheet('QCheckBox{font-size: 12px;}')
-        self.showignoredregionsCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showignoredregionsCheckBox.setToolTip("Shows the ranges set by the solvent/buffer ignore regions, if any.")
         self.showignoredpeaksCheckBox = QCheckBox("Show Ignored Peaks")
         self.showignoredpeaksCheckBox.setStyleSheet('QCheckBox{font-size: 12px;}')
-        self.showignoredpeaksCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showignoredpeaksCheckBox.setToolTip("Shows any compound peaks that are in the solvent/buffer ignore regions, if any.\n"
+                                                 "These peaks are ignored and are not evaluated during mixing.")
         self.showpositiveoverlapCheckBox = QCheckBox("Show Overlaps as Positive")
         self.showpositiveoverlapCheckBox.setStyleSheet('QCheckBox{font-size: 12px;}')
-        self.showpositiveoverlapCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showpositiveoverlapCheckBox.setToolTip("By default, peaks that overlap are shown as negative peaks.\n"
+                                                    "This option allows for these peaks to be shown as positive peaks.")
         self.resetButton = QPushButton("Reset")
         self.resetButton.setStyleSheet("QPushButton{color: orange; font-weight: bold;}")
-        self.resetButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.resetButton.setToolTip("Resets the spectral view to the default view.")
         self.saveButton = QPushButton("Save")
         self.saveButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
-        self.saveButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.saveButton.setToolTip("Saves the image in the spectra window.")
         self.closeButton = QPushButton("Close")
         self.closeButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
-        self.closeButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.closeButton.setToolTip("Closes this window.")
         vbox = QVBoxLayout(self)
         self.spectraLabel = QLabel("Simulated Spectra of Mixture %s" % self.mixture_id)
         self.spectraLabel.setStyleSheet('QLabel{color: red; font-weight: bold; qproperty-alignment: AlignCenter; '
                                         'font-size: 14px;}')
-        self.spectraLabel.setToolTip("Tooltip") # TODO: Tooltip
+        self.spectraLabel.setToolTip("Shows the simulated spectra of the compounds in this mixture based solely on peaklists.\n"
+                                     "Peaks are drawn based on a Lorentzian shape.")
         vbox.addWidget(self.spectraLabel)
         vbox.addWidget(self.canvas)
         ins = "Left-click+drag to pan x-axis / Right-click+drag to zoom x-axis / Scroll-wheel to change intensity scale"
@@ -94,9 +101,12 @@ class Window(QDialog):
         gridbox = QGridLayout()
         self.compound_legend = {}
         for i, compound in enumerate(self.show_list):
-            self.compound_legend[i] = QPushButton(str(compound))
-            self.compound_legend[i].setStyleSheet("background-color: %s; font-weight: bold;" % self.compound_colors[i])
-            self.compound_legend[i].clicked.connect(self.handleLegend)
+            self.compound_legend[i] = QPushButtonRight(str(compound))
+            self.compound_legend[i].setStyleSheet("QPushButton {background-color: %s; font-weight: bold;}" % self.compound_colors[i])
+            self.compound_legend[i].leftClicked.connect(self.handleLegend)
+            self.compound_legend[i].rightClicked.connect(self.handleCompoundButtonRight)
+            self.compound_legend[i].setToolTip("Left-click to toggle the spectra for this compound.\n"
+                                               "Right-click to show compound infomation.")
 
             row = int(i / 6)
             column = i % 6
@@ -141,6 +151,13 @@ class Window(QDialog):
             button.setStyleSheet("background-color: %s; font-weight: bold;" % self.compound_colors[i])
             self.show_list[i] = compound
             self.drawData()
+
+    def handleCompoundButtonRight(self):
+        button = self.sender()
+        compound = str(button.text())
+        compound_obj = self.library.library[compound]
+        compound_win = compound_info.Window(self.params, compound_obj, editable_peaklist=False)
+        compound_win.exec_()
 
     def handleROIs(self):
         if self.showroisCheckBox.isChecked():
@@ -305,3 +322,17 @@ class My_Axes(matplotlib.axes.Axes):
     name = "My_Axes"
     def drag_pan(self, button, key, x, y):
         matplotlib.axes.Axes.drag_pan(self, button, 'x', x, y)
+
+class QPushButtonRight(QPushButton):
+    rightClicked = pyqtSignal()
+    leftClicked = pyqtSignal()
+
+    def __init__(self, string):
+        QPushButton.__init__(self, string)
+
+    def mousePressEvent(self, event):
+        QPushButton.mousePressEvent(self, event)
+        if event.button() == Qt.RightButton:
+            self.rightClicked.emit()
+        if event.button() == Qt.LeftButton:
+            self.leftClicked.emit()
