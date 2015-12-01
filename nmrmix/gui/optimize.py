@@ -89,6 +89,7 @@ class Window(QDialog):
         hbox2 = QHBoxLayout()
         self.stopButton = QPushButton("Stop Optimizing")
         self.stopButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
+        self.stopButton.setDefault(True)
         hbox2.addWidget(self.stopButton)
         self.okButton = QPushButton("Accept Results")
         self.okButton.setStyleSheet("QPushButton{color: gray; font-weight: bold;}")
@@ -151,7 +152,9 @@ class Window(QDialog):
             self.okButton.setDisabled(False)
             self.okButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
             self.optimizeResults.setDisabled(False)
+            self.optimizeResults.setDefault(True)
             self.stopButton.setText("Cancel Changes")
+            self.stopButton.setDefault(False)
             if self.params.use_refine:
                 self.refineResults.setDisabled(False)
 
