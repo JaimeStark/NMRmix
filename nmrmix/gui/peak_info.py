@@ -490,6 +490,7 @@ class RegionWindow(QDialog):
         self.cancelButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
         self.okButton = QPushButton("Accept")
         self.okButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
+        self.okButton.setDefault(True)
 
     def layoutWidgets(self):
         layout = QGridLayout(self)
