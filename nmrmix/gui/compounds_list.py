@@ -10,7 +10,7 @@ from __future__ import division
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui import compound_info
+from nmrmix.gui import compound_info
 
 class Window(QDialog):
     def __init__(self, params_object, library_object, compound_list, list_title, parent=None):

@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar2
 
-from gui import compound_info
+from nmrmix.gui import compound_info
     
 class Window(QDialog):
     def __init__(self, params_object, library_object, compound_list, mixture_id, parent=None):

@@ -32,10 +32,10 @@ from PyQt5.QtWidgets import QApplication
 
 import sys
 import os
-from core import parameters
-from gui import splash_screen, library_import
+from nmrmix.core import parameters
+from nmrmix.gui import splash_screen, library_import
 
-__VERSION__ = "0.9 (Build 2015.11.30)"
+__VERSION__ = open('VERSION', 'rU').read()
 
 def startGUI(params_object):
     app = QApplication(sys.argv)

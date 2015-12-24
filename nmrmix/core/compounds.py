@@ -18,7 +18,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw, rdMolDescriptors, rdDepictor
 from rdkit.Chem.Draw import DrawingOptions
 
-from core import readpeaks
+from nmrmix.core import readpeaks
 
 if 'RDBASE' not in os.environ.keys():
     os.environ['RDBASE'] = os.getcwd()
