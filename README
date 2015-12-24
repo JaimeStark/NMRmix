@@ -14,5 +14,7 @@ RDKit (with python bindings)
 cairo
 py2cairo
 pango
+gobject
+gtk
 
 To execute the software, run: python NMRmix.py
