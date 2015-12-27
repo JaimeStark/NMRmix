@@ -291,7 +291,7 @@ class AnnealThread(QThread):
             # else:
             #     delta_median = self.mixtures.medianDeltaScore(delta_scores)
 
-            if new_score == 0:
+            if new_score <= 0.0001:
                 score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
                               num_peaks, max_score, 1, 'PASSED')
                 scores.append(score_step)
