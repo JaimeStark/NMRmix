@@ -49,7 +49,7 @@ class Window(QDialog):
         self.nmrfamLogo.setAlignment(Qt.AlignCenter)
         text = "http://www.nmrfam.wisc.edu<br>" \
                "<br>" \
-               "J.L. Stark, H. Eghbalnia, W.M. Westler, and J.L. Markley (2015).<br>" \
+               "J.L. Stark, W. Lee, H. Eghbalnia, W.M. Westler, and J.L. Markley (2015).<br>" \
                "<i>In Preparation</i><br>" \
                "<br>" \
                "Questions or Problems?<br>" \
