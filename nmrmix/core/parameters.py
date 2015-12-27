@@ -30,7 +30,7 @@ class Parameters(object):
         self.max_steps = 1000
         self.refine_max_steps = 1000
         self.start_temp = 10000
-        self.refine_start_temp = 2500
+        self.refine_start_temp = 50
         self.final_temp = 25
         self.refine_final_temp = 25
         self.alpha_temp = math.exp((math.log(self.final_temp/self.start_temp))/self.max_steps)
@@ -44,7 +44,7 @@ class Parameters(object):
         self.blind_regions = []
         self.aromatic_cutoff = 4.700
         self.intense_peak_cutoff = 0.900
-        self.score_power = 2
+        self.score_power = 1
         self.score_scale = 10000
         self.iterations = 1
         self.randomize_initial = True
