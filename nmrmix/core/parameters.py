@@ -44,7 +44,6 @@ class Parameters(object):
         self.blind_regions = []
         self.aromatic_cutoff = 4.700
         self.intense_peak_cutoff = 0.900
-        self.score_power = 1
         self.score_scale = 10000
         self.iterations = 1
         self.randomize_initial = True
@@ -241,12 +240,6 @@ class Parameters(object):
         except:
             pass
 
-    def setScorePower(self, power):
-        try:
-            if int(power) >= 1:
-                self.score_power = int(power)
-        except:
-            pass
 
     def setScoreScale(self, scale):
         try:
@@ -271,8 +264,6 @@ class Parameters(object):
             with codecs.open(path, 'w', encoding='utf-8') as scoreparams:
                 peak_range = "DefaultPeak Overlap Range: %0.3f" % self.peak_range
                 scoreparams.write(peak_range+'\n')
-                score_power = "Score Exponential: %d" % self.score_power
-                scoreparams.write(score_power+'\n')
                 score_scale = "Score Scaling Factor: %d" % self.score_scale
                 scoreparams.write(score_scale+'\n')
                 use_intensity = "Intensity Scoring: %s" % str(self.use_intensity)
@@ -346,8 +337,6 @@ class Parameters(object):
                             self.setAromaticCutoff(param_value)
                         elif parameter == "Intense Peak Cutoff":
                             self.setIntensePeakCutoff(param_value)
-                        elif parameter == "Score Exponential":
-                            self.setScorePower(param_value)
                         elif parameter == "Score Scale":
                             self.setScoreScale(param_value)
                         elif parameter == "Iterations":
@@ -401,7 +390,6 @@ class Parameters(object):
                 # pref_file.write("Ignored Regions" + " = " + self.blind_regions + "\n")
                 pref_file.write("Aromatic/Aliphatic Cutoff" + " = " + str(self.aromatic_cutoff) + "\n")
                 pref_file.write("Intense Peak Cutoff" + " = " + str(self.intense_peak_cutoff) + "\n")
-                pref_file.write("Score Exponential" + " = " + str(self.score_power) + "\n")
                 pref_file.write("Score Scale" + " = " + str(self.score_scale) + "\n")
                 pref_file.write("Iterations" + " = " + str(self.iterations) + "\n")
                 pref_file.write("Randomize Initial Mixture State" + " = " + str(self.randomize_initial) + "\n")
