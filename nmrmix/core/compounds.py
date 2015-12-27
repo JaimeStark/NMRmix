@@ -272,7 +272,7 @@ class Compound(object):
     def calculateIntensitySum(self):
         intensity_sum = 0
         for peak in self.mix_peaklist:
-            intensity_sum += pow(peak[1], self.params.score_power)
+            intensity_sum += peak[1]
         return(intensity_sum)
 
     def determineIgnoredPeaks(self, ignored_regions, custom_peaks=[]):

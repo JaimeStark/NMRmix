@@ -399,7 +399,6 @@ class Window(QDialog):
                 params.write("Using Peak Intensity: True\n")
             else:
                 params.write("Using Peak Intensity: False\n")
-            params.write("Score Exponent: %d\n" % self.params.score_power)
             params.write("Score Scale: %d\n" % self.params.score_scale)
 
             if self.refine:
