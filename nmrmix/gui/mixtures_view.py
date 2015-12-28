@@ -364,6 +364,15 @@ class Window(QDialog):
         self.statsHLine2.setFrameShape(QFrame.HLine)
         #self.showmixturehist = QPushButton("Show Mixtures Peak Plot")
         self.showrankedcompounds = QPushButton("Show Compounds Ranked by Score")
+        self.useautosaveLabel = QLabel("Autosave Results")
+        self.useautosaveLabel.setAlignment(Qt.AlignCenter)
+        self.useautosaveLabel.setToolTip("Turns on/off the autosaving of results after optimizing mixtures.")
+        self.useautosaveCheckBox = QCheckBox()
+        self.useautosaveCheckBox.setToolTip("Turns on/off the autosaving of results after optimizing mixtures.")
+        if self.params.autosave:
+            self.useautosaveCheckBox.setCheckState(Qt.Checked)
+        else:
+            self.useautosaveCheckBox.setCheckState(Qt.Unchecked)
 
     def updateStats(self):
         self.mixtures.calcPeakStats()
@@ -378,49 +387,56 @@ class Window(QDialog):
     def layoutWidgets(self):
         winLayout = QGridLayout(self)
         winLayout.addWidget(self.mixtable, 1, 0)
-
         scoreLayout = QGridLayout()
-        scoreLayout.addWidget(self.rangeLabel, 2, 0)
-        scoreLayout.addWidget(self.rangeSpinBox, 2, 1)
-        scoreLayout.addWidget(self.scorescaleLabel, 3, 0)
-        scoreLayout.addWidget(self.scorescaleSpinBox, 3, 1)
-        scoreLayout.addWidget(self.useintensityLabel, 4, 0)
+        scoreLayout.addWidget(self.totalmixLabel, 2, 0)
+        scoreLayout.addWidget(self.totalmix, 2, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 3, 0)
+        scoreLayout.addWidget(self.totalcompoundsLabel, 4, 0)
+        scoreLayout.addWidget(self.totalcompounds, 4, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 5, 0)
+        scoreLayout.addWidget(self.totalpeaksLabel, 6, 0)
+        scoreLayout.addWidget(self.totalpeaks, 6, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 7, 0)
+        scoreLayout.addWidget(self.statsHLine1, 8, 0, 1, 2)
+        scoreLayout.addItem(QSpacerItem(0, 8), 9, 0)
+        scoreLayout.addWidget(self.totaloverlapLabel, 10, 0)
+        scoreLayout.addWidget(self.totaloverlap, 10, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 11, 0)
+        scoreLayout.addWidget(self.totalscoreLabel, 12, 0)
+        scoreLayout.addWidget(self.totalscore, 12, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 13, 0)
+        scoreLayout.addWidget(self.meanoverlapLabel, 14, 0)
+        scoreLayout.addWidget(self.meanoverlap, 14, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 15, 0)
+        scoreLayout.addWidget(self.meanscoreLabel, 16, 0)
+        scoreLayout.addWidget(self.meanscore, 16, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 17, 0)
+        scoreLayout.addWidget(self.statsHLine2, 18, 0, 1, 2)
+        scoreLayout.addItem(QSpacerItem(0, 8), 19, 0)
+        scoreLayout.addWidget(self.rangeLabel, 20, 0)
+        scoreLayout.addWidget(self.rangeSpinBox, 20, 1)
+        #scoreLayout.addItem(QSpacerItem(0, 8), 21, 0)
+        scoreLayout.addWidget(self.scorescaleLabel, 22, 0)
+        scoreLayout.addWidget(self.scorescaleSpinBox, 22, 1)
+        #scoreLayout.addItem(QSpacerItem(0, 8), 23, 0)
+        scoreLayout.addWidget(self.useintensityLabel, 24, 0)
         checkbox1Layout = QHBoxLayout()
         checkbox1Layout.addWidget(self.useintensityCheckBox)
-        scoreLayout.addLayout(checkbox1Layout, 4, 1, Qt.AlignCenter)
-        scoreLayout.addItem(QSpacerItem(0, 10), 5, 0)
-        scoreLayout.addWidget(self.scoreHLine, 6, 0, 1, 2)
-        scoreLayout.addItem(QSpacerItem(0, 10), 8, 0)
-        scoreLayout.addWidget(self.totalmixLabel, 9, 0)
-        scoreLayout.addWidget(self.totalmix, 9, 1)
-        scoreLayout.addItem(QSpacerItem(0, 15), 10, 0)
-        scoreLayout.addWidget(self.totalcompoundsLabel, 11, 0)
-        scoreLayout.addWidget(self.totalcompounds, 11, 1)
-        scoreLayout.addItem(QSpacerItem(0, 15), 12, 0)
-        scoreLayout.addWidget(self.totalpeaksLabel, 13, 0)
-        scoreLayout.addWidget(self.totalpeaks, 13, 1)
-        scoreLayout.addItem(QSpacerItem(0, 10), 14, 0)
-        scoreLayout.addWidget(self.statsHLine1, 15, 0, 1, 2)
-        scoreLayout.addItem(QSpacerItem(0, 10), 16, 0)
-        scoreLayout.addWidget(self.totaloverlapLabel, 17, 0)
-        scoreLayout.addWidget(self.totaloverlap, 17, 1)
-        scoreLayout.addItem(QSpacerItem(0, 15), 18, 0)
-        scoreLayout.addWidget(self.totalscoreLabel, 19, 0)
-        scoreLayout.addWidget(self.totalscore, 19, 1)
-        scoreLayout.addItem(QSpacerItem(0, 15), 20, 0)
-        scoreLayout.addWidget(self.meanoverlapLabel, 21, 0)
-        scoreLayout.addWidget(self.meanoverlap, 21, 1)
-        scoreLayout.addItem(QSpacerItem(0, 15), 22, 0)
-        scoreLayout.addWidget(self.meanscoreLabel, 23, 0)
-        scoreLayout.addWidget(self.meanscore, 23, 1)
-        scoreLayout.addItem(QSpacerItem(0, 15), 24, 0)
-        scoreLayout.addWidget(self.statsHLine2, 25, 0, 1, 2)
-        scoreLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 26, 0)
-        scoreLayout.addWidget(self.searchLineEdit, 27, 0)
-        scoreLayout.addWidget(self.searchButton, 27, 1)
-        scoreLayout.addWidget(self.searchResults, 28, 0, 1, 2)
+        scoreLayout.addLayout(checkbox1Layout, 24, 1, Qt.AlignCenter)
+        scoreLayout.addItem(QSpacerItem(0, 8), 25, 0)
+        scoreLayout.addWidget(self.scoreHLine, 26, 0, 1, 2)
+        scoreLayout.addItem(QSpacerItem(0, 8), 27, 0)
+        scoreLayout.addWidget(self.useautosaveLabel, 28, 0)
+        checkbox2Layout = QHBoxLayout()
+        checkbox2Layout.addWidget(self.useautosaveCheckBox)
+        scoreLayout.addLayout(checkbox2Layout, 28, 1, Qt.AlignCenter)
+        scoreLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 29, 0)
+        scoreLayout.addWidget(self.searchLineEdit, 30, 0)
+        scoreLayout.addWidget(self.searchButton, 30, 1)
+        scoreLayout.addWidget(self.searchResults, 31, 0, 1, 2)
         #scoreLayout.addWidget(self.showmixturehist, 29, 0, 1, 2)
-        scoreLayout.addWidget(self.showrankedcompounds, 30, 0, 1, 2)
+        scoreLayout.addWidget(self.showrankedcompounds, 32, 0, 1, 2)
+
 
         self.paramtab1.setLayout(scoreLayout)
         self.paramTabs.addTab(self.paramtab1, "Scoring")
@@ -507,6 +523,7 @@ class Window(QDialog):
         self.rangeSpinBox.valueChanged.connect(self.updateTable)
         self.scorescaleSpinBox.valueChanged.connect(self.updateTable)
         self.useintensityCheckBox.clicked.connect(self.updateTable)
+        self.useautosaveCheckBox.clicked.connect(self.updateAutosave)
 
         self.startnumSpinBox.valueChanged.connect(self.updateMixing)
         self.mixsizeSpinBox.valueChanged.connect(self.updateMixing)
@@ -664,6 +681,12 @@ class Window(QDialog):
         else:
             self.params.noIntensity()
         self.mixtures.calculateTotalScore(self.mixtures.mixtures)
+
+    def updateAutosave(self):
+        if self.useautosaveCheckBox.isChecked():
+            self.params.useAutosave()
+        else:
+            self.params.noAutosave()
 
     def updateMixing(self):
         start_num = self.startnumSpinBox.value()
@@ -873,25 +896,31 @@ class Window(QDialog):
             if is_checked:
                 self.mixtures.mixtures_lock.append(int(self.mixtable.item(row,2).text()))
 
-    def saveResults(self):
-        results_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S')
-        results_folder = results_time + "_Results"
-        self.results_path = os.path.join(self.params.work_dir, results_folder)
-        if not os.path.exists(self.results_path):
-            os.mkdir(self.results_path)
-        self.mixtures.exportSimpleMixturesTXT(self.results_path)
-        self.mixtures.exportMixturesCSV(self.results_path)
-        self.mixtures.exportRoiCSV(self.results_path)
-        self.mixtures.exportFullRoiCSV(self.results_path)
-        self.mixtures.exportIgnoreRegion(self.results_path)
-        self.mixtures.exportScores(self.results_path)
-        self.mixtures.exportPeakListCSV(self.results_path)
-        self.library.exportLibraryCSV(self.results_path)
-        self.library.exportImportLog(self.results_path)
-        # self.library.exportPeaklistCSV(self.results_path)
-        self.params.exportScoringParams(self.results_path)
-        output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
-        QMessageBox.information(self, 'Results Saved', output_msg)
+    def saveResults(self, results_time=None):
+        try:
+            if results_time == None:
+                results_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S')
+            results_folder = results_time + "_Results"
+            self.results_path = os.path.join(self.params.work_dir, results_folder)
+            if not os.path.exists(self.results_path):
+                os.mkdir(self.results_path)
+            self.mixtures.exportSimpleMixturesTXT(self.results_path)
+            self.mixtures.exportMixturesCSV(self.results_path)
+            self.mixtures.exportRoiCSV(self.results_path)
+            self.mixtures.exportFullRoiCSV(self.results_path)
+            self.mixtures.exportIgnoreRegion(self.results_path)
+            self.mixtures.exportScores(self.results_path)
+            self.mixtures.exportPeakListCSV(self.results_path)
+            self.library.exportLibraryCSV(self.results_path)
+            self.library.exportImportLog(self.results_path)
+            # self.library.exportPeaklistCSV(self.results_path)
+            self.params.exportScoringParams(self.results_path)
+            output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
+            QMessageBox.information(self, 'Results Saved', output_msg)
+        except Exception as e:
+            print(e)
+            QMessageBox.critical(self, 'Results NOT Saved!',
+                                 "Saving the mixture results was unsuccessful. Please check folder permissions.")
 
     def importMixtures(self):
         dir = self.params.work_dir
@@ -929,6 +958,8 @@ class Window(QDialog):
                 self.updateScoring()
                 self.updateStats()
                 self.setTable()
+                if self.params.autosave:
+                    self.saveResults(results_time=self.mixtures.optimize_time)
         # TODO: Check for value errors
 
     def openCompoundWindow(self, compound_id, mixture_id):

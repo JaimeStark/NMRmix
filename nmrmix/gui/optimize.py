@@ -115,8 +115,8 @@ class Window(QDialog):
         self.thread_pool = {}
         self.mixtures.anneal_scores = {}
         self.start_time = time.time()
-        optimize_time = datetime.datetime.fromtimestamp(self.start_time).strftime('%Y%m%d_%H%M%S')
-        self.mixtures.optimize_folder =  optimize_time + "_Optimize"
+        self.mixtures.optimize_time = datetime.datetime.fromtimestamp(self.start_time).strftime('%Y%m%d_%H%M%S')
+        self.mixtures.optimize_folder =  self.mixtures.optimize_time + "_Optimize"
         for solvent in solvents:
             mixnum_list = list(self.mixtures.solvent_mixnum[solvent])
             self.thread_pool[solvent] = AnnealThread(self.params, self.library, self.mixtures, solvent, mixnum_list)
