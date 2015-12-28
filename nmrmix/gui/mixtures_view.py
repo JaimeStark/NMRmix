@@ -896,10 +896,12 @@ class Window(QDialog):
             if is_checked:
                 self.mixtures.mixtures_lock.append(int(self.mixtable.item(row,2).text()))
 
-    def saveResults(self, results_time=None):
+    def saveResults(self, optimize_time=False):
         try:
-            if results_time == None:
+            if optimize_time == False:
                 results_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S')
+            else:
+                results_time = optimize_time
             results_folder = results_time + "_Results"
             self.results_path = os.path.join(self.params.work_dir, results_folder)
             if not os.path.exists(self.results_path):
@@ -926,23 +928,29 @@ class Window(QDialog):
         dir = self.params.work_dir
 
 
-
-        fileObj = QFileDialog.getOpenFileName(self, "Open Mixtures CSV", directory=dir, filter="CSV Files: (*.csv)")
-        if fileObj[0]:
-            import_extras_win = ExtrasImport()
-            if import_extras_win.exec_():
-                use_extras = import_extras_win.checkbox.checkState()
-            import_win = MixtureImport(self.params, fileObj[0], self.library, self.mixtures, use_extras)
-            if import_win.exec_():
-                self.updateScoring()
-                self.updateStats()
-                self.setTable()
-                self.lockCheckBox.setChecked(True)
-                self.usesolventCheckBox.setChecked(self.params.use_solvent)
-                self.startnumSpinBox.setValue(self.params.start_num)
-                self.mixsizeSpinBox.setValue(self.params.mix_size)
-                self.lockAll()
-                # TODO: Determine how to lock only the mixtures in the imported file
+        dirObj = QFileDialog.getExistingDirectory(self, "Open Results Directory", directory=dir)
+        if dirObj:
+            fileObj = os.path.join(dirObj, "mixtures.csv")
+        # fileObj = QFileDialog.getOpenDir(self, "Open Mixtures CSV", directory=dir, filter="CSV Files: (*.csv)")
+        # if fileObj[0]:
+            if os.path.exists(fileObj):
+                import_extras_win = ExtrasImport()
+                if import_extras_win.exec_():
+                    use_extras = import_extras_win.checkbox.checkState()
+                import_win = MixtureImport(self.params, fileObj, self.library, self.mixtures, use_extras)
+                if import_win.exec_():
+                    self.updateScoring()
+                    self.updateStats()
+                    self.setTable()
+                    self.lockCheckBox.setChecked(True)
+                    self.usesolventCheckBox.setChecked(self.params.use_solvent)
+                    self.startnumSpinBox.setValue(self.params.start_num)
+                    self.mixsizeSpinBox.setValue(self.params.mix_size)
+                    self.lockAll()
+                    # TODO: Determine how to lock only the mixtures in the imported file
+            else:
+                QMessageBox.critical(self, 'Results Folder Missing Mixtures',
+                                 "This folder does not contain a mixtures.csv file. Please select a results folder previously output by NMRmix")
 
     def optimizeMixtures(self):
         self.updateLockMixtures()
@@ -959,7 +967,7 @@ class Window(QDialog):
                 self.updateStats()
                 self.setTable()
                 if self.params.autosave:
-                    self.saveResults(results_time=self.mixtures.optimize_time)
+                    self.saveResults(optimize_time=self.mixtures.optimize_time)
         # TODO: Check for value errors
 
     def openCompoundWindow(self, compound_id, mixture_id):
