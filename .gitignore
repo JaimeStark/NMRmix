@@ -15,3 +15,4 @@ tests/
 .idea/encodings.xml
 
 *.pyc
+docs/build
