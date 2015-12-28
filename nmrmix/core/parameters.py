@@ -23,6 +23,7 @@ class Parameters(object):
         self.work_dir = os.path.expanduser("~/Desktop")
         self.peaklist_dir = os.path.expanduser("~/Desktop")
         self.library_path = os.path.expanduser("~/Desktop/library.csv")
+        self.autosave = True
         self.use_intensity = False
         self.extra_mixtures = 0
         self.peak_range = 0.025
@@ -69,6 +70,14 @@ class Parameters(object):
         can be found."""
         if os.path.isdir(peaklist_dir):
             self.peaklist_dir = peaklist_dir
+
+    def useAutosave(self):
+        """Turns on the use of autosave after optimization is accepted."""
+        self.autosave = True
+
+    def noAutosave(self):
+        """Turns off the use of autosave after optimization is accepted."""
+        self.autosave = False
 
     def useIntensity(self):
         """Turns on the use of peak intensity for peak overlap scoring."""
@@ -289,6 +298,11 @@ class Parameters(object):
                             self.setPeakListDirectory(param_value)
                         elif parameter == "Library File Path":
                             self.setLibraryPath(param_value)
+                        elif parameter == "Use Autosave":
+                            if param_value.lower() == "true":
+                                self.useAutosave()
+                            else:
+                                self.noAutosave()
                         elif parameter == "Use Peak Intensity":
                             if param_value.lower() == "true":
                                 self.useIntensity()
@@ -371,6 +385,7 @@ class Parameters(object):
                 pref_file.write("Working Directory" + " = " + str(self.work_dir) + "\n")
                 pref_file.write("Peaklist Directory" + " = " + str(self.peaklist_dir) + "\n")
                 pref_file.write("Library File Path" + " = " + str(self.library_path) + "\n")
+                pref_file.write("Use Autosave" + " = " + str(self.autosave) + "\n")
                 pref_file.write("Use Peak Intensity" + " = " + str(self.use_intensity) + "\n")
                 pref_file.write("Extra Mixtures" + " = " + str(self.extra_mixtures) + "\n")
                 pref_file.write("Overlap Range" + " = " + str(self.peak_range) + "\n")
