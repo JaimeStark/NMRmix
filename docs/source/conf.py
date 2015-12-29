@@ -20,7 +20,7 @@ import shlex
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'NMRmix'
-copyright = '2015, National Magnetic Resonance Facility At Madison'
+copyright = '2015 National Magnetic Resonance Facility At Madison'
 author = 'Jaime Stark'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -107,6 +107,8 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+autodoc_mock_imports = ['rdkit', 'rdkit.Chem', 'rdkit.Chem.Draw']
+
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -127,14 +129,14 @@ if not on_rtd:
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+# html_title = None
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+#html_short_title = 'NMRmix Documentation'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+#html_logo = '_static/nmrmix_logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -176,7 +178,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False
@@ -235,7 +237,7 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+# latex_logo = '_static/nmrmix_logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -274,7 +276,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   (master_doc, 'NMRmix', 'NMRmix Documentation',
-   author, 'NMRmix', 'One line description of project.',
+   author, 'NMRmix', 'A tool for the optimization of compound mixtures for 1D 1H NMR protein-ligand affinity screens.',
    'Miscellaneous'),
 ]
 
