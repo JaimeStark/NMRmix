@@ -378,7 +378,7 @@ class Window(QDialog):
         with codecs.open(summary_path, 'w', encoding='utf-8') as summary:
             for item in self.summary:
                 summary.write("%s\n" % item)
-        with open(scores_path, 'w') as scoresfile:
+        with open(scores_path, 'wb') as scoresfile:
             writer = csv.writer(scoresfile)
             header = ['Solvent', 'Iteration', 'Step', 'Current Temp', 'Current Score', 'New Score',
                       'Current Overlap', 'New Overlap', 'Total Peaks', 'Max Score', 'Probability', 'Result']

@@ -63,7 +63,7 @@ class Library(object):
     def exportLibraryCSV(self, results_path):
         path = os.path.join(results_path, 'library.csv')
         try:
-            with open(path, 'w') as newcsv:
+            with open(path, 'wb') as newcsv:
                 writer = csv.writer(newcsv)
                 writer.writerows(self.library_header)
                 writer.writerows(self.library_csv)
@@ -82,7 +82,7 @@ class Library(object):
     def exportPeaklistCSV(self, results_path):
         path = os.path.join(results_path, 'peaklist.csv')
         try:
-            with open(path, 'w') as newcsv:
+            with open(path, 'wb') as newcsv:
                 writer = csv.writer(newcsv)
                 compound_list = list(self.library.keys())
                 writer.writerow(['Compound ID', 'Peak Number', 'PPM', 'Intensity', 'Width'])
@@ -100,7 +100,7 @@ class Library(object):
     def exportLibraryStats(self, results_path):
         path = os.path.join(results_path, 'library_stats.csv')
         try:
-            with open(path, 'w') as newcsv:
+            with open(path, 'wb') as newcsv:
                 writer = csv.writer(newcsv)
                 num_solvents = len(self.solvents)
                 header_list = ["", 'All Solvents']

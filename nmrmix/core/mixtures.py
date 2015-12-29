@@ -361,7 +361,7 @@ class Mixtures(object):
 
     def exportMixturesCSV(self, results_directory):
         path = os.path.join(results_directory, "mixtures.csv")
-        with open(path, 'w') as mixture_csv:
+        with open(path, 'wb') as mixture_csv:
             writer = csv.writer(mixture_csv)
             header = ['Mixture Number', 'Mixture Score', 'Mixture Solvent']
             max_length = 0
@@ -397,7 +397,7 @@ class Mixtures(object):
 
     def exportRoiCSV(self, results_directory):
         path = os.path.join(results_directory, "roi_no_overlap.csv")
-        with open(path, 'w') as mixture_csv:
+        with open(path, 'wb') as mixture_csv:
             writer = csv.writer(mixture_csv)
             for mixture in sorted(self.mixtures.keys()):
                 mixture_solvent = []
@@ -419,7 +419,7 @@ class Mixtures(object):
 
     def exportFullRoiCSV(self, results_directory):
         path = os.path.join(results_directory, "roi_w_overlaps.csv")
-        with open(path, 'w') as mixture_csv:
+        with open(path, 'wb') as mixture_csv:
             writer = csv.writer(mixture_csv)
             for mixture in sorted(self.mixtures.keys()):
                 mixture_solvent = []
@@ -441,7 +441,7 @@ class Mixtures(object):
 
     def exportPeakListCSV(self, results_directory):
         path = os.path.join(results_directory, "peaks.csv")
-        with open(path, 'w') as peaks_csv:
+        with open(path, 'wb') as peaks_csv:
             writer = csv.writer(peaks_csv)
             for mixture in sorted(self.mixtures.keys()):
                 mixture_solvent = []
@@ -507,7 +507,7 @@ class Mixtures(object):
 
     def exportScores(self, results_directory):
         path = os.path.join(results_directory, "scores.csv")
-        with open(path, 'w') as scores_csv:
+        with open(path, 'wb') as scores_csv:
             writer = csv.writer(scores_csv)
             header = ["Compound ID", "Compound Peaks", "Compound Overlaps", "Compound Score",
                       "Mixture Number", "Mixture Score"]
@@ -525,7 +525,7 @@ class Mixtures(object):
 
     def exportIgnoreRegion(self, results_directory):
         path = os.path.join(results_directory, "ignored.csv")
-        with open(path, 'w') as ignore_csv:
+        with open(path, 'wb') as ignore_csv:
             writer = csv.writer(ignore_csv)
             header = ['Name', 'Lower', 'Upper', 'Specificity']
             writer.writerow(header)
