@@ -298,6 +298,7 @@ class AnnealThread(QThread):
                 mixtures.update(new_mixtures)
                 curr_score = new_score
                 curr_overlap = new_overlap
+                self.newStep.emit(self.solvent, step, abs(curr_score), refining)
                 break
             elif new_score <= curr_score:
                 score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
