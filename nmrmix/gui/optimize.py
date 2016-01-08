@@ -308,24 +308,29 @@ class AnnealThread(QThread):
                 curr_score = new_score
                 curr_overlap = new_overlap
             else:
-                score_diff = new_score - curr_score
-                probability = math.exp(((-score_diff / max_score) / current_temp) * 25000)
-                if random.random() < probability:
-                    score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
-                                  num_peaks, max_score, probability, 'PASSED')
-                    scores.append(score_step)
-                    mixtures.update(new_mixtures)
-                    curr_score = new_score
-                    curr_overlap = new_overlap
+                if current_temp > 0.0:
+                    score_diff = new_score - curr_score
+                    probability = math.exp(((-score_diff / max_score) / current_temp) * 25000)
+                    if random.random() < probability:
+                        score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
+                                      num_peaks, max_score, probability, 'PASSED')
+                        scores.append(score_step)
+                        mixtures.update(new_mixtures)
+                        curr_score = new_score
+                        curr_overlap = new_overlap
+                    else:
+                        score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
+                                      num_peaks, max_score, probability, 'FAILED')
+                        scores.append(score_step)
                 else:
                     score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
-                                  num_peaks, max_score, probability, 'FAILED')
+                                      num_peaks, max_score, 0, 'FAILED')
                     scores.append(score_step)
-            # print(score_step)
-            # if score_diff > delta_max:
-            #     delta_max = score_diff
-            # test_score, test_overlap = self.mixtures.calculateTotalScore(mixtures)
-            # print(test_score, curr_score, test_overlap, curr_overlap)
+                # print(score_step)
+                # if score_diff > delta_max:
+                #     delta_max = score_diff
+                # test_score, test_overlap = self.mixtures.calculateTotalScore(mixtures)
+                # print(test_score, curr_score, test_overlap, curr_overlap)
             step += 1
             if step > max_steps:
                 self.newStep.emit(self.solvent, step-1, curr_score, refining)
