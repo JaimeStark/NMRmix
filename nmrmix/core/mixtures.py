@@ -277,8 +277,12 @@ class Mixtures(object):
             swap_list.append(pick)
         diff_score = 0.0
         diff_overlaps = 0.0
-        for mix_num in mixed_mixtures:
-            pick = swap_list.pop()
+        for i,mix_num in enumerate(mixed_mixtures):
+            if i+1 == mix_rate:
+                pick = swap_list[0]
+            else:
+                pick = swap_list[i+1]
+            #pick = swap_list.pop()
             if pick == "Blank":
                 pass
             else:
