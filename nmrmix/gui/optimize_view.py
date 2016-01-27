@@ -40,24 +40,8 @@ class Window(QDialog):
             self.setWindowTitle("NMRmix: View Optimizing Score Plots")
             self.anneal_scores = self.mixtures.anneal_scores
         self.summary = {}
-        #self.createMainFrame()
         self.createWidgets()
         self.createConnections()
-
-    #def createMainFrame(self):
-        #self.resultsTabs = QTabWidget()
-        #self.windowWidget = QWidget()
-        # self.scrollArea = QScrollArea()
-        # self.scrollArea.setWidgetResizable(True)
-        # self.scrollArea.setWidget(self.windowWidget)
-        # self.fig = plt.gcf()
-        # self.fig.patch.set_facecolor('white')
-        # #self.fig.set_size_inches(12, 5)
-        # self.canvas = FigureCanvas(self.fig)
-        # self.canvas.setMinimumHeight(150)
-        # self.canvas.setMinimumWidth(150)
-        # self.mpl_toolbar = NavigationToolbar2(self.canvas, self)
-        # self.mpl_toolbar.hide()
 
     def createWidgets(self):
         winLayout = QVBoxLayout(self)
@@ -67,8 +51,6 @@ class Window(QDialog):
         self.resultsTabs.setStyleSheet('QTabBar {font-weight: bold;}'
                                      'QTabBar::tab {color: black;}'
                                      'QTabBar::tab:selected {color: red;}')
-        #widgetLayout = QVBoxLayout()
-
 
         self.xLabel = QLabel("X-axis")
         self.xLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -96,8 +78,6 @@ class Window(QDialog):
         comboLayout.addWidget(self.fullResultsCheckbox)
         comboLayout.addItem(QSpacerItem(0,0, QSizePolicy.MinimumExpanding))
 
-
-
         self.canvas = {}
         self.fig = {}
         self.mpl_toolbar = {}
@@ -107,17 +87,12 @@ class Window(QDialog):
         self.totalcompLabel = {}
         self.totalpeaksLabel = {}
         self.startingLabel = {}
-        # self.startingcompLabel = {}
         self.startingoverlapLabel = {}
         self.deltascoresLabel = {}
         self.finalLabel = {}
-        # self.finalcompLabel = {}
         self.finaloverlapLabel = {}
         self.solventTab = {}
 
-        # solventLayout = {}
-        # self.numplots = len(self.mixtures.solvent_mixnum)
-        #self.curr_plot = 1
         for i, solvent in enumerate(self.mixtures.solvent_mixnum):
             self.summary[solvent] = []
             self.solventTab[solvent] = QWidget()
@@ -142,17 +117,13 @@ class Window(QDialog):
             self.mpl_toolbar[solvent] = NavigationToolbar2(self.canvas[solvent], self)
             self.mpl_toolbar[solvent].hide()
             solventLayout = QVBoxLayout()
-            #solventLayout.addWidget(self.statsLabel[solvent])
             solventLayout.addWidget(self.canvas[solvent], Qt.AlignCenter)
-            #solventLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
             solventLayout.addWidget(self.totalcompLabel[solvent])
             solventLayout.addWidget(self.totalpeaksLabel[solvent])
             solventLayout.addWidget(self.iterationsLabel[solvent])
             solventLayout.addWidget(self.startingLabel[solvent])
             solventLayout.addWidget(self.finalLabel[solvent])
             solventLayout.addWidget(self.deltascoresLabel[solvent])
-            # solventLayout.addWidget(self.startingcompLabel[solvent])
-            # solventLayout.addWidget(self.finalcompLabel[solvent])
             solventLayout.addWidget(self.startingoverlapLabel[solvent])
             solventLayout.addWidget(self.finaloverlapLabel[solvent])
             # TODO: Add best score and overlap
@@ -163,8 +134,6 @@ class Window(QDialog):
                 self.resultsTabs.addTab(self.solventTab[solvent], solvent)
             self.fig[solvent].tight_layout(pad=4)
             self.canvas[solvent].draw()
-            #statsLayout.addLayout(solventLayout)
-            #self.curr_plot += 1
         self.closeButton = QPushButton("Close")
         self.closeButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
         self.saveFigButton = QPushButton("Save Figure")
@@ -175,19 +144,11 @@ class Window(QDialog):
         buttonLayout.addWidget(self.closeButton)
         buttonLayout.addWidget(self.saveFigButton)
         buttonLayout.addWidget(self.saveButton)
-        #widgetLayout.addWidget(self.canvas[solvent])
-        #widgetLayout.addLayout(comboLayout)
         winLayout.addWidget(self.resultsTabs)
         winLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
         winLayout.addLayout(comboLayout)
-        # winLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
-        # winLayout.addWidget(self.fullResultsCheckbox)
         winLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
         winLayout.addLayout(buttonLayout)
-        #self.windowWidget.setLayout(winLayout)
-        # for solvent in self.mixtures.solvent_mixnum:
-        #     self.fig[solvent].tight_layout(pad=4)
-        #     self.canvas[solvent].draw()
 
     def createConnections(self):
         self.xCombobox.currentTextChanged.connect(self.updateStats)
@@ -197,11 +158,9 @@ class Window(QDialog):
         self.saveButton.clicked.connect(self.saveResults)
 
     def updateStats(self):
-        #self.curr_plot = 1
         for i, solvent in enumerate(self.mixtures.solvent_mixnum):
             self.fig[solvent].clear()
             self.calculateStats(i, solvent)
-            # self.curr_plot += 1
 
     def calculateStats(self, solvent_key, solvent):
         scores = {}
@@ -217,7 +176,6 @@ class Window(QDialog):
             chart_title = "Refinement"
         else:
             chart_title = "Optimization"
-        #subplot_num = "1%d%d" % (self.numplots, self.curr_plot)
         plt.figure(solvent_key)
         if not solvent:
             plt.title("%s of All Mixtures" % chart_title, fontweight='bold')
@@ -290,18 +248,6 @@ class Window(QDialog):
             elif self.yCombobox.currentText() == 'Energy Difference (Per Step)':
                 y = scores[iteration]['DeltaScores']
                 plt.ylabel("Total Mixtures Score Difference (Abs)", fontweight='bold')
-
-            # elif self.yCombobox.currentText() == 'Probabilities':
-            #     y = scores[iteration]['Probabilities']
-            #     if self.xCombobox.currentText() == 'Steps':
-            #         x = scores[iteration]['StepsProb']
-            #         plt.xlabel("Optimization Step", fontweight='bold')
-            #         plt.xlim([x[0], x[-1]])
-            #     elif self.xCombobox.currentText() == 'Temperature':
-            #         x = scores[iteration]['TempsProb']
-            #         plt.xlabel("Optimization Temperature", fontweight='bold')
-            #         plt.xlim([x[0], x[-1]])
-            #     plt.ylabel("Acceptance Probabilities", fontweight='bold')
             plt.plot(x, y, linewidth=2.0)
             self.canvas[solvent].draw()
         average_start = np.mean(starting_energy)
