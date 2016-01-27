@@ -252,11 +252,19 @@ class Window(QDialog):
             self.canvas[solvent].draw()
         average_start = np.mean(starting_energy)
         average_final = np.mean(final_energy)
+        min_start = np.min(starting_energy)
+        max_start = np.max(starting_energy)
+        min_final = np.min(final_energy)
+        max_final = np.max(final_energy)
         average_difference = np.mean(delta_scores)
         max_difference = max(delta_scores)
         min_difference = min(delta_scores)
         average_start_overlap = np.mean(starting_overlaps)
         average_final_overlap = np.mean(final_overlaps)
+        min_start_overlap = np.min(starting_overlaps)
+        max_start_overlap = np.max(starting_overlaps)
+        min_final_overlap = np.min(final_overlaps)
+        max_final_overlap = np.max(final_overlaps)
         if iterations < 2:
             stdev_start = 0.0
             stdev_final = 0.0
@@ -282,9 +290,8 @@ class Window(QDialog):
         self.iterationsLabel[solvent] = QLabel("Number of Iterations: %d" % iterations)
         self.iterationsLabel[solvent].setAlignment(Qt.AlignCenter)
         self.summary[solvent].append(self.iterationsLabel[solvent].text())
-        self.startingLabel[solvent] = QLabel("Mean Starting Energy (Per Compound): %0.1f ± %0.1f (%0.2f ± %0.2f)" %
-                                             (average_start, stdev_start,
-                                              average_start / num_compounds, stdev_start / num_compounds))
+        self.startingLabel[solvent] = QLabel("Mean Starting Energy (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
+                                             (average_start, stdev_start, min_start, max_start))
         self.startingLabel[solvent].setAlignment(Qt.AlignCenter)
         self.summary[solvent].append(self.startingLabel[solvent].text())
         self.deltascoresLabel[solvent] = QLabel("Mean Energy Difference Per Step (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
@@ -295,25 +302,22 @@ class Window(QDialog):
         #                                          (average_start_compound, stdev_start_compound))
         # self.startingcompLabel[solvent].setAlignment(Qt.AlignCenter)
         # self.summary.append(self.startingcompLabel[solvent].text())
-        self.startingoverlapLabel[solvent] = QLabel("Mean Starting Overlaps: %0.1f ± %0.1f (%0.2f ± %0.2f)" %
-                                                    (average_start_overlap, stdev_start_overlap,
-                                                     average_start_overlap / num_compounds,
-                                                     stdev_start_overlap / num_compounds))
+        self.startingoverlapLabel[solvent] = QLabel("Mean Starting Overlaps (Min/Max): %0.1f ± %0.1f (%d / %d)" %
+                                                    (average_start_overlap, stdev_start_overlap, min_start_overlap,
+                                                     max_start_overlap))
         self.startingoverlapLabel[solvent].setAlignment(Qt.AlignCenter)
         self.summary[solvent].append(self.startingoverlapLabel[solvent].text())
-        self.finalLabel[solvent] = QLabel("Mean Final Energy (Per Compound): %0.1f ± %0.1f (%0.2f ± %0.2f)" %
-                                          (average_final, stdev_final,
-                                           average_final / num_compounds, stdev_final / num_compounds))
+        self.finalLabel[solvent] = QLabel("Mean Final Energy (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
+                                          (average_final, stdev_final, min_final, max_final))
         self.finalLabel[solvent].setAlignment(Qt.AlignCenter)
         self.summary[solvent].append(self.finalLabel[solvent].text())
         # self.finalcompLabel[solvent] = QLabel("Average Final Energy Per Compound: %0.1f ± %0.1f" %
         #                                       (average_final_compound, stdev_final_compound))
         # self.finalcompLabel[solvent].setAlignment(Qt.AlignCenter)
         # self.summary.append(self.finalcompLabel[solvent].text())
-        self.finaloverlapLabel[solvent] = QLabel("Mean Final Overlaps: %0.1f ± %0.1f (%0.2f ± %0.2f)" %
-                                                 (average_final_overlap, stdev_final_overlap,
-                                                  average_final_overlap / num_compounds,
-                                                  stdev_final_overlap / num_compounds))
+        self.finaloverlapLabel[solvent] = QLabel("Mean Final Overlaps (Min/Max): %0.1f ± %0.1f (%d / %d)" %
+                                                 (average_final_overlap, stdev_final_overlap, min_final_overlap,
+                                                  max_final_overlap))
         self.finaloverlapLabel[solvent].setAlignment(Qt.AlignCenter)
         self.summary[solvent].append(self.finaloverlapLabel[solvent].text())
 
@@ -403,6 +407,7 @@ class Window(QDialog):
 
     def generateParams(self, params_path):
         with codecs.open(params_path, 'w', encoding='utf-8') as params:
+            params.write("Max Mixture Size: %d\n" % self.params.mix_size)
             params.write("Iterations: %d\n" % self.params.iterations)
             params.write("Default Overlap Range: %0.3f\n" % self.params.peak_range)
             if self.params.use_intensity:
