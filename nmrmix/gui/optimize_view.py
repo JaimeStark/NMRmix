@@ -39,7 +39,7 @@ class Window(QDialog):
         else:
             self.setWindowTitle("NMRmix: View Optimizing Score Plots")
             self.anneal_scores = self.mixtures.anneal_scores
-        self.summary = []
+        self.summary = {}
         #self.createMainFrame()
         self.createWidgets()
         self.createConnections()
@@ -79,6 +79,12 @@ class Window(QDialog):
         self.yCombobox = QComboBox()
         self.yCombobox.addItems(['Energy (Total)', 'Energy (Per Compound)', 'Energy Difference (Per Step)',
                                  'Peak Overlaps'])
+        self.fullResultsCheckbox = QCheckBox("Save Full Results")
+        self.fullResultsCheckbox.setToolTip("When enabled, a csv file is saved containing the results of\n"
+                                            "every step of the optimization, which can result in very large\n"
+                                            "files and take a significant amount of time to generate.")
+        self.fullResultsCheckbox.setChecked(True)
+
         comboLayout = QHBoxLayout()
         comboLayout.addItem(QSpacerItem(0,0, QSizePolicy.MinimumExpanding))
         comboLayout.addWidget(self.xLabel)
@@ -86,7 +92,11 @@ class Window(QDialog):
         comboLayout.addItem(QSpacerItem(30,0, QSizePolicy.Maximum))
         comboLayout.addWidget(self.yLabel)
         comboLayout.addWidget(self.yCombobox)
+        comboLayout.addItem(QSpacerItem(30,0, QSizePolicy.MinimumExpanding))
+        comboLayout.addWidget(self.fullResultsCheckbox)
         comboLayout.addItem(QSpacerItem(0,0, QSizePolicy.MinimumExpanding))
+
+
 
         self.canvas = {}
         self.fig = {}
@@ -106,9 +116,10 @@ class Window(QDialog):
         self.solventTab = {}
 
         # solventLayout = {}
-        self.numplots = len(self.mixtures.solvent_mixnum)
+        # self.numplots = len(self.mixtures.solvent_mixnum)
         #self.curr_plot = 1
         for i, solvent in enumerate(self.mixtures.solvent_mixnum):
+            self.summary[solvent] = []
             self.solventTab[solvent] = QWidget()
             self.solventTab[solvent].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.MinimumExpanding)
             if self.refine:
@@ -117,10 +128,10 @@ class Window(QDialog):
                 statlabel = "Optimizing"
             if not solvent:
                 self.statsLabel[solvent] = QLabel("<b>%s Statistics</b>" % statlabel)
-                self.summary.append('\n%s Statistics for All Mixtures' % statlabel)
+                self.summary[solvent].append('\n%s Statistics for All Mixtures' % statlabel)
             else:
                 self.statsLabel[solvent] = QLabel("<b>%s Statistics for %s</b>" % (statlabel, solvent))
-                self.summary.append('\n%s Statistics for %s Mixtures' % (statlabel, solvent))
+                self.summary[solvent].append('\n%s Statistics for %s Mixtures' % (statlabel, solvent))
             self.statsLabel[solvent].setAlignment(Qt.AlignCenter)
             self.fig[solvent] = plt.figure(i)
             self.fig[solvent].patch.set_facecolor('white')
@@ -156,16 +167,21 @@ class Window(QDialog):
             #self.curr_plot += 1
         self.closeButton = QPushButton("Close")
         self.closeButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
+        self.saveFigButton = QPushButton("Save Figure")
+        self.saveFigButton.setStyleSheet("QPushButton{color: blue; font-weight: bold}")
         self.saveButton = QPushButton("Save Results")
-        self.closeButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
+        self.saveButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
         buttonLayout = QHBoxLayout()
         buttonLayout.addWidget(self.closeButton)
+        buttonLayout.addWidget(self.saveFigButton)
         buttonLayout.addWidget(self.saveButton)
         #widgetLayout.addWidget(self.canvas[solvent])
         #widgetLayout.addLayout(comboLayout)
         winLayout.addWidget(self.resultsTabs)
         winLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
         winLayout.addLayout(comboLayout)
+        # winLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
+        # winLayout.addWidget(self.fullResultsCheckbox)
         winLayout.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
         winLayout.addLayout(buttonLayout)
         #self.windowWidget.setLayout(winLayout)
@@ -177,6 +193,7 @@ class Window(QDialog):
         self.xCombobox.currentTextChanged.connect(self.updateStats)
         self.yCombobox.currentTextChanged.connect(self.updateStats)
         self.closeButton.clicked.connect(self.closeEvent)
+        self.saveFigButton.clicked.connect(lambda: self.saveResults(figures_only=True))
         self.saveButton.clicked.connect(self.saveResults)
 
     def updateStats(self):
@@ -309,25 +326,25 @@ class Window(QDialog):
 
         self.totalmixturesLabel[solvent] = QLabel("Total Number of Mixtures: %d" % len(self.mixtures.solvent_mixnum[solvent]))
         self.totalmixturesLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.totalmixturesLabel[solvent].text())
+        self.summary[solvent].append(self.totalmixturesLabel[solvent].text())
         self.totalcompLabel[solvent] = QLabel("Total Number of Compounds: %d" % len(self.mixtures.solvent_dict[solvent]))
         self.totalcompLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.totalcompLabel[solvent].text())
+        self.summary[solvent].append(self.totalcompLabel[solvent].text())
         self.totalpeaksLabel[solvent] = QLabel("Total Number of Peaks: %d" % num_peaks)
         self.totalpeaksLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.totalpeaksLabel[solvent].text())
+        self.summary[solvent].append(self.totalpeaksLabel[solvent].text())
         self.iterationsLabel[solvent] = QLabel("Number of Iterations: %d" % iterations)
         self.iterationsLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.iterationsLabel[solvent].text())
+        self.summary[solvent].append(self.iterationsLabel[solvent].text())
         self.startingLabel[solvent] = QLabel("Mean Starting Energy (Per Compound): %0.1f ± %0.1f (%0.2f ± %0.2f)" %
                                              (average_start, stdev_start,
                                               average_start / num_compounds, stdev_start / num_compounds))
         self.startingLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.startingLabel[solvent].text())
+        self.summary[solvent].append(self.startingLabel[solvent].text())
         self.deltascoresLabel[solvent] = QLabel("Mean Energy Difference Per Step (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
                                                 (average_difference, stdev_difference, min_difference, max_difference))
         self.deltascoresLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.deltascoresLabel[solvent].text())
+        self.summary[solvent].append(self.deltascoresLabel[solvent].text())
         # self.startingcompLabel[solvent] = QLabel("Average Starting Energy Per Compound: %0.1f ± %0.1f" %
         #                                          (average_start_compound, stdev_start_compound))
         # self.startingcompLabel[solvent].setAlignment(Qt.AlignCenter)
@@ -337,12 +354,12 @@ class Window(QDialog):
                                                      average_start_overlap / num_compounds,
                                                      stdev_start_overlap / num_compounds))
         self.startingoverlapLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.startingoverlapLabel[solvent].text())
+        self.summary[solvent].append(self.startingoverlapLabel[solvent].text())
         self.finalLabel[solvent] = QLabel("Mean Final Energy (Per Compound): %0.1f ± %0.1f (%0.2f ± %0.2f)" %
                                           (average_final, stdev_final,
                                            average_final / num_compounds, stdev_final / num_compounds))
         self.finalLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.finalLabel[solvent].text())
+        self.summary[solvent].append(self.finalLabel[solvent].text())
         # self.finalcompLabel[solvent] = QLabel("Average Final Energy Per Compound: %0.1f ± %0.1f" %
         #                                       (average_final_compound, stdev_final_compound))
         # self.finalcompLabel[solvent].setAlignment(Qt.AlignCenter)
@@ -352,77 +369,85 @@ class Window(QDialog):
                                                   average_final_overlap / num_compounds,
                                                   stdev_final_overlap / num_compounds))
         self.finaloverlapLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary.append(self.finaloverlapLabel[solvent].text())
+        self.summary[solvent].append(self.finaloverlapLabel[solvent].text())
 
-    def saveResults(self):
+    def saveResults(self, figures_only=False):
         try:
             optimize_path = os.path.join(self.params.work_dir, self.mixtures.optimize_folder)
             if not os.path.isdir(optimize_path):
                 os.mkdir(optimize_path)
             if self.refine:
-                graphname = "refinement.png"
-                graphpath = os.path.join(optimize_path, graphname)
-                count = 1
-                while os.path.exists(graphpath):
-                    graphname = "refinement_%d.png" % count
+                for solvent in self.mixtures.solvent_mixnum:
+                    if not solvent:
+                        solvent_name = "_ALL"
+                    else:
+                        solvent_name = "_" + solvent
+                    graphname = "refinement%s.png" % (solvent_name)
                     graphpath = os.path.join(optimize_path, graphname)
-                    count += 1
-                summaryname = "refinement.txt"
-                summarypath = os.path.join(optimize_path, summaryname)
-                scoresname = "refinement.csv"
-                scorespath = os.path.join(optimize_path, scoresname)
-                paramsname = "refinement_params.txt"
-                paramspath = os.path.join(optimize_path, paramsname)
-                self.generateResults(summarypath, scorespath)
-                self.generateParams(paramspath)
-                output_msg = "Results saved to %s in working directory.<br><br>" \
-                             "Refinement graphs: <font color='blue'>%s</font><br>" \
-                             "Refinement summary stats: <font color='green'>%s</font><br>" \
-                             "Refinement scores data: <font color='purple'>%s</font><br>" \
-                             "Refinement parameters: <font color='orange'>%s</font>" % \
-                             (self.mixtures.optimize_folder, graphname, summaryname, scoresname, paramsname)
+                    count = 1
+                    while os.path.exists(graphpath):
+                        graphname = "refinement%s%d.png" % (solvent_name, count)
+                        graphpath = os.path.join(optimize_path, graphname)
+                        count += 1
+                    self.fig[solvent].set_size_inches(12, 8)
+                    plt.savefig(graphpath, dpi=200)
+                    if not figures_only:
+                        summaryname = "refinement%s.txt" % (solvent_name)
+                        summarypath = os.path.join(optimize_path, summaryname)
+                        scoresname = "refinement%s.csv" % (solvent_name)
+                        scorespath = os.path.join(optimize_path, scoresname)
+                        self.generateResults(summarypath, scorespath, solvent)
+                if not figures_only:
+                    paramsname = "refinement_params.txt"
+                    paramspath = os.path.join(optimize_path, paramsname)
+                    self.generateParams(paramspath)
             else:
-                graphname = "optimization.png"
-                graphpath = os.path.join(optimize_path, graphname)
-                count = 1
-                while os.path.exists(graphpath):
-                    graphname = "optimization_%d.png" % count
+                for solvent in self.mixtures.solvent_mixnum:
+                    if not solvent:
+                        solvent_name = "_ALL"
+                    else:
+                        solvent_name = "_" + solvent
+                    graphname = "optimization%s.png" % (solvent_name)
                     graphpath = os.path.join(optimize_path, graphname)
-                    count += 1
-                summaryname = "optimization.txt"
-                summarypath = os.path.join(optimize_path, summaryname)
-                scoresname = "optimization.csv"
-                scorespath = os.path.join(optimize_path, scoresname)
-                paramsname = "optimization_params.txt"
-                paramspath = os.path.join(optimize_path, paramsname)
-                self.generateResults(summarypath, scorespath)
-                self.generateParams(paramspath)
-                output_msg = "Results saved to %s in working directory.<br><br>" \
-                             "Optimization graphs: <font color='blue'>%s</font><br>" \
-                             "Optimization summary stats: <font color='green'>%s</font><br>" \
-                             "Optimization scores data: <font color='purple'>%s</font><br>" \
-                             "Optimization parameters: <font color='orange'>%s</font>" % \
-                             (self.mixtures.optimize_folder, graphname, summaryname, scoresname, paramsname)
-            self.fig.set_size_inches(12, 8)
-            plt.savefig(graphpath, dpi=200)
-            # TODO: Save summary result
-            # TODO: Save full scores
-            QMessageBox.information(self, 'Results Saved', output_msg)
+                    count = 1
+                    while os.path.exists(graphpath):
+                        graphname = "optimization%s%d.png" % (solvent_name, count)
+                        graphpath = os.path.join(optimize_path, graphname)
+                        count += 1
+                    self.fig[solvent].set_size_inches(12, 8)
+                    plt.savefig(graphpath, dpi=200)
+                    if not figures_only:
+                        summaryname = "optimization%s.txt" % (solvent_name)
+                        summarypath = os.path.join(optimize_path, summaryname)
+                        scoresname = "optimization%s.csv" % (solvent_name)
+                        scorespath = os.path.join(optimize_path, scoresname)
+                        self.generateResults(summarypath, scorespath, solvent)
+                if not figures_only:
+                    paramsname = "optimization_params.txt"
+                    paramspath = os.path.join(optimize_path, paramsname)
+                    self.generateParams(paramspath)
+            if not figures_only:
+                output_msg = "Optimization results output to: <font color='blue'>%s</font>" % (optimize_path)
+                QMessageBox.information(self, 'Results Saved', output_msg)
+            else:
+                output_msg = "Optimization figures output to: <font color='blue'>%s</font>" % (optimize_path)
+                QMessageBox.information(self, 'Results Saved', output_msg)
         except Exception as e:
             print(e)
             QMessageBox.critical(self, 'Results NOT Saved!',
-                                 "Saving the results was unsuccessful. Please check folder permissions.")
+                                 "<font color='red'>Saving the results was unsuccessful. Please check folder permissions.</font>")
 
-    def generateResults(self, summary_path, scores_path):
+
+    def generateResults(self, summary_path, scores_path, solvent):
         with codecs.open(summary_path, 'w', encoding='utf-8') as summary:
-            for item in self.summary:
+            for item in self.summary[solvent]:
                 summary.write("%s\n" % item)
-        with open(scores_path, 'wb') as scoresfile:
-            writer = csv.writer(scoresfile)
-            header = ['Solvent', 'Iteration', 'Step', 'Current Temp', 'Current Score', 'New Score',
-                      'Current Overlap', 'New Overlap', 'Total Peaks', 'Max Score', 'Probability', 'Result']
-            writer.writerow(header)
-            for solvent in self.anneal_scores:
+        if self.fullResultsCheckbox.isChecked():
+            with open(scores_path, 'wb') as scoresfile:
+                writer = csv.writer(scoresfile)
+                header = ['Solvent', 'Iteration', 'Step', 'Current Temp', 'Current Score', 'New Score',
+                          'Current Overlap', 'New Overlap', 'Total Peaks', 'Max Score', 'Probability', 'Result']
+                writer.writerow(header)
                 for i in self.anneal_scores[solvent]:
                     for step in self.anneal_scores[solvent][i]:
                         scores = list(step)
