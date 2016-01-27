@@ -183,7 +183,7 @@ class Window(QDialog):
         self.extramixSpinBox = QSpinBox()
         self.extramixSpinBox.setKeyboardTracking(False)
         self.extramixSpinBox.setAlignment(Qt.AlignCenter)
-        self.extramixSpinBox.setRange(0, 100)
+        self.extramixSpinBox.setRange(0, 1000)
         self.extramixSpinBox.setValue(self.params.extra_mixtures)
         self.coolingLabel = QLabel("Cooling Rate")
         self.coolingLabel.setAlignment(Qt.AlignCenter)
@@ -201,7 +201,7 @@ class Window(QDialog):
         self.starttempSpinBox = QSpinBox()
         self.starttempSpinBox.setKeyboardTracking(False)
         self.starttempSpinBox.setAlignment(Qt.AlignCenter)
-        self.starttempSpinBox.setRange(self.params.final_temp+1, 100000)
+        self.starttempSpinBox.setRange(self.params.final_temp+1, 500000)
         self.starttempSpinBox.setSingleStep(1)
         # self.starttempSpinBox.setDecimals(3)
         self.starttempSpinBox.setValue(self.params.start_temp)
@@ -219,7 +219,7 @@ class Window(QDialog):
         self.maxstepsSpinBox = QSpinBox()
         self.maxstepsSpinBox.setKeyboardTracking(False)
         self.maxstepsSpinBox.setAlignment(Qt.AlignCenter)
-        self.maxstepsSpinBox.setRange(1, 5000000)
+        self.maxstepsSpinBox.setRange(1, 10000000)
         self.maxstepsSpinBox.setValue(self.params.max_steps)
         self.maxstepsSpinBox.setSingleStep(self.params.max_steps)
         self.mixrateLabel = QLabel("Mix Rate")
@@ -286,7 +286,7 @@ class Window(QDialog):
         self.refinestarttempSpinBox = QSpinBox()
         self.refinestarttempSpinBox.setKeyboardTracking(False)
         self.refinestarttempSpinBox.setAlignment(Qt.AlignCenter)
-        self.refinestarttempSpinBox.setRange(self.params.refine_final_temp+1, 100000)
+        self.refinestarttempSpinBox.setRange(self.params.refine_final_temp+1, 500000)
         self.refinestarttempSpinBox.setSingleStep(1.0)
         # self.refinestarttempSpinBox.setDecimals(3)
         self.refinestarttempSpinBox.setValue(self.params.refine_start_temp)
@@ -308,7 +308,7 @@ class Window(QDialog):
         self.refinemaxstepsSpinBox = QSpinBox()
         self.refinemaxstepsSpinBox.setKeyboardTracking(False)
         self.refinemaxstepsSpinBox.setAlignment(Qt.AlignCenter)
-        self.refinemaxstepsSpinBox.setRange(1, 5000000)
+        self.refinemaxstepsSpinBox.setRange(1, 10000000)
         self.refinemaxstepsSpinBox.setValue(self.params.refine_max_steps)
         self.refinemaxstepsSpinBox.setSingleStep(self.params.refine_max_steps)
         self.refinemaxstepsSpinBox.setDisabled(disabled)
@@ -436,10 +436,9 @@ class Window(QDialog):
         scoreLayout.addWidget(self.searchResults, 31, 0, 1, 2)
         #scoreLayout.addWidget(self.showmixturehist, 29, 0, 1, 2)
         scoreLayout.addWidget(self.showrankedcompounds, 32, 0, 1, 2)
-
-
         self.paramtab1.setLayout(scoreLayout)
         self.paramTabs.addTab(self.paramtab1, "Scoring")
+
         mixLayout = QGridLayout()
         mixLayout.addWidget(self.startnumLabel, 2, 0)
         mixLayout.addWidget(self.startnumSpinBox, 2, 1)
@@ -920,7 +919,7 @@ class Window(QDialog):
             output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
             QMessageBox.information(self, 'Results Saved', output_msg)
         except Exception as e:
-            print(e)
+            #print(e)
             QMessageBox.critical(self, 'Results NOT Saved!',
                                  "Saving the mixture results was unsuccessful. Please check folder permissions.")
 

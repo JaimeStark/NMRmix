@@ -43,7 +43,7 @@ def startGUI(params_object):
     params_object.initWindowSize(QApplication.desktop().availableGeometry())
     window = library_import.MainWindow(params_object)
     window.resize(int(params_object.size.width() * 0.85), int(params_object.size.height() * 0.7))
-    splash_win = splash_screen.Window(__VERSION__)
+    splash_win = splash_screen.Window(__VERSION__, params_object)
     splash_win.accepted.connect(window.show)
     splash_win.show()
     sys.exit(app.exec_())

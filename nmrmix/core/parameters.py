@@ -14,10 +14,12 @@ import math
 class Parameters(object):
     def __init__(self, exists, pref_file):
         self.setDefaultParams()
-        if exists:
-            self.readPreferences(pref_file)
+        self.pref_file = pref_file
+        self.exists = exists
+        if self.exists:
+            self.readPreferences(self.pref_file)
         else:
-            self.writePreferences(pref_file)
+            self.writePreferences(self.pref_file)
 
     def setDefaultParams(self):
         self.work_dir = os.path.expanduser("~/Desktop")
