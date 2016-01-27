@@ -157,7 +157,7 @@ class Window(QDialog):
 
     def viewScorePlots(self, refine):
         scoreplot_win = optimize_view.Window(self.params, self.mixtures, refine=refine)
-        scoreplot_win.resize(int(self.params.size.width() * 0.85), int(self.params.size.height() * 0.7))
+        #scoreplot_win.resize(int(self.params.size.width() * 0.85), int(self.params.size.height() * 0.7))
         scoreplot_win.exec_()
 
     def setForegroundColor(self, widget, color):
