@@ -444,7 +444,7 @@ class Mixtures(object):
                         writer.writerow(roi_list)
 
     def exportPeakListCSV(self, results_directory):
-        path = os.path.join(results_directory, "peaks.csv")
+        path = os.path.join(results_directory, "peaks_mixtures.csv")
         with open(path, 'wb') as peaks_csv:
             writer = csv.writer(peaks_csv)
             for mixture in sorted(self.mixtures.keys()):

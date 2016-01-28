@@ -914,7 +914,7 @@ class Window(QDialog):
             self.library.exportLibraryCSV(self.results_path)
             self.library.exportImportLog(self.results_path)
             self.library.exportIgnoreRegions(self.results_path)
-            # self.library.exportPeaklistCSV(self.results_path)
+            self.library.exportPeaklistCSV(self.results_path)
             self.params.exportScoringParams(self.results_path)
             output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
             QMessageBox.information(self, 'Results Saved', output_msg)

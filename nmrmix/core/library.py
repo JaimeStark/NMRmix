@@ -80,7 +80,7 @@ class Library(object):
             print("Log export failed")
 
     def exportPeaklistCSV(self, results_path):
-        path = os.path.join(results_path, 'peaklist.csv')
+        path = os.path.join(results_path, 'peaks_all.csv')
         try:
             with open(path, 'wb') as newcsv:
                 writer = csv.writer(newcsv)
@@ -88,6 +88,15 @@ class Library(object):
                 writer.writerow(['Compound ID', 'Peak Number', 'PPM', 'Intensity', 'Width'])
                 for compound in compound_list:
                     compound_obj = self.library[compound]
+                    for i, peak in enumerate(compound_obj.peaklist):
+                        if len(peak) > 2:
+                            peakrow = [compound_obj.id, i+1, peak[0], peak[1], peak[2]]
+                        else:
+                            peakrow = [compound_obj.id, i+1, peak[0], peak[1], self.params.peak_range]
+                        writer.writerow(peakrow)
+                compound_list = list(self.ignored_library.keys())
+                for compound in compound_list:
+                    compound_obj = self.ignored_library[compound]
                     for i, peak in enumerate(compound_obj.peaklist):
                         if len(peak) > 2:
                             peakrow = [compound_obj.id, i+1, peak[0], peak[1], peak[2]]
