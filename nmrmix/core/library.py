@@ -191,9 +191,9 @@ class Library(object):
             path = os.path.join(results_directory, 'ignored_compounds.csv')
             with open(path, 'wb') as ignored_compounds_csv:
                 writer = csv.writer(ignored_compounds_csv)
+                header = ['Compound ID', 'Compound Name', 'Compound Solvent']
+                writer.writerow(header)
                 if self.ignored_library:
-                    header = ['Compound ID', 'Compound Name', 'Compound Solvent']
-                    writer.writerow(header)
                     for compound in self.ignored_library:
                         row = [self.ignored_library[compound].id, self.ignored_library[compound].name,
                                self.ignored_library[compound].solvent]
