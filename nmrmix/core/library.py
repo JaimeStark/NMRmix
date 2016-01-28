@@ -130,6 +130,75 @@ class Library(object):
                 # print(e)
                 pass
 
+    def importIgnoreRegions(self, filepath):
+        message_log = []
+        ignore_regions = []
+        ignore_regions_header = []
+        try:
+            with open(filepath, 'rU') as csv_file:
+                reader = csv.reader(csv_file)
+                for rowcounter, row in enumerate(reader):
+                    if len(row) != 4:
+                        message_log.append("There should be 4 columns. The imported file has %d" % len(row))
+                        break
+                    if "" in row[0:3]:
+                        message_log.append("Skipped row %d due to missing name or limits" % (rowcounter+1))
+                        continue
+                    if row[0]  == "Name":
+                        # Assumes that a header resides in the first row of the csv file.
+                        ignore_regions_header.append(row)
+                    else:
+                        name = row[0]
+                        lower = row[1]
+                        upper = row[2]
+                        solvent = row[3]
+                        if row[1] > row[2]:
+                            message_log.append("PPM limits for %s were reversed" % row[0])
+                            lower = row[2]
+                            upper = row[1]
+                        elif row[1] == row[2]:
+                            message_log.append("No range of limits for %s. Region skipped." % row[0])
+                            continue
+                        if solvent not in self.solvents:
+                            if solvent != "ALL":
+                                message_log.append("Solvent specificity for %s not recognized. Set to ALL" % row[0])
+                                solvent = 'ALL'
+                        for region in ignore_regions:
+                            if row[0] in region:
+                                message_log.append("%s is a duplicate" % row[0])
+                                row[0] = ""
+                        if row[0] == '':
+                            continue
+                        ignore_regions.append([name, lower, upper, solvent])
+                if not ignore_regions:
+                    message_log.append("No valid ignore regions recognized in file.")
+                return(ignore_regions, message_log)
+        except IOError:
+            message_log.append("Filepath %s does not exist." % self.params.library_path)
+            return(ignore_regions, message_log)
+
+    def exportIgnoreRegions(self, results_directory):
+            path = os.path.join(results_directory, "ignored.csv")
+            with open(path, 'wb') as ignore_csv:
+                writer = csv.writer(ignore_csv)
+                header = ['Name', 'Lower', 'Upper', 'Specificity']
+                writer.writerow(header)
+                for name in self.ignored_regions:
+                    region = self.ignored_regions[name]
+                    region_list = [name, region[0], region[1], region[2]]
+                    writer.writerow(region_list)
+
+            path = os.path.join(results_directory, 'ignored_compounds.csv')
+            with open(path, 'wb') as ignored_compounds_csv:
+                writer = csv.writer(ignored_compounds_csv)
+                if self.ignored_library:
+                    header = ['Compound ID', 'Compound Name', 'Compound Solvent']
+                    writer.writerow(header)
+                    for compound in self.ignored_library:
+                        row = [self.ignored_library[compound].id, self.ignored_library[compound].name,
+                               self.ignored_library[compound].solvent]
+                        writer.writerow(row)
+
     def addLibraryCompound(self, index_count, compound_object):
         """Adds the compound object to the library dictionary with a key that is the same as the compound id."""
         if compound_object.id in self.library:

@@ -180,6 +180,10 @@ class Window(QDialog):
         self.ignoretblbtnRemove.setToolTip('Remove the selected row/region from the table.')
         self.ignoretblbtnEdit = QPushButton("Edit Region")
         self.ignoretblbtnEdit.setToolTip('Allows for the selected row/region to be edited.')
+        self.ignoretblbtnClear = QPushButton("Clear Regions")
+        self.ignoretblbtnClear.setToolTip("Clears the table of all ignored regions")
+        self.ignoretblbtnImport = QPushButton("Import Regions")
+        self.ignoretblbtnImport.setToolTip("Clear table and import a csv containing the ignored regions")
 
         self.btnwidget = QWidget()
         self.buttonContinue = QPushButton("Continue to Mixture Generation")
@@ -223,6 +227,8 @@ class Window(QDialog):
         ignoreLayout.addWidget(self.ignoretblbtnAdd)
         ignoreLayout.addWidget(self.ignoretblbtnEdit)
         ignoreLayout.addWidget(self.ignoretblbtnRemove)
+        ignoreLayout.addWidget(self.ignoretblbtnClear)
+        ignoreLayout.addWidget(self.ignoretblbtnImport)
         winLayout.addLayout(ignoreLayout, 1, 2)
 
         buttonLayout = QHBoxLayout()
@@ -239,6 +245,8 @@ class Window(QDialog):
         self.ignoretblbtnAdd.clicked.connect(self.addRegion)
         self.ignoretblbtnRemove.clicked.connect(self.removeRegion)
         self.ignoretblbtnEdit.clicked.connect(self.editRegion)
+        self.ignoretblbtnClear.clicked.connect(self.clearRegions)
+        self.ignoretblbtnImport.clicked.connect(self.importRegions)
         self.buttonBack.clicked.connect(self.backToLibrary)
         self.buttonContinue.clicked.connect(self.continueToMixtures)
         self.statstable.itemClicked.connect(self.stat_clicked)
@@ -277,9 +285,9 @@ class Window(QDialog):
         self.ignoretable.insertRow(rows)
         name = QTableWidgetItem(table_values[0])
         name.setTextAlignment(Qt.AlignCenter)
-        lowerl = QTableWidgetItem("%.3f" % table_values[1])
+        lowerl = QTableWidgetItem("%.3f" % float(table_values[1]))
         lowerl.setTextAlignment(Qt.AlignCenter)
-        upperl = QTableWidgetItem("%.3f" % table_values[2])
+        upperl = QTableWidgetItem("%.3f" % float(table_values[2]))
         upperl.setTextAlignment(Qt.AlignCenter)
         solvent = QTableWidgetItem(table_values[3])
         solvent.setTextAlignment(Qt.AlignCenter)
@@ -287,7 +295,7 @@ class Window(QDialog):
         self.ignoretable.setItem(rows, 1, lowerl)
         self.ignoretable.setItem(rows, 2, upperl)
         self.ignoretable.setItem(rows, 3, solvent)
-        self.ignored_regions[table_values[0]] = (table_values[1], table_values[2], table_values[3])
+        self.ignored_regions[table_values[0]] = (float(lowerl.text()), float(upperl.text()), table_values[3])
         self.ignoretable.scrollToItem(self.ignoretable.item(rows, 1))
         self.ignoretable.selectRow(rows)
         self.updateStats()
@@ -311,15 +319,37 @@ class Window(QDialog):
         if editregion_win.exec_():
             self.changeRegion(editregion_win.table_values)
 
+    def clearRegions(self):
+        while self.ignoretable.rowCount() > 0:
+            self.ignoretable.selectRow(0)
+            self.removeRegion()
+
+    def importRegions(self):
+        dir = self.params.work_dir
+        fileObj = QFileDialog.getOpenFileName(self, "Open Ignore Regions CSV", directory=dir,
+                                              filter = "CSV Files: (*.csv)")
+        if fileObj[0]:
+            ignore_regions, message_log = self.library.importIgnoreRegions(fileObj[0])
+            if not ignore_regions:
+                QMessageBox.critical(self, "Import Error!", message_log[0], QMessageBox.Ok)
+            else:
+                message_string = ''
+                for i in message_log:
+                    message_string = message_string + "\n" + i
+                QMessageBox.information(self, "Ignore Regions Imported", message_string)
+                self.clearRegions()
+                for region in ignore_regions:
+                    self.acceptedRegion(region)
+
     def changeRegion(self, table_values):
         selected = self.ignoretable.currentRow()
         oldname = self.ignoretable.item(selected,0).text()
         del self.ignored_regions[oldname]
         name = QTableWidgetItem(table_values[0])
         name.setTextAlignment(Qt.AlignCenter)
-        lowerl = QTableWidgetItem("%.3f" % table_values[1])
+        lowerl = QTableWidgetItem("%.3f" % float(table_values[1]))
         lowerl.setTextAlignment(Qt.AlignCenter)
-        upperl = QTableWidgetItem("%.3f" % table_values[2])
+        upperl = QTableWidgetItem("%.3f" % float(table_values[2]))
         upperl.setTextAlignment(Qt.AlignCenter)
         solvent = QTableWidgetItem(table_values[3])
         solvent.setTextAlignment(Qt.AlignCenter)
@@ -327,7 +357,7 @@ class Window(QDialog):
         self.ignoretable.setItem(selected, 1, lowerl)
         self.ignoretable.setItem(selected, 2, upperl)
         self.ignoretable.setItem(selected, 3, solvent)
-        self.ignored_regions[table_values[0]] = (table_values[1], table_values[2], table_values[3])
+        self.ignored_regions[table_values[0]] = (float(lowerl.text()), float(upperl.text()), table_values[3])
         self.ignoretable.scrollToItem(self.ignoretable.item(selected, 1))
         self.ignoretable.selectRow(selected)
         self.updateStats()

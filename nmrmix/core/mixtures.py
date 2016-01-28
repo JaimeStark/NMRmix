@@ -527,21 +527,7 @@ class Mixtures(object):
                     scores.append("%.1f" % self.mixture_scores[tuple(self.mixtures[mixture])])
                     writer.writerow(scores)
 
-    def exportIgnoreRegion(self, results_directory):
-        path = os.path.join(results_directory, "ignored.csv")
-        with open(path, 'wb') as ignore_csv:
-            writer = csv.writer(ignore_csv)
-            header = ['Name', 'Lower', 'Upper', 'Specificity']
-            writer.writerow(header)
-            for name in self.library.ignored_regions:
-                region = self.library.ignored_regions[name]
-                region_list = [name, region[0], region[1], region[2]]
-                writer.writerow(region_list)
-            writer.writerow([""])
-            if self.library.ignored_library:
-                writer.writerow(["Ignored Compounds"])
-                for compound in self.library.ignored_library:
-                    writer.writerow([compound])
+
 
     def exportStats(self):
         # TODO: Library Stats

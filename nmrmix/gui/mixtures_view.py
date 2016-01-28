@@ -909,11 +909,11 @@ class Window(QDialog):
             self.mixtures.exportMixturesCSV(self.results_path)
             self.mixtures.exportRoiCSV(self.results_path)
             self.mixtures.exportFullRoiCSV(self.results_path)
-            self.mixtures.exportIgnoreRegion(self.results_path)
             self.mixtures.exportScores(self.results_path)
             self.mixtures.exportPeakListCSV(self.results_path)
             self.library.exportLibraryCSV(self.results_path)
             self.library.exportImportLog(self.results_path)
+            self.library.exportIgnoreRegions(self.results_path)
             # self.library.exportPeaklistCSV(self.results_path)
             self.params.exportScoringParams(self.results_path)
             output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
@@ -921,7 +921,7 @@ class Window(QDialog):
         except Exception as e:
             #print(e)
             QMessageBox.critical(self, 'Results NOT Saved!',
-                                 "Saving the mixture results was unsuccessful. Please check folder permissions.")
+                                 "Some mixture results files could not be saved. Please check folder permissions.")
 
     def importMixtures(self):
         dir = self.params.work_dir
