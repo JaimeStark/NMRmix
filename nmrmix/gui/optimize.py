@@ -17,7 +17,7 @@ import time
 import datetime
 import copy
 
-from nmrmix.gui import optimize_view
+from gui import optimize_view
 
 
 class Window(QDialog):

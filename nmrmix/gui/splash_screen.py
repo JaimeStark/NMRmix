@@ -15,7 +15,6 @@ import os
 import sys
 
 class Window(QDialog):
-
     def __init__(self, __version__, params_object, parent=None):
         QDialog.__init__(self, parent)
         self.params = params_object

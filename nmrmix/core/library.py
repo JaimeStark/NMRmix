@@ -17,7 +17,7 @@ else:
 import numpy as np
 import copy
 
-from nmrmix.core import compounds
+from core import compounds
 
 class Library(object):
     """DOCSTRING"""

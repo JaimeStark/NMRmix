@@ -13,8 +13,7 @@ from PyQt5.QtWidgets import *
 
 import sys
 
-# from nmrmix.gui import mixtures_view
-from nmrmix.gui import mixtures_view, peak_histogram, peak_count, peak_aromaticity, compounds_list
+from gui import mixtures_view, peak_histogram, peak_count, peak_aromaticity, compounds_list
 
 class Window(QDialog):
     def __init__(self, params_object, library_object, parent=None):

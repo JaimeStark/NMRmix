@@ -13,7 +13,7 @@ from PyQt5.QtCore import *
 
 import time
 
-from nmrmix.core import compounds
+from core import compounds
 
 
 class Window(QDialog):

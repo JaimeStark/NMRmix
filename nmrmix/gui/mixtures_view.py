@@ -23,12 +23,8 @@ else:
     import unicodecsv as csv
 import copy
 
-from nmrmix.core import mixtures
-from nmrmix.gui import mixture_spectra, compound_info, optimize, move_compounds, compounds_ranked
-# from gui import compound_info
-# from gui import optimize
-# from gui import move_compounds
-# from gui import compounds_ranked
+from core import mixtures
+from gui import mixture_spectra, compound_info, optimize, move_compounds, compounds_ranked
 
 class Window(QDialog):
     def __init__(self, params_object, library_object, parent=None):

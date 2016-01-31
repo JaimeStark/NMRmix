@@ -32,8 +32,8 @@ from PyQt5.QtWidgets import QApplication
 
 import sys
 import os
-from nmrmix.core import parameters
-from nmrmix.gui import splash_screen, library_import
+from core import parameters
+from gui import splash_screen, library_import
 
 __VERSION__ = open('VERSION', 'rU').read()
 

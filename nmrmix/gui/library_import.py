@@ -12,8 +12,8 @@ from PyQt5.QtWidgets import *
 
 import sys
 
-from nmrmix.core import library
-from nmrmix.gui import peak_info, peak_import
+from core import library
+from gui import peak_info, peak_import
 
 
 class MainWindow(QWidget):
