@@ -32,8 +32,20 @@ from PyQt5.QtWidgets import QApplication
 
 import sys
 import os
+import inspect
 from core import parameters
 from gui import splash_screen, library_import
+
+def get_script_dir(follow_symlinks = True):
+    if getattr(sys, 'frozen', False):
+        path = os.path.abspath(sys.executable)
+    else:
+        path = inspect.getabsfile(get_script_dir)
+    if follow_symlinks:
+        path = os.path.realpath(path)
+    return os.path.dirname(path)
+
+os.chdir(get_script_dir())
 
 __VERSION__ = open('VERSION', 'rU').read()
 
