@@ -859,14 +859,12 @@ class Window(QDialog):
         query_success = False
         print(query, query_success)
         if query:
-            print("if query")
             for mixture in self.mixtures.mixtures:
                 for compound in self.mixtures.mixtures[mixture]:
                     name = self.library.library[compound].name
                     search_options = [compound, compound.upper(), compound.lower(),
                                       name, name.upper(), name.lower(), name.capitalize()]
                     if query in search_options:
-                        print("query in search_options")
                         self.searchResults.setText("%s Found in Mixture %d" % (query, mixture))
                         self.searchResults.setStyleSheet("QLabel {color: blue;}")
                         rows = self.mixtable.rowCount()
