@@ -407,6 +407,7 @@ class Window(QDialog):
 
     def generateParams(self, params_path):
         with codecs.open(params_path, 'w', encoding='utf-8') as params:
+            params.write("Optimization Time: %s\n" % self.mixtures.optimize_duration)
             params.write("Max Mixture Size: %d\n" % self.params.mix_size)
             params.write("Iterations: %d\n" % self.params.iterations)
             params.write("Default Overlap Range: %0.3f\n" % self.params.peak_range)
