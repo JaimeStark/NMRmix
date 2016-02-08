@@ -12,14 +12,14 @@ import codecs
 import math
 
 class Parameters(object):
-    def __init__(self, exists, pref_file):
+    def __init__(self):
         self.setDefaultParams()
-        self.pref_file = pref_file
-        self.exists = exists
-        if self.exists:
-            self.readPreferences(self.pref_file)
-        else:
-            self.writePreferences(self.pref_file)
+        self.pref_dir = "~/.nmrmix"
+        self.pref_file = "~/.nmrmix/preferences.txt"
+        if os.path.exists(os.path.expanduser(self.pref_dir)):
+            if os.path.isfile(os.path.expanduser(self.pref_file)):
+                self.readPreferences()
+
 
     def setDefaultParams(self):
         self.work_dir = os.path.expanduser("~/Desktop")
@@ -284,12 +284,13 @@ class Parameters(object):
 
     def resetPreferences(self):
         self.setDefaultParams()
-        self.writePreferences("~/.nmrmix/preferences.txt")
+        self.writePreferences()
 
-    def readPreferences(self, preferences_path):
+    def readPreferences(self):
         try:
-            if os.path.isfile(preferences_path):
-                with codecs.open(preferences_path, 'r', encoding='utf-8') as pref_file:
+            pref_path = os.path.expanduser(self.pref_file)
+            if os.path.isfile(pref_path):
+                with codecs.open(pref_path, 'r', encoding='utf-8') as pref_file:
                     for line in pref_file:
                         line_list = line.split('=')
                         parameter = line_list[0].strip()
@@ -378,12 +379,16 @@ class Parameters(object):
                             except:
                                 pass
         except Exception as e:
-            print("Failed to read preferences")
-            print(e)
+            # print("Failed to read preferences")
+            # print(e)
+            pass
 
-    def writePreferences(self, preferences_path):
+    def writePreferences(self):
         try:
-            with codecs.open(preferences_path, 'w', encoding='utf-8') as pref_file:
+            if not os.path.exists(os.path.expanduser(self.pref_dir)):
+                os.mkdir(os.path.expanduser(self.pref_dir))
+            pref_path = os.path.expanduser(self.pref_file)
+            with codecs.open(pref_path, 'w', encoding='utf-8') as pref_file:
                 pref_file.write("Working Directory" + " = " + str(self.work_dir) + "\n")
                 pref_file.write("Peaklist Directory" + " = " + str(self.peaklist_dir) + "\n")
                 pref_file.write("Library File Path" + " = " + str(self.library_path) + "\n")
@@ -414,7 +419,8 @@ class Parameters(object):
                 pref_file.write("Step Size Print" + " = " + str(self.print_step_size) + "\n")
                 pref_file.write("Peak Display Width" + " = " + str(self.peak_display_width) + "\n")
         except Exception as e:
-            print("Failed to write preferences")
-            print(e)
+            # print("Failed to write preferences")
+            # print(e)
+            pass
 
     

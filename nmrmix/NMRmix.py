@@ -60,13 +60,5 @@ def startGUI(params_object):
     splash_win.show()
     sys.exit(app.exec_())
 
-
-pref_dir = os.path.expanduser("~/.nmrmix")
-pref_file = os.path.expanduser("~/.nmrmix/preferences.txt")
-if not os.path.exists(pref_dir):
-    os.mkdir(pref_dir)
-if not os.path.isfile(pref_file):
-    params = parameters.Parameters(False, pref_file)
-else:
-    params = parameters.Parameters(True, pref_file)
+params = parameters.Parameters()
 startGUI(params)

@@ -568,7 +568,7 @@ class DefaultPreferences(QDialog):
 
     def closeWindow(self):
         if self.params.exists:
-            self.params.readPreferences(self.params.pref_file)
+            self.params.readPreferences()
         else:
             self.params.setDefaultParams()
         self.reject()
@@ -579,14 +579,16 @@ class DefaultPreferences(QDialog):
 
     def restoreParams(self):
         if self.params.exists:
-            self.params.readPreferences(self.params.pref_file)
+            self.params.readPreferences()
         else:
             self.params.setDefaultParams()
         self.updateValues()
 
     def saveParams(self):
         try:
-            self.params.writePreferences(self.params.pref_file)
+            self.params.writePreferences()
+            output_msg = "Preferences saved to:<br><font color='blue'>%s</font>" % os.path.expanduser(self.params.pref_file)
+            QMessageBox.information(self, 'Preferences Saved', output_msg)
         except:
             QMessageBox.critical(self, 'Preferences NOT Saved!',
                                  "Saving preferences to file was unsuccessful.\n"
