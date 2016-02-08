@@ -11,7 +11,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-import os, sys, time
+import os
+import sys
 
 class Window(QDialog):
     def __init__(self, __version__, params_object, resources_path, parent=None):
@@ -34,7 +35,7 @@ class Window(QDialog):
         self.appName = QLabel("NMRmix")
         self.appName.setStyleSheet("QLabel {font-size: 24px; color: red; font-weight:bold;}")
         self.appName.setAlignment(Qt.AlignCenter)
-        self.appSubName = QLabel("<b>A tool for generating optimal small molecule mixtures for "
+        self.appSubName = QLabel("<b>A tool for generating optimal small molecule mixtures in "
                                  "1D <sup>1</sup>H-NMR ligand affinity screens</b>")
         self.appSubName.setAlignment(Qt.AlignCenter)
         self.appSubName.setWordWrap(True)
@@ -46,7 +47,7 @@ class Window(QDialog):
         text = "http://www.nmrfam.wisc.edu<br>" \
                "<br>" \
                "J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016).<br>" \
-               "<i>In Preparation</i><br>" \
+               "<i>Submitted</i><br>" \
                "<br>" \
                "Questions or Problems?<br>" \
                "Contact: jstark@nmrfam.wisc.edu"
