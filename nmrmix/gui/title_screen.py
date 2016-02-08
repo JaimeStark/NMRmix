@@ -11,18 +11,14 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-import os
-import sys
+import os, sys, time
 
 class Window(QDialog):
-    def __init__(self, __version__, params_object, parent=None):
+    def __init__(self, __version__, params_object, resources_path, parent=None):
         QDialog.__init__(self, parent)
         self.params = params_object
         self.version = __version__
-        if ".app" in str(__file__):
-            self.resources_path = os.path.abspath(os.path.join(os.path.dirname(__file__ ), '../../..', 'static'))
-        else:
-            self.resources_path = os.path.abspath(os.path.join(os.path.dirname(__file__ ), '..', 'static'))
+        self.resources_path = resources_path
         self.setWindowTitle("NMRmix")
         self.createWidgets()
         self.layoutWidgets()

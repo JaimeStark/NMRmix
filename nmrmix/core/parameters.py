@@ -12,8 +12,9 @@ import codecs
 import math
 
 class Parameters(object):
-    def __init__(self):
+    def __init__(self, app_directory):
         self.setDefaultParams()
+        self.app_directory = app_directory
         self.pref_dir = "~/.nmrmix"
         self.pref_file = "~/.nmrmix/preferences.txt"
         if os.path.exists(os.path.expanduser(self.pref_dir)):
