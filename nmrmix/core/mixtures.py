@@ -25,8 +25,8 @@ class Mixtures(object):
         self.params = params_object
         self.library = library_object
         self.mixtures = {}
-        self.solvent_dict = {}
-        self.solvent_mixnum = {}
+        self.group_dict = {}
+        self.group_mixnum = {}
         self.mixture_scores = {}
         self.mixture_overlaps = {}
         self.compound_scores = {}
@@ -39,32 +39,32 @@ class Mixtures(object):
         self.mixtures_lock = []
 
 
-    def generateSolventLists(self):
-        """Generates a dictionary where the keys are the different solvents, and the values is a list of
-        compound IDs that have those solvents."""
-        self.solvent_dict = {}
-        self.solvent_mixnum = {}
-        if self.params.use_solvent:
+    def generateGroupLists(self):
+        """Generates a dictionary where the keys are the different groups, and the values is a list of
+        compound IDs that have those groups."""
+        self.group_dict = {}
+        self.group_mixnum = {}
+        if self.params.use_group:
             for compound in self.library.library:
                 compound_object = self.library.library[compound]
-                if compound_object.solvent in self.solvent_dict:
-                    self.solvent_dict[compound_object.solvent].append(compound_object.id)
+                if compound_object.group in self.group_dict:
+                    self.group_dict[compound_object.group].append(compound_object.id)
                 else:
-                    self.solvent_dict[compound_object.solvent] = []
-                    self.solvent_dict[compound_object.solvent].append(compound_object.id)
+                    self.group_dict[compound_object.group] = []
+                    self.group_dict[compound_object.group].append(compound_object.id)
         else:
-            self.solvent_dict[""] = []
+            self.group_dict[""] = []
             for compound in self.library.library:
                 compound_object = self.library.library[compound]
-                self.solvent_dict[""].append(compound_object.id)
+                self.group_dict[""].append(compound_object.id)
 
     def generateInitialMixtures(self):
         self.mixtures = {}
         self.mixtures.update(self.mixtures_lock)
         start_num = self.params.start_num
-        for solvent in self.solvent_dict:
-            self.solvent_mixnum[solvent] = []
-            library_list = list(self.solvent_dict[solvent])
+        for group in self.group_dict:
+            self.group_mixnum[group] = []
+            library_list = list(self.group_dict[group])
             random.shuffle(library_list)
             num_compounds = len(library_list)
             # Prevents setting mixture size to greater than the size of the library.
@@ -90,7 +90,7 @@ class Mixtures(object):
                         self.mixtures[mix_num].append(compound)
                 # Reorganizes the elements in the mixture alphabetically
                 self.mixtures[mix_num].sort()
-                self.solvent_mixnum[solvent].append(mix_num)
+                self.group_mixnum[group].append(mix_num)
             start_num = mix_num + 1
         self.num_mixtures = len(self.mixtures)
         self.resetScores()
@@ -298,13 +298,13 @@ class Mixtures(object):
 
     def optimizeMixtures(self):
         """Only used in command line version. Not threaded."""
-        solvents = list(self.solvent_dict)
+        groups = list(self.group_dict)
         self.calculateTotalScore(self.mixtures)
         self.anneal_scores = {}
-        for solvent in solvents:
+        for group in groups:
             iter = {}
             for i in range(self.params.iterations):
-                mixnum_list = list(self.solvent_mixnum[solvent])
+                mixnum_list = list(self.group_mixnum[group])
                 curr_score, mixtures, scores = self.annealMixtures(mixnum_list)
                 iter[i] = [curr_score, mixtures, scores]
                 if i == 0:
@@ -367,7 +367,7 @@ class Mixtures(object):
         path = os.path.join(results_directory, "mixtures.csv")
         with open(path, 'wb') as mixture_csv:
             writer = csv.writer(mixture_csv)
-            header = ['Mixture Number', 'Mixture Score', 'Mixture Solvent']
+            header = ['Mixture Number', 'Mixture Score', 'Mixture Group']
             max_length = 0
             for mixture in sorted(self.mixtures.keys()):
                 if len(self.mixtures[mixture]) > max_length:
@@ -379,23 +379,23 @@ class Mixtures(object):
             for mixture in sorted(self.mixtures.keys()):
                 mixture_results = []
                 mixture_results.append(str(mixture))
-                mixture_solvent = []
+                mixture_group = []
                 mixture_score = "%0.1f" % self.mixture_scores[tuple(self.mixtures[mixture])]
                 mixture_results.append(mixture_score)
                 for compound in self.mixtures[mixture]:
-                    if self.library.library[compound].solvent not in mixture_solvent:
-                        mixture_solvent.append(self.library.library[compound].solvent)
-                if len(mixture_solvent) >= 2:
-                    solvent = 'Mixed'
+                    if self.library.library[compound].group not in mixture_group:
+                        mixture_group.append(self.library.library[compound].group)
+                if len(mixture_group) >= 2:
+                    group = 'Mixed'
                 else:
-                    if not mixture_solvent or len(mixture_solvent) == 0:
-                        solvent = ''
+                    if not mixture_group or len(mixture_group) == 0:
+                        group = ''
                     else:
-                        solvent = mixture_solvent[0]
-                mixture_results.append(solvent)
+                        group = mixture_group[0]
+                mixture_results.append(group)
                 for compound in self.mixtures[mixture]:
-                    if self.library.library[compound].solvent not in mixture_solvent:
-                        mixture_solvent.append(self.library.library[compound].solvent)
+                    if self.library.library[compound].group not in mixture_group:
+                        mixture_group.append(self.library.library[compound].group)
                     mixture_results.append(compound)
                 writer.writerow(mixture_results)
 
@@ -404,21 +404,21 @@ class Mixtures(object):
         with open(path, 'wb') as mixture_csv:
             writer = csv.writer(mixture_csv)
             for mixture in sorted(self.mixtures.keys()):
-                mixture_solvent = []
+                mixture_group = []
                 for compound in self.mixtures[mixture]:
-                    if self.library.library[compound].solvent not in mixture_solvent:
-                        mixture_solvent.append(self.library.library[compound].solvent)
-                if len(mixture_solvent) >= 2:
-                    solvent = 'Mixed'
+                    if self.library.library[compound].group not in mixture_group:
+                        mixture_group.append(self.library.library[compound].group)
+                if len(mixture_group) >= 2:
+                    group = 'Mixed'
                 else:
-                    if not mixture_solvent or len(mixture_solvent) == 0:
-                        solvent = ''
+                    if not mixture_group or len(mixture_group) == 0:
+                        group = ''
                     else:
-                        solvent = mixture_solvent[0]
+                        group = mixture_group[0]
                 for compound in self.mixtures[mixture]:
                     compound_name = self.library.library[compound].name
                     for i, roi in enumerate(self.library.library[compound].no_overlap_rois):
-                        roi_list = [mixture, compound, compound_name, i+1, roi[0], roi[1], solvent]
+                        roi_list = [mixture, compound, compound_name, i+1, roi[0], roi[1], group]
                         writer.writerow(roi_list)
 
     def exportFullRoiCSV(self, results_directory):
@@ -426,21 +426,21 @@ class Mixtures(object):
         with open(path, 'wb') as mixture_csv:
             writer = csv.writer(mixture_csv)
             for mixture in sorted(self.mixtures.keys()):
-                mixture_solvent = []
+                mixture_group = []
                 for compound in self.mixtures[mixture]:
-                    if self.library.library[compound].solvent not in mixture_solvent:
-                        mixture_solvent.append(self.library.library[compound].solvent)
-                if len(mixture_solvent) >= 2:
-                    solvent = 'Mixed'
+                    if self.library.library[compound].group not in mixture_group:
+                        mixture_group.append(self.library.library[compound].group)
+                if len(mixture_group) >= 2:
+                    group = 'Mixed'
                 else:
-                    if not mixture_solvent or len(mixture_solvent) == 0:
-                        solvent = ''
+                    if not mixture_group or len(mixture_group) == 0:
+                        group = ''
                     else:
-                        solvent = mixture_solvent[0]
+                        group = mixture_group[0]
                 for compound in self.mixtures[mixture]:
                     compound_name = self.library.library[compound].name
                     for i, roi in enumerate(self.library.library[compound].full_rois):
-                        roi_list = [mixture, compound, compound_name, i+1, roi[0], roi[1], solvent]
+                        roi_list = [mixture, compound, compound_name, i+1, roi[0], roi[1], group]
                         writer.writerow(roi_list)
 
     def exportPeakListCSV(self, results_directory):
@@ -448,17 +448,17 @@ class Mixtures(object):
         with open(path, 'wb') as peaks_csv:
             writer = csv.writer(peaks_csv)
             for mixture in sorted(self.mixtures.keys()):
-                mixture_solvent = []
+                mixture_group = []
                 for compound in self.mixtures[mixture]:
-                    if self.library.library[compound].solvent not in mixture_solvent:
-                        mixture_solvent.append(self.library.library[compound].solvent)
-                if len(mixture_solvent) >= 2:
-                    solvent = 'Mixed'
+                    if self.library.library[compound].group not in mixture_group:
+                        mixture_group.append(self.library.library[compound].group)
+                if len(mixture_group) >= 2:
+                    group = 'Mixed'
                 else:
-                    if not mixture_solvent or len(mixture_solvent) == 0:
-                        solvent = ''
+                    if not mixture_group or len(mixture_group) == 0:
+                        group = ''
                     else:
-                        solvent = mixture_solvent[0]
+                        group = mixture_group[0]
                 for compound in self.mixtures[mixture]:
                     compound_name = self.library.library[compound].name
                     for i, peak in enumerate(self.library.library[compound].mix_peaklist):
@@ -466,14 +466,14 @@ class Mixtures(object):
                             peak_range = peak[2]
                         else:
                             peak_range = self.params.peak_range
-                        peak_list = [mixture, compound, compound_name, i+1, peak[0], peak[1], peak_range, solvent]
+                        peak_list = [mixture, compound, compound_name, i+1, peak[0], peak[1], peak_range, group]
                         writer.writerow(peak_list)
                     for j, peak in enumerate(self.library.library[compound].ignored_peaklist, i+1):
                         if len(peak) == 3:
                             peak_range = peak[2]
                         else:
                             peak_range = self.params.peak_range
-                        peak_list = [mixture, compound, compound_name, j+1, peak[0], peak[1], peak_range, solvent]
+                        peak_list = [mixture, compound, compound_name, j+1, peak[0], peak[1], peak_range, group]
                         writer.writerow(peak_list)
 
     def exportSimpleMixturesTXT(self, results_directory):
@@ -488,20 +488,20 @@ class Mixtures(object):
             mixture_text.write("Score / Compound: %0.1f\n\n" % (self.total_score / len(self.library.library)))
             for mixture in sorted(self.mixtures.keys()):
                 mixture_results = []
-                mixture_solvent = []
+                mixture_group = []
                 mixture_results.append(str(mixture))
                 for compound in self.mixtures[mixture]:
-                    if self.library.library[compound].solvent not in mixture_solvent:
-                        mixture_solvent.append(self.library.library[compound].solvent)
-                if len(mixture_solvent) >= 2:
-                    solvent = 'Mixed'
+                    if self.library.library[compound].group not in mixture_group:
+                        mixture_group.append(self.library.library[compound].group)
+                if len(mixture_group) >= 2:
+                    group = 'Mixed'
                 else:
-                    if not mixture_solvent or len(mixture_solvent) == 0:
-                        solvent = 'N/A'
+                    if not mixture_group or len(mixture_group) == 0:
+                        group = 'N/A'
                     else:
-                        solvent = mixture_solvent[0]
+                        group = mixture_group[0]
                 mixture_results.append("%.1f" % self.mixture_scores[tuple(self.mixtures[mixture])])
-                mixture_results.append("%s" % solvent)
+                mixture_results.append("%s" % group)
                 compound_list = list(self.mixtures[mixture])
                 while len(compound_list) < self.params.mix_size:
                     compound_list.append('Blank')

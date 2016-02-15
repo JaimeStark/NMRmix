@@ -46,7 +46,7 @@ class Window(QDialog):
         self.idLabel = QLabel("<h2><font color='red'>%s</font></h2>" % self.compound.id)
         self.idLabel.setAlignment(Qt.AlignCenter)
         self.nameLabel = QLabel("<b>Name:</b> %s" % self.compound.name)
-        self.solventLabel = QLabel("<b>Solvent:</b> %s" % self.compound.solvent)
+        self.groupLabel = QLabel("<b>Group:</b> %s" % self.compound.group)
         self.pubchemLabel = QLabel("<b>PubChem CID:</b> <a href='https://pubchem.ncbi.nlm.nih.gov/compound/%s'>%s</a>"
                                    % (self.compound.pubchem_id, self.compound.pubchem_id))
         self.pubchemLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
@@ -186,7 +186,7 @@ class Window(QDialog):
         infoLayout = QVBoxLayout(self.compoundtab1)
         infoLayout.addWidget(self.idLabel)
         infoLayout.addWidget(self.nameLabel)
-        infoLayout.addWidget(self.solventLabel)
+        infoLayout.addWidget(self.groupLabel)
         infoLayout.addWidget(self.pubchemLabel)
         infoLayout.addWidget(self.keggLabel)
         infoLayout.addWidget(self.molformulaLabel)

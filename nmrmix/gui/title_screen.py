@@ -232,13 +232,13 @@ class DefaultPreferences(QDialog):
         self.iterationsSpinBox.setAlignment(Qt.AlignCenter)
         self.iterationsSpinBox.setRange(1, 100)
         self.iterationsSpinBox.setValue(self.params.iterations)
-        self.usesolventLabel = QLabel("Restrict by Solvent")
-        self.usesolventLabel.setAlignment(Qt.AlignCenter)
-        self.usesolventCheckBox = QCheckBox()
-        if self.params.use_solvent:
-            self.usesolventCheckBox.setCheckState(Qt.Checked)
+        self.usegroupLabel = QLabel("Restrict by Group")
+        self.usegroupLabel.setAlignment(Qt.AlignCenter)
+        self.usegroupCheckBox = QCheckBox()
+        if self.params.use_group:
+            self.usegroupCheckBox.setCheckState(Qt.Checked)
         else:
-            self.usesolventCheckBox.setCheckState(Qt.Unchecked)
+            self.usegroupCheckBox.setCheckState(Qt.Unchecked)
         self.randomizeLabel = QLabel("Randomize Initial Mixtures")
         self.randomizeLabel.setAlignment(Qt.AlignCenter)
         self.randomizeCheckBox = QCheckBox()
@@ -367,9 +367,9 @@ class DefaultPreferences(QDialog):
         mixLayout.addWidget(self.mixrateSpinBox, 9, 1)
         mixLayout.addWidget(self.iterationsLabel, 10, 0)
         mixLayout.addWidget(self.iterationsSpinBox, 10, 1)
-        mixLayout.addWidget(self.usesolventLabel, 11, 0)
+        mixLayout.addWidget(self.usegroupLabel, 11, 0)
         checkbox3Layout = QHBoxLayout()
-        checkbox3Layout.addWidget(self.usesolventCheckBox)
+        checkbox3Layout.addWidget(self.usegroupCheckBox)
         mixLayout.addLayout(checkbox3Layout, 11, 1, Qt.AlignCenter)
         mixLayout.addWidget(self.randomizeLabel, 12, 0)
         checkbox4Layout = QHBoxLayout()
@@ -428,7 +428,7 @@ class DefaultPreferences(QDialog):
         self.finaltempSpinbox.valueChanged.connect(self.updateParams)
         self.maxstepsSpinBox.valueChanged.connect(self.updateParams)
         self.mixrateSpinBox.valueChanged.connect(self.updateParams)
-        self.usesolventCheckBox.clicked.connect(self.updateParams)
+        self.usegroupCheckBox.clicked.connect(self.updateParams)
         self.iterationsSpinBox.valueChanged.connect(self.updateParams)
         self.randomizeCheckBox.clicked.connect(self.updateParams)
 
@@ -470,10 +470,10 @@ class DefaultPreferences(QDialog):
         self.params.setFinalTemp(self.finaltempSpinbox.value())
         self.params.setMaxSteps(self.maxstepsSpinBox.value())
         self.params.setMixRate(self.mixrateSpinBox.value())
-        if self.usesolventCheckBox.isChecked():
-            self.params.useSolvent()
+        if self.usegroupCheckBox.isChecked():
+            self.params.useGroup()
         else:
-            self.params.noSolvent()
+            self.params.noGroup()
         self.params.setNumIterations(self.iterationsSpinBox.value())
         if self.randomizeCheckBox.isChecked():
             self.params.randomize_initial = True
@@ -520,12 +520,12 @@ class DefaultPreferences(QDialog):
         self.maxstepsSpinBox.setValue(self.params.max_steps)
         self.mixrateSpinBox.setValue(self.params.mix_rate)
         self.iterationsSpinBox.setValue(self.params.iterations)
-        if self.params.use_solvent:
-            self.usesolventCheckBox.setCheckState(Qt.Checked)
-            if self.params.solvent_specific_ignored_region:
-                self.usesolventCheckBox.setDisabled(True)
+        if self.params.use_group:
+            self.usegroupCheckBox.setCheckState(Qt.Checked)
+            if self.params.group_specific_ignored_region:
+                self.usegroupCheckBox.setDisabled(True)
         else:
-            self.usesolventCheckBox.setCheckState(Qt.Unchecked)
+            self.usegroupCheckBox.setCheckState(Qt.Unchecked)
         if self.params.randomize_initial:
             self.randomizeCheckBox.setCheckState(Qt.Checked)
         else:

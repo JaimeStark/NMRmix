@@ -91,49 +91,49 @@ class Window(QDialog):
         self.deltascoresLabel = {}
         self.finalLabel = {}
         self.finaloverlapLabel = {}
-        self.solventTab = {}
+        self.groupTab = {}
 
-        for i, solvent in enumerate(self.mixtures.solvent_mixnum):
-            self.summary[solvent] = []
-            self.solventTab[solvent] = QWidget()
-            self.solventTab[solvent].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.MinimumExpanding)
+        for i, group in enumerate(self.mixtures.group_mixnum):
+            self.summary[group] = []
+            self.groupTab[group] = QWidget()
+            self.groupTab[group].setSizePolicy(QSizePolicy.Maximum, QSizePolicy.MinimumExpanding)
             if self.refine:
                 statlabel = "Refining"
             else:
                 statlabel = "Optimizing"
-            if not solvent:
-                self.statsLabel[solvent] = QLabel("<b>%s Statistics</b>" % statlabel)
-                self.summary[solvent].append('\n%s Statistics for All Mixtures' % statlabel)
+            if not group:
+                self.statsLabel[group] = QLabel("<b>%s Statistics</b>" % statlabel)
+                self.summary[group].append('\n%s Statistics for All Mixtures' % statlabel)
             else:
-                self.statsLabel[solvent] = QLabel("<b>%s Statistics for %s</b>" % (statlabel, solvent))
-                self.summary[solvent].append('\n%s Statistics for %s Mixtures' % (statlabel, solvent))
-            self.statsLabel[solvent].setAlignment(Qt.AlignCenter)
-            self.fig[solvent] = plt.figure(i)
-            self.fig[solvent].patch.set_facecolor('white')
-            self.canvas[solvent] = FigureCanvas(self.fig[solvent])
-            self.canvas[solvent].setMinimumHeight(150)
-            self.canvas[solvent].setMinimumWidth(150)
-            self.calculateStats(i, solvent)
-            self.mpl_toolbar[solvent] = NavigationToolbar2(self.canvas[solvent], self)
-            self.mpl_toolbar[solvent].hide()
-            solventLayout = QVBoxLayout()
-            solventLayout.addWidget(self.canvas[solvent], Qt.AlignCenter)
-            solventLayout.addWidget(self.totalcompLabel[solvent])
-            solventLayout.addWidget(self.totalpeaksLabel[solvent])
-            solventLayout.addWidget(self.iterationsLabel[solvent])
-            solventLayout.addWidget(self.startingLabel[solvent])
-            solventLayout.addWidget(self.finalLabel[solvent])
-            solventLayout.addWidget(self.deltascoresLabel[solvent])
-            solventLayout.addWidget(self.startingoverlapLabel[solvent])
-            solventLayout.addWidget(self.finaloverlapLabel[solvent])
+                self.statsLabel[group] = QLabel("<b>%s Statistics for %s</b>" % (statlabel, group))
+                self.summary[group].append('\n%s Statistics for %s Mixtures' % (statlabel, group))
+            self.statsLabel[group].setAlignment(Qt.AlignCenter)
+            self.fig[group] = plt.figure(i)
+            self.fig[group].patch.set_facecolor('white')
+            self.canvas[group] = FigureCanvas(self.fig[group])
+            self.canvas[group].setMinimumHeight(150)
+            self.canvas[group].setMinimumWidth(150)
+            self.calculateStats(i, group)
+            self.mpl_toolbar[group] = NavigationToolbar2(self.canvas[group], self)
+            self.mpl_toolbar[group].hide()
+            groupLayout = QVBoxLayout()
+            groupLayout.addWidget(self.canvas[group], Qt.AlignCenter)
+            groupLayout.addWidget(self.totalcompLabel[group])
+            groupLayout.addWidget(self.totalpeaksLabel[group])
+            groupLayout.addWidget(self.iterationsLabel[group])
+            groupLayout.addWidget(self.startingLabel[group])
+            groupLayout.addWidget(self.finalLabel[group])
+            groupLayout.addWidget(self.deltascoresLabel[group])
+            groupLayout.addWidget(self.startingoverlapLabel[group])
+            groupLayout.addWidget(self.finaloverlapLabel[group])
             # TODO: Add best score and overlap
-            self.solventTab[solvent].setLayout(solventLayout)
-            if not solvent:
-                self.resultsTabs.addTab(self.solventTab[solvent], "ALL")
+            self.groupTab[group].setLayout(groupLayout)
+            if not group:
+                self.resultsTabs.addTab(self.groupTab[group], "ALL")
             else:
-                self.resultsTabs.addTab(self.solventTab[solvent], solvent)
-            self.fig[solvent].tight_layout(pad=4)
-            self.canvas[solvent].draw()
+                self.resultsTabs.addTab(self.groupTab[group], group)
+            self.fig[group].tight_layout(pad=4)
+            self.canvas[group].draw()
         self.closeButton = QPushButton("Close")
         self.closeButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
         self.saveFigButton = QPushButton("Save Figure")
@@ -158,15 +158,15 @@ class Window(QDialog):
         self.saveButton.clicked.connect(self.saveResults)
 
     def updateStats(self):
-        for i, solvent in enumerate(self.mixtures.solvent_mixnum):
-            self.fig[solvent].clear()
-            self.calculateStats(i, solvent)
+        for i, group in enumerate(self.mixtures.group_mixnum):
+            self.fig[group].clear()
+            self.calculateStats(i, group)
 
-    def calculateStats(self, solvent_key, solvent):
+    def calculateStats(self, group_key, group):
         scores = {}
         best_iteration_score = 99999999999
-        iterations = len(self.mixtures.anneal_scores[solvent])
-        num_compounds = len(self.mixtures.solvent_dict[solvent])
+        iterations = len(self.mixtures.anneal_scores[group])
+        num_compounds = len(self.mixtures.group_dict[group])
         starting_energy = []
         final_energy = []
         starting_overlaps = []
@@ -176,15 +176,15 @@ class Window(QDialog):
             chart_title = "Refinement"
         else:
             chart_title = "Optimization"
-        plt.figure(solvent_key)
-        if not solvent:
+        plt.figure(group_key)
+        if not group:
             plt.title("%s of All Mixtures" % chart_title, fontweight='bold')
         else:
-            plt.title("%s of %s Mixtures" % (chart_title, solvent), fontweight='bold')
+            plt.title("%s of %s Mixtures" % (chart_title, group), fontweight='bold')
 
-        for iteration in self.mixtures.anneal_scores[solvent]:
+        for iteration in self.mixtures.anneal_scores[group]:
             scores[iteration] = {}
-            iteration_list = list(self.anneal_scores[solvent][iteration])
+            iteration_list = list(self.anneal_scores[group][iteration])
             scores[iteration]['Steps'] = []
             scores[iteration]['StepsProb'] = []
             scores[iteration]['Temps'] = []
@@ -249,7 +249,7 @@ class Window(QDialog):
                 y = scores[iteration]['DeltaScores']
                 plt.ylabel("Total Mixtures Score Difference (Abs)", fontweight='bold')
             plt.plot(x, y, linewidth=2.0)
-            self.canvas[solvent].draw()
+            self.canvas[group].draw()
         average_start = np.mean(starting_energy)
         average_final = np.mean(final_energy)
         min_start = np.min(starting_energy)
@@ -278,48 +278,48 @@ class Window(QDialog):
             stdev_start_overlap = np.std(starting_overlaps)
             stdev_final_overlap = np.std(final_overlaps)
 
-        self.totalmixturesLabel[solvent] = QLabel("Total Number of Mixtures: %d" % len(self.mixtures.solvent_mixnum[solvent]))
-        self.totalmixturesLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.totalmixturesLabel[solvent].text())
-        self.totalcompLabel[solvent] = QLabel("Total Number of Compounds: %d" % len(self.mixtures.solvent_dict[solvent]))
-        self.totalcompLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.totalcompLabel[solvent].text())
-        self.totalpeaksLabel[solvent] = QLabel("Total Number of Peaks: %d" % num_peaks)
-        self.totalpeaksLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.totalpeaksLabel[solvent].text())
-        self.iterationsLabel[solvent] = QLabel("Number of Iterations: %d" % iterations)
-        self.iterationsLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.iterationsLabel[solvent].text())
-        self.startingLabel[solvent] = QLabel("Mean Starting Energy (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
+        self.totalmixturesLabel[group] = QLabel("Total Number of Mixtures: %d" % len(self.mixtures.group_mixnum[group]))
+        self.totalmixturesLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.totalmixturesLabel[group].text())
+        self.totalcompLabel[group] = QLabel("Total Number of Compounds: %d" % len(self.mixtures.group_dict[group]))
+        self.totalcompLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.totalcompLabel[group].text())
+        self.totalpeaksLabel[group] = QLabel("Total Number of Peaks: %d" % num_peaks)
+        self.totalpeaksLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.totalpeaksLabel[group].text())
+        self.iterationsLabel[group] = QLabel("Number of Iterations: %d" % iterations)
+        self.iterationsLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.iterationsLabel[group].text())
+        self.startingLabel[group] = QLabel("Mean Starting Energy (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
                                              (average_start, stdev_start, min_start, max_start))
-        self.startingLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.startingLabel[solvent].text())
-        self.deltascoresLabel[solvent] = QLabel("Mean Energy Difference Per Step (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
+        self.startingLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.startingLabel[group].text())
+        self.deltascoresLabel[group] = QLabel("Mean Energy Difference Per Step (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
                                                 (average_difference, stdev_difference, min_difference, max_difference))
-        self.deltascoresLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.deltascoresLabel[solvent].text())
-        # self.startingcompLabel[solvent] = QLabel("Average Starting Energy Per Compound: %0.1f ± %0.1f" %
+        self.deltascoresLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.deltascoresLabel[group].text())
+        # self.startingcompLabel[group] = QLabel("Average Starting Energy Per Compound: %0.1f ± %0.1f" %
         #                                          (average_start_compound, stdev_start_compound))
-        # self.startingcompLabel[solvent].setAlignment(Qt.AlignCenter)
-        # self.summary.append(self.startingcompLabel[solvent].text())
-        self.startingoverlapLabel[solvent] = QLabel("Mean Starting Overlaps (Min/Max): %0.1f ± %0.1f (%d / %d)" %
+        # self.startingcompLabel[group].setAlignment(Qt.AlignCenter)
+        # self.summary.append(self.startingcompLabel[group].text())
+        self.startingoverlapLabel[group] = QLabel("Mean Starting Overlaps (Min/Max): %0.1f ± %0.1f (%d / %d)" %
                                                     (average_start_overlap, stdev_start_overlap, min_start_overlap,
                                                      max_start_overlap))
-        self.startingoverlapLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.startingoverlapLabel[solvent].text())
-        self.finalLabel[solvent] = QLabel("Mean Final Energy (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
+        self.startingoverlapLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.startingoverlapLabel[group].text())
+        self.finalLabel[group] = QLabel("Mean Final Energy (Min/Max): %0.1f ± %0.1f (%0.1f / %0.1f)" %
                                           (average_final, stdev_final, min_final, max_final))
-        self.finalLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.finalLabel[solvent].text())
-        # self.finalcompLabel[solvent] = QLabel("Average Final Energy Per Compound: %0.1f ± %0.1f" %
+        self.finalLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.finalLabel[group].text())
+        # self.finalcompLabel[group] = QLabel("Average Final Energy Per Compound: %0.1f ± %0.1f" %
         #                                       (average_final_compound, stdev_final_compound))
-        # self.finalcompLabel[solvent].setAlignment(Qt.AlignCenter)
-        # self.summary.append(self.finalcompLabel[solvent].text())
-        self.finaloverlapLabel[solvent] = QLabel("Mean Final Overlaps (Min/Max): %0.1f ± %0.1f (%d / %d)" %
+        # self.finalcompLabel[group].setAlignment(Qt.AlignCenter)
+        # self.summary.append(self.finalcompLabel[group].text())
+        self.finaloverlapLabel[group] = QLabel("Mean Final Overlaps (Min/Max): %0.1f ± %0.1f (%d / %d)" %
                                                  (average_final_overlap, stdev_final_overlap, min_final_overlap,
                                                   max_final_overlap))
-        self.finaloverlapLabel[solvent].setAlignment(Qt.AlignCenter)
-        self.summary[solvent].append(self.finaloverlapLabel[solvent].text())
+        self.finaloverlapLabel[group].setAlignment(Qt.AlignCenter)
+        self.summary[group].append(self.finaloverlapLabel[group].text())
 
     def saveResults(self, figures_only=False):
         try:
@@ -327,51 +327,51 @@ class Window(QDialog):
             if not os.path.isdir(optimize_path):
                 os.mkdir(optimize_path)
             if self.refine:
-                for solvent in self.mixtures.solvent_mixnum:
-                    if not solvent:
-                        solvent_name = "_ALL"
+                for group in self.mixtures.group_mixnum:
+                    if not group:
+                        group_name = "_ALL"
                     else:
-                        solvent_name = "_" + solvent
-                    graphname = "refinement%s.png" % (solvent_name)
+                        group_name = "_" + group
+                    graphname = "refinement%s.png" % (group_name)
                     graphpath = os.path.join(optimize_path, graphname)
                     count = 1
                     while os.path.exists(graphpath):
-                        graphname = "refinement%s%d.png" % (solvent_name, count)
+                        graphname = "refinement%s%d.png" % (group_name, count)
                         graphpath = os.path.join(optimize_path, graphname)
                         count += 1
-                    self.fig[solvent].set_size_inches(12, 8)
+                    self.fig[group].set_size_inches(12, 8)
                     plt.savefig(graphpath, dpi=200)
                     if not figures_only:
-                        summaryname = "refinement%s.txt" % (solvent_name)
+                        summaryname = "refinement%s.txt" % (group_name)
                         summarypath = os.path.join(optimize_path, summaryname)
-                        scoresname = "refinement%s.csv" % (solvent_name)
+                        scoresname = "refinement%s.csv" % (group_name)
                         scorespath = os.path.join(optimize_path, scoresname)
-                        self.generateResults(summarypath, scorespath, solvent)
+                        self.generateResults(summarypath, scorespath, group)
                 if not figures_only:
                     paramsname = "refinement_params.txt"
                     paramspath = os.path.join(optimize_path, paramsname)
                     self.generateParams(paramspath)
             else:
-                for solvent in self.mixtures.solvent_mixnum:
-                    if not solvent:
-                        solvent_name = "_ALL"
+                for group in self.mixtures.group_mixnum:
+                    if not group:
+                        group_name = "_ALL"
                     else:
-                        solvent_name = "_" + solvent
-                    graphname = "optimization%s.png" % (solvent_name)
+                        group_name = "_" + group
+                    graphname = "optimization%s.png" % (group_name)
                     graphpath = os.path.join(optimize_path, graphname)
                     count = 1
                     while os.path.exists(graphpath):
-                        graphname = "optimization%s%d.png" % (solvent_name, count)
+                        graphname = "optimization%s%d.png" % (group_name, count)
                         graphpath = os.path.join(optimize_path, graphname)
                         count += 1
-                    self.fig[solvent].set_size_inches(12, 8)
+                    self.fig[group].set_size_inches(12, 8)
                     plt.savefig(graphpath, dpi=200)
                     if not figures_only:
-                        summaryname = "optimization%s.txt" % (solvent_name)
+                        summaryname = "optimization%s.txt" % (group_name)
                         summarypath = os.path.join(optimize_path, summaryname)
-                        scoresname = "optimization%s.csv" % (solvent_name)
+                        scoresname = "optimization%s.csv" % (group_name)
                         scorespath = os.path.join(optimize_path, scoresname)
-                        self.generateResults(summarypath, scorespath, solvent)
+                        self.generateResults(summarypath, scorespath, group)
                 if not figures_only:
                     paramsname = "optimization_params.txt"
                     paramspath = os.path.join(optimize_path, paramsname)
@@ -388,21 +388,21 @@ class Window(QDialog):
                                  "<font color='red'>Saving the results was unsuccessful. Please check folder permissions.</font>")
 
 
-    def generateResults(self, summary_path, scores_path, solvent):
+    def generateResults(self, summary_path, scores_path, group):
         with codecs.open(summary_path, 'w', encoding='utf-8') as summary:
-            for item in self.summary[solvent]:
+            for item in self.summary[group]:
                 summary.write("%s\n" % item)
         if self.fullResultsCheckbox.isChecked():
             with open(scores_path, 'wb') as scoresfile:
                 writer = csv.writer(scoresfile)
-                header = ['Solvent', 'Iteration', 'Step', 'Current Temp', 'Current Score', 'New Score',
+                header = ['Group', 'Iteration', 'Step', 'Current Temp', 'Current Score', 'New Score',
                           'Current Overlap', 'New Overlap', 'Total Peaks', 'Max Score', 'Probability', 'Result']
                 writer.writerow(header)
-                for i in self.anneal_scores[solvent]:
-                    for step in self.anneal_scores[solvent][i]:
+                for i in self.anneal_scores[group]:
+                    for step in self.anneal_scores[group][i]:
                         scores = list(step)
                         scores.insert(0, i+1)
-                        scores.insert(0, solvent)
+                        scores.insert(0, group)
                         writer.writerow(scores)
 
     def generateParams(self, params_path):

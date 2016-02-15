@@ -61,7 +61,7 @@ class MainWindow(QWidget):
         self.header = self.table.horizontalHeader()
         self.header.setStretchLastSection(True)
         self.headerlabels = ['Active', 'Identifier', 'Compound Name', 'BMRB ID', 'HMDB ID', 'Peaklist File',
-                             'Peaklist Format', 'Solvent', 'PubChem CID', 'KEGG ID', 'SMILES']
+                             'Peaklist Format', 'Group', 'PubChem CID', 'KEGG ID', 'SMILES']
         self.table.setHorizontalHeaderLabels(self.headerlabels)
         self.header.setStyleSheet("QHeaderView {font-weight: bold;}")
 
@@ -97,7 +97,8 @@ class MainWindow(QWidget):
                                                       'Set to the appropriate format used for peak list files.\n'
                                                       'Set to BMRB ID or HMDB ID to download from those sites.\n'
                                                       'See documentation for format of USER files.')
-        self.table.horizontalHeaderItem(7).setToolTip('The solvent the compound was dissolved in.\n'
+        self.table.horizontalHeaderItem(7).setToolTip('Sets the compound to belong to a group.\n'
+                                                      'Typically, the dissolving solvent is used here.\n'
                                                        'OPTIONAL')
         self.table.horizontalHeaderItem(8).setToolTip('The Pubchem Chemical ID for the compound.\n'
                                                       'OPTIONAL')

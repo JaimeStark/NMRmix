@@ -48,11 +48,11 @@ class Compound(object):
         self.hmdb_id = compound_list[4].lower().strip()
         self.user_file= compound_list[5].strip()
         self.format_choice = compound_list[6].upper().strip()
-        solvent = compound_list[7].upper().strip()
-        if solvent:
-            self.solvent = solvent
+        group = compound_list[7].upper().strip()
+        if group:
+            self.group = group
         else:
-            self.solvent = 'N/A'
+            self.group = 'N/A'
         self.pubchem_id = str(compound_list[8]).strip()
         self.kegg_id = str(compound_list[9]).upper().strip()
         self.smiles = str(compound_list[10]).strip()
@@ -280,7 +280,7 @@ class Compound(object):
         self.ignored_intense_count = 0
         for peak in tmp_peaklist:
             for name in ignored_regions:
-                if (ignored_regions[name][2] == 'ALL') or (ignored_regions[name][2] == self.solvent):
+                if (ignored_regions[name][2] == 'ALL') or (ignored_regions[name][2] == self.group):
                     self.ignored_regions[name] = ignored_regions[name]
                     if (peak[0] >= ignored_regions[name][0]) and (peak[0] <= ignored_regions[name][1]):
                         self.ignorePeak(peak)

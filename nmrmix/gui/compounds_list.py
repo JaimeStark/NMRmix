@@ -34,7 +34,7 @@ class Window(QDialog):
 
         # self.compoundtable.verticalHeader().setDefaultSectionSize(40)
         self.compoundtable.setColumnWidth(0, 140)
-        self.header = ['Identifier','Compound Name', 'Solvent', '# Peaks', '% Aromaticity', 'Info']
+        self.header = ['Identifier','Compound Name', 'Group', '# Peaks', '% Aromaticity', 'Info']
         self.compoundtable.setHorizontalHeaderLabels(self.header)
         self.compoundtable.horizontalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.compoundtable.horizontalHeader().setStretchLastSection(True)
@@ -62,9 +62,9 @@ class Window(QDialog):
             name = QTableWidgetItem(compound_obj.name)
             name.setTextAlignment(Qt.AlignCenter)
             self.compoundtable.setItem(i, 1, name)
-            solvent = QTableWidgetItem(compound_obj.solvent)
-            solvent.setTextAlignment(Qt.AlignCenter)
-            self.compoundtable.setItem(i, 2, solvent)
+            group = QTableWidgetItem(compound_obj.group)
+            group.setTextAlignment(Qt.AlignCenter)
+            self.compoundtable.setItem(i, 2, group)
             # print(len(self.library.library[compound].peaklist), self.library.library[compound].aromatic_percent)
             numpeaks = QTableWidgetItem()
             numpeaks.setTextAlignment(Qt.AlignCenter)

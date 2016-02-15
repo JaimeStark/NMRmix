@@ -196,7 +196,7 @@ class Window(QDialog):
             else:
                 self.totalScoreLabel2.setText("%0.1f" % total_score_change)
                 self.totalScoreLabel2.setStyleSheet("QLabel { color : black; }")
-        # TODO: Check for violating mixing parameters like solvent or mixture size
+        # TODO: Check for violating mixing parameters like group or mixture size
 
 
 

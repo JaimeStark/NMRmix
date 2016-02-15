@@ -30,7 +30,7 @@ class Parameters(object):
         self.use_intensity = False
         self.extra_mixtures = 0
         self.peak_range = 0.025
-        self.use_solvent = False
+        self.use_group = False
         self.max_steps = 1000
         self.refine_max_steps = 1000
         self.start_temp = 10000
@@ -52,7 +52,7 @@ class Parameters(object):
         self.iterations = 1
         self.randomize_initial = True
         self.use_refine = False
-        self.solvent_specific_ignored_region = False
+        self.group_specific_ignored_region = False
         self.print_step_size = 50
         self.peak_display_width = 0.003
 
@@ -90,15 +90,15 @@ class Parameters(object):
         """Turns off the use of peak intensity for peak overlap scoring."""
         self.use_intensity = False
 
-    def useSolvent(self):
+    def useGroup(self):
         """Turns on the generation of mixtures so that each mixture only
-        contains compounds dissolved in the same solvent."""
-        self.use_solvent = True
+        contains compounds dissolved in the same group."""
+        self.use_group = True
 
-    def noSolvent(self):
+    def noGroup(self):
         """Turns off the generation of mixtures so that each mixture only
-        contains compounds dissolved in the same solvent."""
-        self.use_solvent = False
+        contains compounds dissolved in the same group."""
+        self.use_group = False
 
     def setPeakRange(self, peak_range):
         """Sets the range width (in ppm) of a peak that is used to
@@ -316,11 +316,11 @@ class Parameters(object):
                             self.setExtraMixtures(param_value)
                         elif parameter == "Overlap Range":
                             self.setPeakRange(param_value)
-                        elif parameter == "Use Solvent":
+                        elif parameter == "Use Group":
                             if param_value.lower() == "true":
-                                self.useSolvent()
+                                self.useGroup()
                             else:
-                                self.noSolvent()
+                                self.noGroup()
                         elif parameter == "Max Optimizing Steps":
                             self.setMaxSteps(param_value)
                         elif parameter == "Max Refining Steps":
@@ -397,7 +397,7 @@ class Parameters(object):
                 pref_file.write("Use Peak Intensity" + " = " + str(self.use_intensity) + "\n")
                 pref_file.write("Extra Mixtures" + " = " + str(self.extra_mixtures) + "\n")
                 pref_file.write("Overlap Range" + " = " + str(self.peak_range) + "\n")
-                pref_file.write("Use Solvent" + " = " + str(self.use_solvent) + "\n")
+                pref_file.write("Use Group" + " = " + str(self.use_group) + "\n")
                 pref_file.write("Max Optimizing Steps" + " = " + str(self.max_steps) + "\n")
                 pref_file.write("Max Refining Steps" + " = " + str(self.refine_max_steps) + "\n")
                 pref_file.write("Optimizing Start Temp" + " = " + str(self.start_temp) + "\n")
