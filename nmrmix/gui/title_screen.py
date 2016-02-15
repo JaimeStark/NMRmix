@@ -299,7 +299,23 @@ class DefaultPreferences(QDialog):
         self.refinemixrateSpinBox.setValue(self.params.refine_mix_rate)
 
         # Graphs and Stats
-
+        self.displaystepsLabel = QLabel("Optimization Progress Bar Update (steps)")
+        self.displaystepsLabel.setAlignment(Qt.AlignCenter)
+        self.displaystepsSpinBox = QSpinBox()
+        self.displaystepsSpinBox.setKeyboardTracking(False)
+        self.displaystepsSpinBox.setAlignment(Qt.AlignCenter)
+        self.displaystepsSpinBox.setRange(1, 100000)
+        self.displaystepsSpinBox.setValue(self.params.print_step_size)
+        self.displaystepsSpinBox.setSingleStep(10)
+        self.peakdrawwidthLabel = QLabel("Simulated Peak Width Fraction (HWHM)")
+        self.peakdrawwidthLabel.setAlignment(Qt.AlignCenter)
+        self.peakdrawwidthSpinBox = QDoubleSpinBoxScore()
+        self.peakdrawwidthSpinBox.setKeyboardTracking(False)
+        self.peakdrawwidthSpinBox.setAlignment(Qt.AlignCenter)
+        self.peakdrawwidthSpinBox.setRange(0.001, 1.0001)
+        self.peakdrawwidthSpinBox.setSingleStep(0.01)
+        self.peakdrawwidthSpinBox.setDecimals(3)
+        self.peakdrawwidthSpinBox.setValue(self.params.peak_display_width)
 
         self.closeButton = QPushButton("Close")
         self.closeButton.setToolTip("Closes the window without saving any changes")
@@ -398,9 +414,14 @@ class DefaultPreferences(QDialog):
         self.paramtab3.setLayout(refineLayout)
         self.paramTabs.addTab(self.paramtab3, "Refining")
 
-        # statsLayout = QGridLayout()
-        # self.paramtab4.setLayout(statsLayout)
-        # self.paramTabs.addTab(self.paramtab4, "Graphs/Statistics")
+        statsLayout = QGridLayout()
+        statsLayout.addWidget(self.displaystepsLabel, 0, 0)
+        statsLayout.addWidget(self.displaystepsSpinBox, 0, 1)
+        statsLayout.addWidget(self.peakdrawwidthLabel, 1, 0)
+        statsLayout.addWidget(self.peakdrawwidthSpinBox, 1, 1)
+        statsLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 7, 0)
+        self.paramtab4.setLayout(statsLayout)
+        self.paramTabs.addTab(self.paramtab4, "Display/Statistics")
 
         winbuttonLayout = QHBoxLayout()
         winbuttonLayout.addWidget(self.closeButton)
@@ -438,6 +459,9 @@ class DefaultPreferences(QDialog):
         self.refinefinaltempSpinbox.valueChanged.connect(self.updateParams)
         self.refinemaxstepsSpinBox.valueChanged.connect(self.updateParams)
         self.refinemixrateSpinBox.valueChanged.connect(self.updateParams)
+
+        self.displaystepsSpinBox.valueChanged.connect(self.updateParams)
+        self.peakdrawwidthSpinBox.valueChanged.connect(self.updateParams)
 
         self.closeButton.clicked.connect(self.closeWindow)
         self.resetButton.clicked.connect(self.resetParams)
@@ -493,6 +517,8 @@ class DefaultPreferences(QDialog):
         self.params.setRefineFinalTemp(self.refinefinaltempSpinbox.value())
         self.params.setRefineMaxSteps(self.refinemaxstepsSpinBox.value())
         self.params.setRefineMixRate(self.refinemixrateSpinBox.value())
+        self.params.setPrintSizeStep(self.displaystepsSpinBox.value())
+        self.params.setPeakDrawWidth(self.peakdrawwidthSpinBox.value())
 
 
         ## Graphs and Stats

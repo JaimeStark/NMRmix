@@ -313,12 +313,11 @@ class Window(QDialog):
     def drawPeakData(self, peaks, color="red", alpha=1.0):
         for peak in peaks:
             if len(peak) == 3:
-                # hwhm = peak[2] / 10
                 width = peak[2] * 3
+                hwhm = peak[2] * self.params.peak_display_width
             else:
                 width = self.params.peak_range * 3
-                # hwhm = self.params.peak_range / 10
-            hwhm = self.params.peak_display_width / 2
+                hwhm = self.params.peak_range * self.params.peak_display_width
             mean = peak[0]
             intensity = peak[1]
             shifts = (np.arange(mean-width, mean+width, 0.001))

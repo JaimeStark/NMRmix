@@ -54,7 +54,7 @@ class Parameters(object):
         self.use_refine = False
         self.group_specific_ignored_region = False
         self.print_step_size = 50
-        self.peak_display_width = 0.003
+        self.peak_display_width = 0.06
 
 
     def setLibraryPath(self, library_path):
@@ -264,6 +264,22 @@ class Parameters(object):
         try:
             if int(iterations) > 0:
                 self.iterations = int(iterations)
+        except:
+            pass
+
+    def setPrintStepSize(self, step_size):
+        """Sets how often the optimization progress bar updates"""
+        try:
+            if float(step_size) > 0:
+                self.print_step_size = float(step_size)
+        except:
+            pass
+
+    def setPeakDrawWidth(self, peak_width):
+        """Sets how often the optimization progress bar updates"""
+        try:
+            if float(peak_width) > 0 and float(peak_width) <= 1.0:
+                self.peak_display_width = float(peak_width)
         except:
             pass
 
