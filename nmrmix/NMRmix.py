@@ -55,7 +55,6 @@ def startGUI(params_object):
     app.setStyle('Fusion')
     params_object.initWindowSize(QApplication.desktop().availableGeometry())
     resources_path = os.path.abspath(os.path.join(params_object.app_directory,'static'))
-    print(resources_path)
     # if ".app" in str(__file__):
     #     resources_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'static'))
     # else:

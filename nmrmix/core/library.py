@@ -26,6 +26,7 @@ class Library(object):
         self.library = {}
         self.inactive_library = {}
         self.ignored_library = {}
+        self.original_library = {}
         self.solvents = []
         self.import_log = []
 
@@ -81,30 +82,46 @@ class Library(object):
 
     def exportPeaklistCSV(self, results_path):
         path = os.path.join(results_path, 'peaks_all.csv')
+        status = ['ACTIVE', 'IGNORED', 'REMOVED', 'ADDED']
         try:
             with open(path, 'wb') as newcsv:
                 writer = csv.writer(newcsv)
                 compound_list = list(self.library.keys())
-                writer.writerow(['Compound ID', 'Peak Number', 'PPM', 'Intensity', 'Width'])
+                writer.writerow(['Compound ID', 'Peak Number', 'PPM', 'Intensity', 'Width', 'Status'])
                 for compound in compound_list:
                     compound_obj = self.library[compound]
-                    for i, peak in enumerate(compound_obj.peaklist):
-                        if len(peak) > 2:
-                            peakrow = [compound_obj.id, i+1, peak[0], peak[1], peak[2]]
-                        else:
-                            peakrow = [compound_obj.id, i+1, peak[0], peak[1], self.params.peak_range]
-                        writer.writerow(peakrow)
+                    for i in range(0,3):
+                        if i == 0:
+                            peaklist = compound_obj.mix_peaklist
+                        elif i == 1:
+                            peaklist = compound_obj.ignored_peaklist
+                        elif i == 2:
+                            peaklist = compound_obj.removed_peaklist
+                        for j, peak in enumerate(peaklist):
+                            if len(peak) > 2:
+                                peakrow = [compound_obj.id, j+1, peak[0], peak[1], peak[2], status[i]]
+                            else:
+                                peakrow = [compound_obj.id, j+1, peak[0], peak[1], self.params.peak_range, status[i]]
+                            writer.writerow(peakrow)
                 compound_list = list(self.ignored_library.keys())
                 for compound in compound_list:
                     compound_obj = self.ignored_library[compound]
-                    for i, peak in enumerate(compound_obj.peaklist):
-                        if len(peak) > 2:
-                            peakrow = [compound_obj.id, i+1, peak[0], peak[1], peak[2]]
-                        else:
-                            peakrow = [compound_obj.id, i+1, peak[0], peak[1], self.params.peak_range]
-                        writer.writerow(peakrow)
+                    for i in range(0,3):
+                        if i == 0:
+                            peaklist = compound_obj.mix_peaklist
+                        elif i == 1:
+                            peaklist = compound_obj.ignored_peaklist
+                        elif i == 2:
+                            peaklist = compound_obj.removed_peaklist
+                        for j, peak in enumerate(peaklist):
+                            if len(peak) > 2:
+                                peakrow = [compound_obj.id, j+1, peak[0], peak[1], peak[2], status[i]]
+                            else:
+                                peakrow = [compound_obj.id, j+1, peak[0], peak[1], self.params.peak_range, status[i]]
+                            writer.writerow(peakrow)
         except Exception as e:
             print("Peaklist export failed")
+            print(e)
 
     def exportLibraryStats(self, results_path):
         path = os.path.join(results_path, 'library_stats.csv')
@@ -224,6 +241,13 @@ class Library(object):
     def removeLibraryCompound(self, compound_object):
         self.inactive_library[compound_object.id] = compound_object
         del self.library[compound_object.id]
+
+    def backupOriginalLibraryCompound(self, compound_object):
+        self.original_library[compound_object.id] = compound_object
+
+    def restoreOriginalLibraryCompound(self, compound_object):
+        self.library[compound_object.id] = self.original_library[compound_object.id]
+        del self.original_library[compound_object.id]
 
     def calcStats(self, ignored_regions={}):
         self.stats = {}

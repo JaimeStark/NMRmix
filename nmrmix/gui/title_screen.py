@@ -47,7 +47,7 @@ class Window(QDialog):
         text = "http://www.nmrfam.wisc.edu<br>" \
                "<br>" \
                "J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016).<br>" \
-               "<i>Submitted</i><br>" \
+               "<i>submitted</i><br>" \
                "<br>" \
                "Questions or Problems?<br>" \
                "Contact: jstark@nmrfam.wisc.edu"
@@ -67,7 +67,6 @@ class Window(QDialog):
         widgetLayout.addWidget(self.nmrfamLogo)
         widgetLayout.addWidget(self.textLabel)
         winLayout.addWidget(self.winWidget)
-        # TODO: Create preferences update window
         winLayout.addWidget(self.prefButton)
         winLayout.addWidget(self.okButton)
 
@@ -399,9 +398,9 @@ class DefaultPreferences(QDialog):
         self.paramtab3.setLayout(refineLayout)
         self.paramTabs.addTab(self.paramtab3, "Refining")
 
-        statsLayout = QGridLayout()
-        self.paramtab4.setLayout(statsLayout)
-        self.paramTabs.addTab(self.paramtab4, "Graphs/Statistics")
+        # statsLayout = QGridLayout()
+        # self.paramtab4.setLayout(statsLayout)
+        # self.paramTabs.addTab(self.paramtab4, "Graphs/Statistics")
 
         winbuttonLayout = QHBoxLayout()
         winbuttonLayout.addWidget(self.closeButton)

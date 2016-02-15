@@ -174,7 +174,6 @@ class Window(QDialog):
                 self.mixture2ScoreChange.setStyleSheet("QLabel { color : black; }")
                 score_change_text = "%0.1f" % score_change
             self.mixture2ScoreChange.setText("Change: %s" % score_change_text)
-        # TODO: Check for violating mixing parameters like solvent or mixture size
 
     def moveToMixture2(self):
         if self.mixture1List.currentItem():

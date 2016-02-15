@@ -153,7 +153,7 @@ class Window(QDialog):
         self.peakTable.setColumnWidth(2, 150)
         self.peakTable.setColumnWidth(3, 100)
         self.peakTable.horizontalHeader().setStretchLastSection(True)
-        self.tableheader = ['Active', 'Chemical Shift', 'Intensity', 'Width']
+        self.tableheader = ['Status', 'Chemical Shift', 'Intensity', 'Width']
         self.peakTable.setHorizontalHeaderLabels(self.tableheader)
         self.peakTable.horizontalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.peakTable.verticalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")

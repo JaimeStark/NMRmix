@@ -78,7 +78,6 @@ class Compound(object):
     def importPeakList(self):
         """Based upon the contents of the column of database choice in the library file, read in a peak list.
         Calls the setPeakList method to store the peak lists."""
-        # TODO: Error handling
         format_options = ['USER', 'BMRB_ID', 'HMDB_ID', 'ACD', 'MNOVA', 'TOPSPIN', 'VNMR', 'NMRPIPE', 'NMRSTAR', 'HMDB']
         self.original_peaklist_path = os.path.join(self.params.peaklist_dir, '', self.user_file)
         if self.format_choice in format_options:
@@ -90,7 +89,6 @@ class Compound(object):
                 else:
                     return(False)
             else:
-                # TODO: Setup HMDB download from ID
                 if self.format_choice == 'BMRB_ID':
                     peaklist = readpeaks.download_bmrb(self.bmrb_id, self.params.peaklist_dir)
                     if peaklist:
@@ -106,7 +104,6 @@ class Compound(object):
                     else:
                         return(False)
         else:
-            # TODO: Error handling of incorrect format option
             # print("No t a valid format choice for %s" % self.id)
             return(False)
 
@@ -309,6 +306,10 @@ class Compound(object):
     def removePeak(self, peak):
         self.mix_peaklist.remove(peak)
         self.removed_peaklist.append(peak)
+
+    def addPeak(self, peak):
+        self.mix_peaklist.append(peak)
+        self.added_peaklist.append(peak)
 
     def generateROIs(self, peaklist):
         range_list = []
