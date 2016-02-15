@@ -517,7 +517,7 @@ class DefaultPreferences(QDialog):
         self.params.setRefineFinalTemp(self.refinefinaltempSpinbox.value())
         self.params.setRefineMaxSteps(self.refinemaxstepsSpinBox.value())
         self.params.setRefineMixRate(self.refinemixrateSpinBox.value())
-        self.params.setPrintSizeStep(self.displaystepsSpinBox.value())
+        self.params.setPrintStepSize(self.displaystepsSpinBox.value())
         self.params.setPeakDrawWidth(self.peakdrawwidthSpinBox.value())
 
 
@@ -589,7 +589,7 @@ class DefaultPreferences(QDialog):
 
 
     def closeWindow(self):
-        if self.params.exists:
+        if os.path.isfile(os.path.expanduser(self.params.pref_file)):
             self.params.readPreferences()
         else:
             self.params.setDefaultParams()
@@ -600,7 +600,7 @@ class DefaultPreferences(QDialog):
         self.updateValues()
 
     def restoreParams(self):
-        if self.params.exists:
+        if os.path.isfile(os.path.expanduser(self.params.pref_file)):
             self.params.readPreferences()
         else:
             self.params.setDefaultParams()
