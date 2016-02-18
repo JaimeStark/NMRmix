@@ -40,8 +40,8 @@ class Library(object):
                 self.library_csv = []
                 self.library_header = []
                 for rowcounter, row in enumerate(reader):
-                    if len(row) != 11:
-                        message = "There should be 11 columns. The imported file has %d" % len(row)
+                    if len(row) != 11 and len(row) != 12:
+                        message = "There should be 11 or 12 columns. The imported file has %d" % len(row)
                         return(False, message)
                     if rowcounter == 0:
                         # Assumes that a header resides in the first row of the csv file.

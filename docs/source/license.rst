@@ -1,10 +1,10 @@
 License
 =======
 
-NMRmix: A tool for the optimization of compound mixtures for 1D \ :sup:`1`\H
-NMR protein-ligand affinity screens
+NMRmix: A tool for the optimization of compound mixtures in 1D \ :sup:`1`\H
+NMR ligand affinity screens
 
-Copyright (C) 2015 National Magnetic Resonance Facility At Madison
+Copyright (C) 2016 National Magnetic Resonance Facility At Madison, University of Wisconsin - Madison
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
