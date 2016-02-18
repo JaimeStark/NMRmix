@@ -150,23 +150,8 @@ class Mixtures(object):
         peak_overlap_list = []
 
         for peakB in peak_listB:
-            # Checks for a custom peak_range for this peak
-            # if len(peakB) == 3:
-            #     peakB_low = peakB[0] - (peakB[2] / 2)
-            #     peakB_high = peakB[0] + (peakB[2] / 2)
-            # else:
-            #     peakB_low = peakB[0] - (half_peak_range)
-            #     peakB_high = peakB[0] + (half_peak_range)
             new_list = list(peak_listA)
             for peakA in peak_listA:
-                # new_list keeps track of which peaks get overlapped so that it can avoid checking them again.
-                # Checks for a custom peak_range for this peak
-                # if len(peakA) == 3:
-                #     peakA_low = peakA[0] - (peakA[2] / 2)
-                #     peakA_high = peakA[0] + (peakA[2] / 2)
-                # else:
-                #     peakA_low = peakA[0] - (half_peak_range)
-                #     peakA_high = peakA[0] + (half_peak_range)
                 if (peakA[2] > peakB[1]) and (peakA[1] < peakB[2]):
                     peak_overlap_count += 1
                     if self.params.use_intensity:
@@ -178,10 +163,6 @@ class Mixtures(object):
                     peak_overlap_list.append(overlap_peak)
                     new_list.remove(peakA)
             peak_listA = list(new_list)
-        # compound_object.no_overlap_list = list(peak_listA)
-        # compound_object.no_overlap_rois = compound_object.generateROIs(list(peak_listA))
-        # compound_object.overlap_list = list(peak_overlap_list)
-        # compound_object.overlap_rois = compound_object.generateROIs(list(peak_overlap_list))
         if self.params.use_intensity:
             compound_score = peak_overlap_score * self.params.score_scale
         else:
@@ -250,7 +231,6 @@ class Mixtures(object):
         return(delta_mean)
 
     def mixMixtures(self, mixtures_dict, mixture_list, refining=False):
-        # new_mixtures = copy.deepcopy(mixtures_dict)
         new_mixtures = {}
         if refining:
             ideal_mix_rate = self.params.refine_mix_rate
@@ -282,7 +262,6 @@ class Mixtures(object):
                 pick = swap_list[0]
             else:
                 pick = swap_list[i+1]
-            #pick = swap_list.pop()
             if pick == "Blank":
                 pass
             else:
@@ -291,9 +270,7 @@ class Mixtures(object):
             old_score, old_overlaps = self.calculateMixtureScore(mixtures_dict[mix_num], temp_score=True)
             new_score, new_overlaps = self.calculateMixtureScore(new_mixtures[mix_num], temp_score=True)
             diff_score = diff_score + (new_score - old_score)
-            # print([mix_num, pick], new_score, old_score, diff_score)
             diff_overlaps = diff_overlaps + (new_overlaps - old_overlaps)
-        # print(mixed_mixtures, diff_score, diff_overlaps)
         return(new_mixtures, diff_score, diff_overlaps)
 
     def optimizeMixtures(self):
@@ -526,8 +503,6 @@ class Mixtures(object):
                     scores.append(mixture)
                     scores.append("%.1f" % self.mixture_scores[tuple(self.mixtures[mixture])])
                     writer.writerow(scores)
-
-
 
     def exportStats(self):
         # TODO: Library Stats
