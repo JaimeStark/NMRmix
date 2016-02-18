@@ -19,7 +19,7 @@ in the library and generates mixtures that minimize
 peak overlap.
 
 REFERENCE
-J.L. Stark, H. Eghbalnia, W.M. Westler, and J.L. Markley (2015). In preparation.
+J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016). Submitted.
 
 USAGE
 python NMRmix.py
