@@ -22,19 +22,19 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar2
 
 class Window(QDialog):
-    def __init__(self, params_object, library_object, solvent, parent=None):
+    def __init__(self, params_object, library_object, group, parent=None):
         QDialog.__init__(self, parent)
         self.params = params_object
         self.library = library_object
-        self.solvent = solvent
+        self.group = group
         matplotlib.projections.register_projection(My_Axes)
         self.region_colors = {0:'gray', 1:'red', 2:'green', 3:'orange', 4:'teal', 5:'pink',
                               6:'cyan', 7:'magenta', 8:'gold'}
-        if self.solvent == 'ALL':
-            self.plural_solvent = "s"
+        if self.group == 'ALL':
+            self.plural_group = "s"
         else:
-            self.plural_solvent = ""
-        self.setWindowTitle("NMRmix: Peaks Histogram for %s Solvent%s" % (self.solvent, self.plural_solvent))
+            self.plural_group = ""
+        self.setWindowTitle("NMRmix: Peaks Histogram for %s Group%s" % (self.group, self.plural_group))
         self.scale = 1.05
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.createMainFrame()
@@ -88,10 +88,10 @@ class Window(QDialog):
 
     def calculateAllHistogram(self):
         self.ax1 = self.fig.add_subplot(211, projection="My_Axes")
-        self.ax1.set_title("Peaks Histogram for %s Solvent%s" % (self.solvent, self.plural_solvent), fontweight='bold')
+        self.ax1.set_title("Peaks Histogram for %s Group%s" % (self.group, self.plural_group), fontweight='bold')
         self.ax1.set_xlabel("Chemical Shift (ppm)", fontweight='bold')
         self.ax1.set_ylabel("Number of Peaks", fontweight='bold')
-        data = list(self.library.stats[self.solvent]['Peaklist'])
+        data = list(self.library.stats[self.group]['Peaklist'])
         y, binEdges = np.histogram(data, bins=np.arange(-1, 12, 0.02))
         bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
         self.ax1.set_xlim([12, -1])
@@ -101,11 +101,11 @@ class Window(QDialog):
 
     def calculateIntenseHistogram(self):
         self.ax2 = self.fig.add_subplot(212, sharex=self.ax1, projection="My_Axes")
-        self.ax2.set_title("Intense Peaks Histogram for %s Solvent%s" % (self.solvent, self.plural_solvent),
+        self.ax2.set_title("Intense Peaks Histogram for %s Group%s" % (self.group, self.plural_group),
                            fontweight='bold')
         self.ax2.set_xlabel("Chemical Shift (ppm)", fontweight='bold')
         self.ax2.set_ylabel("Number of Peaks", fontweight='bold')
-        data = list(self.library.stats[self.solvent]['Intense Peaklist'])
+        data = list(self.library.stats[self.group]['Intense Peaklist'])
         y, binEdges = np.histogram(data, bins=np.arange(-1, 12, 0.02))
         bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
         self.ax2.set_xlim([12, -1])
@@ -117,20 +117,20 @@ class Window(QDialog):
         self.mpl_toolbar.home()
 
     def drawIgnoredRegions(self):
-        solvents = ['ALL']
-        if self.solvent != 'ALL':
-            solvents.append(self.solvent)
+        groups = ['ALL']
+        if self.group != 'ALL':
+            groups.append(self.group)
         for region in self.library.ignored_regions:
-            solvent = self.library.ignored_regions[region][2]
-            if self.solvent == 'ALL':
-                if solvent not in solvents:
-                    solvents.append(solvent)
+            group = self.library.ignored_regions[region][2]
+            if self.group == 'ALL':
+                if group not in groups:
+                    groups.append(group)
         for region in self.library.ignored_regions:
             lower_bound = self.library.ignored_regions[region][0]
             upper_bound = self.library.ignored_regions[region][1]
-            solvent = self.library.ignored_regions[region][2]
-            if solvent in solvents:
-                color = self.region_colors[solvents.index(solvent)]
+            group = self.library.ignored_regions[region][2]
+            if group in groups:
+                color = self.region_colors[groups.index(group)]
                 bar_width = abs(upper_bound - lower_bound)
                 bar_center = (lower_bound + upper_bound) / 2
                 self.ax1.bar(bar_center, self.upper_ylim_all, width=bar_width, color=color, align='center', edgecolor=color,

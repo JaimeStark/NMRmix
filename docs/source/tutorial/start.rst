@@ -3,7 +3,8 @@ Starting NMRmix
 
 Start NMRmix
 
-Editing Preferences
+
+Setting Preferences
 -------------------
 
 There is a preference file.

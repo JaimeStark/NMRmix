@@ -124,22 +124,27 @@ def read_user(filepath):
     this file."""
     try:
         with open(filepath, 'rU') as csv_file:
-            reader = unicodecsv.reader(csv_file, encoding='utf-8')
+            reader = csv.reader(csv_file, encoding='utf-8')
             peaklist = []
             for i, row in enumerate(reader):
-                print(row)
                 if i == 0:
                     continue
                 else:
                     if row[1]:
-                        if row[2]:
-                            peak = (float(row[0]), (float(row[1])), float(row[2]))
-                        else:
+                        try:
+                            if row[2]:
+                                peak = (float(row[0]), (float(row[1])), float(row[2]))
+                            else:
+                                peak = (float(row[0]), (float(row[1])))
+                        except:
                             peak = (float(row[0]), (float(row[1])))
                     else:
-                        if row[2]:
-                            peak = (float(row[0]), 1.0, float(row[2]))
-                        else:
+                        try:
+                            if row[2]:
+                                peak = (float(row[0]), 1.0, float(row[2]))
+                            else:
+                                peak = (float(row[0]), 1.0)
+                        except:
                             peak = (float(row[0]), 1.0)
                     peaklist.append(tuple(peak))
         return(peaklist)

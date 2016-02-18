@@ -232,13 +232,13 @@ class DefaultPreferences(QDialog):
         self.iterationsSpinBox.setAlignment(Qt.AlignCenter)
         self.iterationsSpinBox.setRange(1, 100)
         self.iterationsSpinBox.setValue(self.params.iterations)
-        self.usesolventLabel = QLabel("Restrict by Solvent")
-        self.usesolventLabel.setAlignment(Qt.AlignCenter)
-        self.usesolventCheckBox = QCheckBox()
-        if self.params.use_solvent:
-            self.usesolventCheckBox.setCheckState(Qt.Checked)
+        self.usegroupLabel = QLabel("Restrict by Group")
+        self.usegroupLabel.setAlignment(Qt.AlignCenter)
+        self.usegroupCheckBox = QCheckBox()
+        if self.params.use_group:
+            self.usegroupCheckBox.setCheckState(Qt.Checked)
         else:
-            self.usesolventCheckBox.setCheckState(Qt.Unchecked)
+            self.usegroupCheckBox.setCheckState(Qt.Unchecked)
         self.randomizeLabel = QLabel("Randomize Initial Mixtures")
         self.randomizeLabel.setAlignment(Qt.AlignCenter)
         self.randomizeCheckBox = QCheckBox()
@@ -299,7 +299,23 @@ class DefaultPreferences(QDialog):
         self.refinemixrateSpinBox.setValue(self.params.refine_mix_rate)
 
         # Graphs and Stats
-
+        self.displaystepsLabel = QLabel("Optimization Progress Bar Update (steps)")
+        self.displaystepsLabel.setAlignment(Qt.AlignCenter)
+        self.displaystepsSpinBox = QSpinBox()
+        self.displaystepsSpinBox.setKeyboardTracking(False)
+        self.displaystepsSpinBox.setAlignment(Qt.AlignCenter)
+        self.displaystepsSpinBox.setRange(1, 100000)
+        self.displaystepsSpinBox.setValue(self.params.print_step_size)
+        self.displaystepsSpinBox.setSingleStep(10)
+        self.peakdrawwidthLabel = QLabel("Simulated Peak Width Fraction (HWHM)")
+        self.peakdrawwidthLabel.setAlignment(Qt.AlignCenter)
+        self.peakdrawwidthSpinBox = QDoubleSpinBoxScore()
+        self.peakdrawwidthSpinBox.setKeyboardTracking(False)
+        self.peakdrawwidthSpinBox.setAlignment(Qt.AlignCenter)
+        self.peakdrawwidthSpinBox.setRange(0.001, 1.0001)
+        self.peakdrawwidthSpinBox.setSingleStep(0.01)
+        self.peakdrawwidthSpinBox.setDecimals(3)
+        self.peakdrawwidthSpinBox.setValue(self.params.peak_display_width)
 
         self.closeButton = QPushButton("Close")
         self.closeButton.setToolTip("Closes the window without saving any changes")
@@ -367,9 +383,9 @@ class DefaultPreferences(QDialog):
         mixLayout.addWidget(self.mixrateSpinBox, 9, 1)
         mixLayout.addWidget(self.iterationsLabel, 10, 0)
         mixLayout.addWidget(self.iterationsSpinBox, 10, 1)
-        mixLayout.addWidget(self.usesolventLabel, 11, 0)
+        mixLayout.addWidget(self.usegroupLabel, 11, 0)
         checkbox3Layout = QHBoxLayout()
-        checkbox3Layout.addWidget(self.usesolventCheckBox)
+        checkbox3Layout.addWidget(self.usegroupCheckBox)
         mixLayout.addLayout(checkbox3Layout, 11, 1, Qt.AlignCenter)
         mixLayout.addWidget(self.randomizeLabel, 12, 0)
         checkbox4Layout = QHBoxLayout()
@@ -398,9 +414,14 @@ class DefaultPreferences(QDialog):
         self.paramtab3.setLayout(refineLayout)
         self.paramTabs.addTab(self.paramtab3, "Refining")
 
-        # statsLayout = QGridLayout()
-        # self.paramtab4.setLayout(statsLayout)
-        # self.paramTabs.addTab(self.paramtab4, "Graphs/Statistics")
+        statsLayout = QGridLayout()
+        statsLayout.addWidget(self.displaystepsLabel, 0, 0)
+        statsLayout.addWidget(self.displaystepsSpinBox, 0, 1)
+        statsLayout.addWidget(self.peakdrawwidthLabel, 1, 0)
+        statsLayout.addWidget(self.peakdrawwidthSpinBox, 1, 1)
+        statsLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 7, 0)
+        self.paramtab4.setLayout(statsLayout)
+        self.paramTabs.addTab(self.paramtab4, "Display/Statistics")
 
         winbuttonLayout = QHBoxLayout()
         winbuttonLayout.addWidget(self.closeButton)
@@ -428,7 +449,7 @@ class DefaultPreferences(QDialog):
         self.finaltempSpinbox.valueChanged.connect(self.updateParams)
         self.maxstepsSpinBox.valueChanged.connect(self.updateParams)
         self.mixrateSpinBox.valueChanged.connect(self.updateParams)
-        self.usesolventCheckBox.clicked.connect(self.updateParams)
+        self.usegroupCheckBox.clicked.connect(self.updateParams)
         self.iterationsSpinBox.valueChanged.connect(self.updateParams)
         self.randomizeCheckBox.clicked.connect(self.updateParams)
 
@@ -438,6 +459,9 @@ class DefaultPreferences(QDialog):
         self.refinefinaltempSpinbox.valueChanged.connect(self.updateParams)
         self.refinemaxstepsSpinBox.valueChanged.connect(self.updateParams)
         self.refinemixrateSpinBox.valueChanged.connect(self.updateParams)
+
+        self.displaystepsSpinBox.valueChanged.connect(self.updateParams)
+        self.peakdrawwidthSpinBox.valueChanged.connect(self.updateParams)
 
         self.closeButton.clicked.connect(self.closeWindow)
         self.resetButton.clicked.connect(self.resetParams)
@@ -470,10 +494,10 @@ class DefaultPreferences(QDialog):
         self.params.setFinalTemp(self.finaltempSpinbox.value())
         self.params.setMaxSteps(self.maxstepsSpinBox.value())
         self.params.setMixRate(self.mixrateSpinBox.value())
-        if self.usesolventCheckBox.isChecked():
-            self.params.useSolvent()
+        if self.usegroupCheckBox.isChecked():
+            self.params.useGroup()
         else:
-            self.params.noSolvent()
+            self.params.noGroup()
         self.params.setNumIterations(self.iterationsSpinBox.value())
         if self.randomizeCheckBox.isChecked():
             self.params.randomize_initial = True
@@ -493,6 +517,8 @@ class DefaultPreferences(QDialog):
         self.params.setRefineFinalTemp(self.refinefinaltempSpinbox.value())
         self.params.setRefineMaxSteps(self.refinemaxstepsSpinBox.value())
         self.params.setRefineMixRate(self.refinemixrateSpinBox.value())
+        self.params.setPrintStepSize(self.displaystepsSpinBox.value())
+        self.params.setPeakDrawWidth(self.peakdrawwidthSpinBox.value())
 
 
         ## Graphs and Stats
@@ -520,12 +546,12 @@ class DefaultPreferences(QDialog):
         self.maxstepsSpinBox.setValue(self.params.max_steps)
         self.mixrateSpinBox.setValue(self.params.mix_rate)
         self.iterationsSpinBox.setValue(self.params.iterations)
-        if self.params.use_solvent:
-            self.usesolventCheckBox.setCheckState(Qt.Checked)
-            if self.params.solvent_specific_ignored_region:
-                self.usesolventCheckBox.setDisabled(True)
+        if self.params.use_group:
+            self.usegroupCheckBox.setCheckState(Qt.Checked)
+            if self.params.group_specific_ignored_region:
+                self.usegroupCheckBox.setDisabled(True)
         else:
-            self.usesolventCheckBox.setCheckState(Qt.Unchecked)
+            self.usegroupCheckBox.setCheckState(Qt.Unchecked)
         if self.params.randomize_initial:
             self.randomizeCheckBox.setCheckState(Qt.Checked)
         else:
@@ -563,7 +589,7 @@ class DefaultPreferences(QDialog):
 
 
     def closeWindow(self):
-        if self.params.exists:
+        if os.path.isfile(os.path.expanduser(self.params.pref_file)):
             self.params.readPreferences()
         else:
             self.params.setDefaultParams()
@@ -574,7 +600,7 @@ class DefaultPreferences(QDialog):
         self.updateValues()
 
     def restoreParams(self):
-        if self.params.exists:
+        if os.path.isfile(os.path.expanduser(self.params.pref_file)):
             self.params.readPreferences()
         else:
             self.params.setDefaultParams()
