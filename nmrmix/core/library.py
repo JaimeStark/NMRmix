@@ -82,7 +82,7 @@ class Library(object):
 
     def exportPeaklistCSV(self, results_path):
         path = os.path.join(results_path, 'peaks_all.csv')
-        status = ['ACTIVE', 'IGNORED', 'REMOVED', 'ADDED']
+        status = ['ACTIVE', 'IGNORED', 'REMOVED']
         try:
             with open(path, 'wb') as newcsv:
                 writer = csv.writer(newcsv)

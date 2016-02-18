@@ -19,6 +19,7 @@ class Window(QDialog):
         self.library = library_object
         self.compound_list = compound_list
         self.title = list_title
+        self.modified = False
         self.setWindowTitle("NMRmix: %s" % self.title)
         self.createWidgets()
         self.layoutWidgets()
@@ -27,7 +28,9 @@ class Window(QDialog):
     def createWidgets(self):
         self.titleLabel = QLabel("%s" % self.title)
         self.titleLabel.setStyleSheet("QLabel{font-weight: bold; color: red; qproperty-alignment: AlignCenter;}")
-        self.compoundtable = QTableWidget(len(self.compound_list), 6, self)
+        self.compoundtable = QTableWidget(self)
+        # self.compoundtable.setRowCount(len(self.compound_list))
+        self.compoundtable.setColumnCount(6)
         self.compoundtable.setSelectionMode(QAbstractItemView.NoSelection)
         self.compoundtable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.compoundtable.setFocusPolicy(Qt.NoFocus)
@@ -51,6 +54,25 @@ class Window(QDialog):
         self.compoundtable.horizontalHeaderItem(3).setToolTip('Tooltip')
         self.compoundtable.horizontalHeaderItem(4).setToolTip('Tooltip')
         self.compoundtable.horizontalHeaderItem(5).setToolTip('Tooltip')
+        self.closeButton = QPushButton("Close")
+        self.closeButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
+        self.closeButton.setFixedWidth(200)
+        self.setTable()
+
+    def layoutWidgets(self):
+        winLayout = QVBoxLayout(self)
+        winLayout.addWidget(self.titleLabel)
+        winLayout.addWidget(self.compoundtable)
+        winLayout.addItem(QSpacerItem(0,20))
+        winLayout.addWidget(self.closeButton)
+        winLayout.setAlignment(self.closeButton, Qt.AlignCenter)
+
+    def createConnections(self):
+        self.closeButton.clicked.connect(self.accept)
+
+    def setTable(self):
+        self.compoundtable.setSortingEnabled(False)
+        self.compoundtable.setRowCount(len(self.compound_list))
         for i, compound in enumerate(self.compound_list):
             try:
                 compound_obj = self.library.library[compound]
@@ -81,20 +103,10 @@ class Window(QDialog):
             view_info.clicked.connect(self.handleInfo)
         self.compoundtable.setSortingEnabled(True)
         self.compoundtable.sortByColumn(0, Qt.AscendingOrder)
-        self.closeButton = QPushButton("Close")
-        self.closeButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
-        self.closeButton.setFixedWidth(200)
 
-    def layoutWidgets(self):
-        winLayout = QVBoxLayout(self)
-        winLayout.addWidget(self.titleLabel)
-        winLayout.addWidget(self.compoundtable)
-        winLayout.addItem(QSpacerItem(0,20))
-        winLayout.addWidget(self.closeButton)
-        winLayout.setAlignment(self.closeButton, Qt.AlignCenter)
-
-    def createConnections(self):
-        self.closeButton.clicked.connect(self.accept)
+    def clearTable(self):
+        while self.compoundtable.rowCount() > 0:
+            self.compoundtable.removeRow(0)
 
     def handleInfo(self):
         button = self.sender()
@@ -104,10 +116,14 @@ class Window(QDialog):
             try:
                 if compound in self.library.library:
                     compound_obj = self.library.library[compound]
-                if compound in self.library.ignored_library:
+                elif compound in self.library.ignored_library:
                     compound_obj = self.library.ignored_library[compound]
-                compound_win = compound_info.Window(self.params, compound_obj, editable_peaklist=True)
-                compound_win.exec_()
+                compound_win = compound_info.Window(self.params, compound_obj, self.library, editable=True)
+                if compound_win.exec_():
+                    if compound_win.modified:
+                        self.clearTable()
+                        self.setTable()
+                        self.modified = True
             except Exception as e:
                 #print(e)
                 pass

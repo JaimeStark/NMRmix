@@ -170,7 +170,7 @@ class Mixtures(object):
                 if (peakA[2] > peakB[1]) and (peakA[1] < peakB[2]):
                     peak_overlap_count += 1
                     if self.params.use_intensity:
-                        intensity_sum = compound_object.calculateIntensitySum()
+                        intensity_sum = compound_object.intensity_sum
                         peak_overlap_score += float(peakA[3]) / intensity_sum
                     else:
                         peak_overlap_score += 1.0
@@ -188,7 +188,7 @@ class Mixtures(object):
             compound_score = (peak_overlap_score / num_peaks) * self.params.score_scale
         if not temp_score:
             compound_object.no_overlap_list = [(item[0], item[3], item[2]-item[1]) for item in peak_listA]
-            compound_object.no_overlap_rois = compound_object.generateROIs([(item[0], item[3]) for item in peak_listA])
+            compound_object.no_overlap_rois = compound_object.generateROIs(compound_object.no_overlap_list)
             compound_object.overlap_list = list(peak_overlap_list)
             self.compound_scores[compound1] = (compound_score, peak_overlap_count, num_peaks)
 

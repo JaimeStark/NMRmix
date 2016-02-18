@@ -391,7 +391,9 @@ class Window(QDialog):
                 title = 'All Compounds in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
         elif item.row() == 1:
             histogram_win = peak_histogram.Window(self.params, self.library, group)
             histogram_win.exec_()
@@ -409,7 +411,9 @@ class Window(QDialog):
                 title = 'Compounds with Ignored Peaks in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
         elif item.row() == 8:
             compound_list = self.library.stats[group]['Ignored Intense Peak Compounds']
             if group == 'ALL':
@@ -418,7 +422,9 @@ class Window(QDialog):
                 title = 'Compounds with Ignored Intense Peaks in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
         elif item.row() == 9:
             compound_list = self.library.stats[group]['Ignored Compounds']
             if group == 'ALL':
@@ -427,10 +433,12 @@ class Window(QDialog):
                 title = 'Completely Ignored Compounds in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
 
     def showIgnoredCompounds(self):
-        ignored_win = IgnoredWindow(self.library)
+        ignored_win = RegionWindow(self.library)
         ignored_win.exec_()
 
     def backToLibrary(self):

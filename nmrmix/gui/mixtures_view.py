@@ -857,7 +857,6 @@ class Window(QDialog):
     def searchTable(self):
         query = self.searchLineEdit.text()
         query_success = False
-        print(query, query_success)
         if query:
             for mixture in self.mixtures.mixtures:
                 for compound in self.mixtures.mixtures[mixture]:
@@ -965,9 +964,8 @@ class Window(QDialog):
 
     def openCompoundWindow(self, compound_id, mixture_id):
         compound_object = self.library.library[compound_id]
-        compound_win = compound_info.Window(self.params, compound_object)
-        if compound_win.exec_():
-            pass
+        compound_win = compound_info.Window(self.params, compound_object, self.library, editable=False)
+        compound_win.exec_()
 
     def openCompoundList(self):
         compoundlist_win = compounds_ranked.Window(self.params, self.library, self.mixtures)
