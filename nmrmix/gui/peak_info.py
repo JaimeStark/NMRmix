@@ -322,6 +322,8 @@ class Window(QDialog):
         while self.ignoretable.rowCount() > 0:
             self.ignoretable.selectRow(0)
             self.removeRegion()
+        self.ignored_regions = {}
+        self.updateStats()
 
     def importRegions(self):
         dir = self.params.work_dir
@@ -470,7 +472,7 @@ class Window(QDialog):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.backToLibrary()
+            event.ignore()
 
 
 class RegionWindow(QDialog):

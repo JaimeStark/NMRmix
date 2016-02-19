@@ -991,7 +991,7 @@ class Window(QDialog):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.backToPeakInfo()
+            event.ignore()
 
 class QDoubleSpinBoxScore(QDoubleSpinBox):
     def __init__(self, parent=None):

@@ -360,7 +360,7 @@ class MainWindow(QWidget):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.backToLibrary()
+            event.ignore()
 
 class ComboBoxNoWheel(QComboBox):
     def wheelEvent(self, event):
