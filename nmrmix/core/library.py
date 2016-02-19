@@ -148,7 +148,7 @@ class Library(object):
                 compound = compounds.Compound(self.params, row)
                 if compound.active:
                     compound.importPeakList()
-                    compound.normalizeIntensities()
+                    # compound.normalizeIntensities()
                     self.addLibraryCompound(i, compound)
                 else:
                     self.addLibraryCompound(i, compound)
@@ -306,7 +306,8 @@ class Library(object):
             peak_types["ALL"][compound_obj.peak_types] += 1
             peak_types[compound_obj.group][compound_obj.peak_types] += 1
             if self.ignored_regions:
-                compound_obj.determineIgnoredPeaks(self.ignored_regions)
+                compound_obj.setIgnoredRegions(self.ignored_regions)
+                compound_obj.determineIgnoredPeaks()
                 # Add the changed peaks back here?
                 if len(compound_obj.ignored_peaklist) != 0:
                     self.stats['ALL']['Ignored Peak Compounds'].append(compound_obj.id)

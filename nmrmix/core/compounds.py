@@ -296,33 +296,41 @@ class Compound(object):
             for peak in self.mix_peaklist:
                 self.intensity_sum += peak[1]
 
-    def determineIgnoredPeaks(self, ignored_regions, custom_peaks=[]):
+    def setIgnoredRegions(self, ignored_regions):
         self.ignored_regions = {}
+        for name in ignored_regions:
+            if (ignored_regions[name][2] == 'ALL') or (ignored_regions[name][2] == self.group):
+                self.ignored_regions[name] = ignored_regions[name]
+
+    def determineIgnoredPeaks(self, custom_peaks=[]):
         tmp_peaklist = list(self.mix_peaklist)
         tmp_peaklist.sort(key=itemgetter(1), reverse=True)
-        max_intensity = tmp_peaklist[0][1]
+        try:
+            max_intensity = tmp_peaklist[0][1]
+        except Exception as e:
+            return
         self.ignored_intense_count = 0
         for peak in tmp_peaklist:
-            for name in ignored_regions:
-                if (ignored_regions[name][2] == 'ALL') or (ignored_regions[name][2] == self.group):
-                    self.ignored_regions[name] = ignored_regions[name]
-                    if (peak[0] >= ignored_regions[name][0]) and (peak[0] <= ignored_regions[name][1]):
-                        self.ignorePeak(peak)
-                        if peak[1] >= (self.params.intense_peak_cutoff * max_intensity):
-                            self.ignored_intense_count += 1
-                        break
+            for name in self.ignored_regions:
+                if (peak[0] >= self.ignored_regions[name][0]) and (peak[0] <= self.ignored_regions[name][1]):
+                    self.ignorePeak(peak)
+                    if peak[1] >= (self.params.intense_peak_cutoff * max_intensity):
+                        self.ignored_intense_count += 1
+                    break
         self.normalizeIntensities()
         self.full_rois = self.generateROIs(self.mix_peaklist)
+        return
 
     def resetMixPeakList(self):
         self.mix_peaklist = list(self.peaklist)
         self.ignored_peaklist = []
-        self.determineIgnoredPeaks(dict(self.ignored_regions))
-        # self.normalizeIntensities()
+        self.ignored_regions = {}
+        # self.determineIgnoredPeaks()
+        self.normalizeIntensities()
 
     def resetPeakList(self):
         self.setPeakList(self.original_peaklist)
-        self.determineIgnoredPeaks(dict(self.ignored_regions))
+        self.determineIgnoredPeaks()
         self.peaks_modified = False
 
     def ignorePeak(self, peak):
@@ -338,18 +346,18 @@ class Compound(object):
         self.removed_peaklist.append(peak)
         self.peaklist = self.mix_peaklist + self.ignored_peaklist
         self.resetMixPeakList()
-        self.determineIgnoredPeaks(dict(self.ignored_regions))
+        self.determineIgnoredPeaks()
         self.peaks_modified = True
 
     def editPeak(self, peak):
         self.peaklist = self.mix_peaklist + self.ignored_peaklist + [peak]
         self.resetMixPeakList()
-        self.determineIgnoredPeaks(dict(self.ignored_regions))
+        self.determineIgnoredPeaks()
 
     def addPeak(self, peak):
         self.peaklist = self.mix_peaklist + self.ignored_peaklist + [peak]
         self.resetMixPeakList()
-        self.determineIgnoredPeaks(dict(self.ignored_regions))
+        self.determineIgnoredPeaks()
         self.peaks_modified = True
         # self.added_peaklist.append(peak)
 
