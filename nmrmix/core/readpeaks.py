@@ -29,6 +29,8 @@ def set_filetype(filetype, filepath):
         peaklist = read_vnmrj(filepath)
     elif filetype == 'NMRSTAR':
         peaklist = read_nmrstar(filepath)
+    elif filetype == 'HMDB':
+        peaklist = read_hmdb(filepath)
     elif filetype == 'USER':
         peaklist = read_user(filepath)
     return(peaklist)
