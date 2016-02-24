@@ -1,15 +1,21 @@
-Review Peaklist Statistics
-==========================
+The Peaklist Statistics Window
+==============================
 
 Check out all those stats
 
-Statistics
-----------
+Reviewing Statistics
+--------------------
 
 stats
 
 
-Ignore Regions
---------------
+Editing Compound Information and Peaklists
+------------------------------------------
+
+editing
+
+
+Setting Ignore Regions
+----------------------
 
 Ignore regions.

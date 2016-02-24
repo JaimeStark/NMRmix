@@ -1,4 +1,20 @@
-Importing the Compound Library
-==============================
+The Compound Library Window
+===========================
 
-Import the compound library
+The compound library window.
+
+Setting Working and Peaklist Directories
+----------------------------------------
+
+Working and peaklist directories
+
+
+The Compound Table
+------------------
+
+The compound table
+
+Importing a Compound Library
+----------------------------
+
+Importing the compound library.
