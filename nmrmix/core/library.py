@@ -13,7 +13,10 @@ import sys
 if sys.version > '3':
     import csv
 else:
-    import unicodecsv as csv
+    try:
+        import unicodecsv as csv
+    except:
+        from core import unicodecsv as csv
 import numpy as np
 import copy
 

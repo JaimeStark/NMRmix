@@ -14,7 +14,10 @@ if sys.version > '3':
     import csv
     from urllib.request import urlretrieve, urlopen
 else:
-    import unicodecsv as csv
+    try:
+        import unicodecsv as csv
+    except:
+        from core import unicodecsv as csv
     from urllib import urlretrieve, urlopen
 from bs4 import BeautifulSoup
 
