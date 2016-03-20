@@ -10,13 +10,14 @@ Necessary Python Modules:
 
 NMRmix requires the installation of some external packages and their dependencies.
 
+* gcc
 * Qt5
 * PyQt5
-* RDKit (with python bindings)
+* RDKit (with python and pycairo options)
 * cairo
 * py2cairo
-* pango
-* gobject
-* gtk
+* pango (optional)
+* gobject (optional)
+* gtk (optional)
 
 To execute the software, run: python NMRmix.py
