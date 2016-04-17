@@ -44,16 +44,19 @@ class Window(QDialog):
         self.nmrfamLogo = QLabel()
         self.nmrfamLogo.setPixmap(QPixmap(os.path.join(self.resources_path, "nmrfam_logo.png")))
         self.nmrfamLogo.setAlignment(Qt.AlignCenter)
-        text = "http://www.nmrfam.wisc.edu<br>" \
+        text = "<a href='http://nmrfam.wisc.edu'>http://nmrfam.wisc.edu</a><br>" \
                "<br>" \
-               "J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016).<br>" \
-               "<i>submitted</i><br>" \
+               "J.L. Stark, H.R. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley<br>" \
+               "<i>J. Proteome Research</i> (2016), 15(4): 1360-1368<br>" \
+               "<br>" \
+               "<a href='http://nmrmix.nmrfam.wisc.edu'>Documentation/Tutorials</a><br>" \
                "<br>" \
                "Questions or Problems?<br>" \
-               "Contact: jstark@nmrfam.wisc.edu"
-        self.textLabel = QLabel(text)
-        self.textLabel.setAlignment(Qt.AlignCenter)
-        self.prefButton = QPushButton("Set Default Preferences")
+               "Contact <a href=mailto:jstark@nmrfam.wisc.edu>Dr. Jaime Stark</a>"
+        self.referenceLabel = QLabel(text)
+        self.referenceLabel.setAlignment(Qt.AlignCenter)
+        self.referenceLabel.setOpenExternalLinks(True)
+        self.paramButton = QPushButton("Set Default Parameters")
         self.okButton = QPushButton("Continue")
         self.okButton.setStyleSheet("QPushButton {color: red; font-weight: bold;}")
 
@@ -65,25 +68,26 @@ class Window(QDialog):
         widgetLayout.addWidget(self.appSubName)
         widgetLayout.addWidget(self.versionLabel)
         widgetLayout.addWidget(self.nmrfamLogo)
-        widgetLayout.addWidget(self.textLabel)
+        widgetLayout.addWidget(self.referenceLabel)
         winLayout.addWidget(self.winWidget)
-        winLayout.addWidget(self.prefButton)
+        winLayout.addWidget(self.paramButton)
         winLayout.addWidget(self.okButton)
 
     def createConnections(self):
         self.okButton.clicked.connect(self.accept)
-        self.prefButton.clicked.connect(self.showDefaultPrefs)
+        self.paramButton.clicked.connect(self.showDefaultPrefs)
 
     def showDefaultPrefs(self):
-        pref_win = DefaultPreferences(self.params)
-        pref_win.exec_()
+        param_win = DefaultParameters(self.params)
+        param_win.exec_()
 
     def closeEvent(self, event):
         sys.exit()
 
-class DefaultPreferences(QDialog):
+class DefaultParameters(QDialog):
     def __init__(self, params_object, parent=None):
         QDialog.__init__(self, parent)
+        self.setWindowTitle("Set Default Parameters")
         self.params = params_object
         self.createWidgets()
         self.layoutWidgets()
@@ -321,13 +325,13 @@ class DefaultPreferences(QDialog):
         self.closeButton.setToolTip("Closes the window without saving any changes")
         self.closeButton.setStyleSheet("QPushButton {color: red;}")
         self.resetButton = QPushButton("Reset")
-        self.resetButton.setToolTip("Resets all preferences to factory defaults")
+        self.resetButton.setToolTip("Resets all parameters to factory defaults")
         self.resetButton.setStyleSheet("QPushButton {color: orange;}")
         self.restoreButton = QPushButton("Restore")
-        self.restoreButton.setToolTip("Restores all preferences to previously save values")
+        self.restoreButton.setToolTip("Restores all parameters to previously saved values")
         self.restoreButton.setStyleSheet("QPushButton {color: blue;}")
         self.saveButton = QPushButton("Save")
-        self.saveButton.setToolTip("Saves all current preferences as default values")
+        self.saveButton.setToolTip("Saves all current parameters as default values")
         self.saveButton.setStyleSheet("QPushButton {color: green;}")
 
     def layoutWidgets(self):
