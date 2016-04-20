@@ -46,13 +46,16 @@ class Window(QDialog):
         self.nmrfamLogo.setAlignment(Qt.AlignCenter)
         text = "<a href='http://nmrfam.wisc.edu'>http://nmrfam.wisc.edu</a><br>" \
                "<br>" \
-               "J.L. Stark, H.R. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley<br>" \
+               "<b>Documentation/Tutorials</b><br>" \
+               "<a href='http://nmrmix.nmrfam.wisc.edu'>http://nmrmix.nmrfam.wisc.edu</a><br>" \
+               "<br>" \
+               "<b>Questions or Problems?</b><br>" \
+               "Contact <a href=mailto:jstark@nmrfam.wisc.edu>Dr. Jaime Stark</a><br>" \
+               "<br>" \
+               "<b>Reference</b><br>" \
+               "J.L. Stark, H.R. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley.<br>" \
                "<i>J. Proteome Research</i> (2016), 15(4): 1360-1368<br>" \
-               "<br>" \
-               "<a href='http://nmrmix.nmrfam.wisc.edu'>Documentation/Tutorials</a><br>" \
-               "<br>" \
-               "Questions or Problems?<br>" \
-               "Contact <a href=mailto:jstark@nmrfam.wisc.edu>Dr. Jaime Stark</a>"
+
         self.referenceLabel = QLabel(text)
         self.referenceLabel.setAlignment(Qt.AlignCenter)
         self.referenceLabel.setOpenExternalLinks(True)
