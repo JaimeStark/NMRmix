@@ -64,7 +64,7 @@ def startGUI(params_object):
     splash.show()
     time.sleep(2)
     title_win = title_screen.Window(__VERSION__, params_object, resources_path)
-    title_win.resize(475, 735)
+    title_win.resize(475, 750)
     title_win.show()
     splash.finish(title_win)
     window = library_import.MainWindow(params_object)

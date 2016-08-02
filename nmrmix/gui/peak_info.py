@@ -137,8 +137,8 @@ class Window(QDialog):
         self.ignoreTabs = QTabWidget()
         self.ignoreTabs.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         self.ignoreTabs.setStyleSheet('QTabBar {font-weight: bold;}'
-                                     'QTabBar::tab {color: black;}'
-                                     'QTabBar::tab:selected {color: red;}')
+                                      'QTabBar::tab {color: black;}'
+                                      'QTabBar::tab:selected {color: red;}')
         self.ignoretab1 = QWidget()
 
         self.ignoretablelabel = QLabel('<b><center>Regions to Ignore for Peak Overlaps</center></b>')

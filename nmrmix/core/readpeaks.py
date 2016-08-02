@@ -168,7 +168,8 @@ def download_bmrb(bmrb_id, directory_path):
         try:
             urlretrieve(bmrb_url, bmrb_path)
             peaklist = read_nmrstar(bmrb_path)
-        except:
+        except Exception as e:
+            print(e)
             peaklist = []
     return(peaklist)
 
@@ -234,7 +235,7 @@ def download_hmdb(hmdb_id, directory_path):
             urlretrieve(str(link3['href']), hmdb_path)
             peaklist = read_hmdb(hmdb_path)
         except Exception as e:
-            #print(e)
+            print(e)
             peaklist = []
     return(peaklist)
 
