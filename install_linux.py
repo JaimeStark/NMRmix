@@ -22,17 +22,17 @@ in the library and generates mixtures that minimize
 peak overlap using a simulated annealing approach.
 
 REFERENCE
-J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016). In preparation.
+J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016). Journal of Proteome Research, 15(4):1360-1368.
 
 USAGE
-python install-linux.py [INSTALLATION DIR]
+python install_linux.py [INSTALLATION DIR]
 """
 
-ubuntu = "apt-get -y install pyqt5-dev-tools python-qt5 python-scipy python-matplotlib python-imaging python-rdkit python-bs4 python-unicodecsv"
+ubuntu = "apt-get -y install python-pyqt5 python-scipy python-matplotlib python-imaging python-rdkit python-bs4 python-unicodecsv"
 
 redhat1_1 = "yum-config-manager --add-repo https://copr.fedoraproject.org/coprs/giallu/rdkit/repo/epel-6/giallu-rdkit-epel-6.repo"
 redhat1_2 = "yum-config-manager --add-repo https://copr.fedoraproject.org/coprs/giallu/rdkit/repo/epel-7/giallu-rdkit-epel-7.repo"
-redhat2 = "yum -y install PyQt5 PyQt5-devel scipy python-matplotlib python-imaging python-rdkit python-beautifulsoup4 "
+redhat2 = "yum -y install python-qt5 scipy python-matplotlib python-imaging python-rdkit python-beautifulsoup4 "
 
 print logo
 
