@@ -23,7 +23,6 @@ import copy
 from core import compounds
 
 class Library(object):
-    """DOCSTRING"""
     def __init__(self, params_object):
         self.params = params_object
         self.library = {}

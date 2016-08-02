@@ -31,7 +31,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
+    # 'sphinx.ext.autodoc',
     'sphinx.ext.mathjax',
     'sphinx.ext.todo',
 ]
@@ -52,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'NMRmix'
-copyright = '2016 National Magnetic Resonance Facility At Madison, University of Wisconsin - Madison'
+copyright = '2016, National Magnetic Resonance Facility At Madison, University of Wisconsin - Madison'
 author = 'Jaime Stark'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -108,7 +108,7 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-autodoc_mock_imports = ['rdkit', 'rdkit.Chem', 'rdkit.Chem.Draw']
+# autodoc_mock_imports = ['rdkit', 'rdkit.Chem', 'rdkit.Chem.Draw']
 
 
 # -- Options for HTML output ----------------------------------------------

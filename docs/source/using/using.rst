@@ -1,5 +1,5 @@
-Tutorial
-========
+Usage
+=====
 
 .. toctree::
     :maxdepth: 2
@@ -10,3 +10,4 @@ Tutorial
     peakstats
     mixturestable
     optimize
+    results

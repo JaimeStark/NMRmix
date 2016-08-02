@@ -50,11 +50,12 @@ class Window(QDialog):
                "<a href='http://nmrmix.nmrfam.wisc.edu'>http://nmrmix.nmrfam.wisc.edu</a><br>" \
                "<br>" \
                "<b>Questions or Problems?</b><br>" \
-               "Contact <a href=mailto:jstark@nmrfam.wisc.edu>Dr. Jaime Stark</a><br>" \
+               "<a href=mailto:jstark@nmrfam.wisc.edu>Contact Jaime Stark</a><br>" \
                "<br>" \
                "<b>Reference</b><br>" \
                "J.L. Stark, H.R. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley.<br>" \
                "<i>J. Proteome Research</i> (2016), 15(4): 1360-1368<br>" \
+               "<a href='http://pubs.acs.org/doi/abs/10.1021/acs.jproteome.6b00121'>Download</a><br>"
 
         self.referenceLabel = QLabel(text)
         self.referenceLabel.setAlignment(Qt.AlignCenter)
