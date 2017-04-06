@@ -14,7 +14,10 @@ if sys.version > '3':
     import csv
     from urllib.request import urlretrieve, urlopen
 else:
-    import unicodecsv as csv
+    try:
+        import unicodecsv as csv
+    except:
+        from core import unicodecsv as csv
     from urllib import urlretrieve, urlopen
 from bs4 import BeautifulSoup
 
@@ -29,6 +32,8 @@ def set_filetype(filetype, filepath):
         peaklist = read_vnmrj(filepath)
     elif filetype == 'NMRSTAR':
         peaklist = read_nmrstar(filepath)
+    elif filetype == 'HMDB':
+        peaklist = read_hmdb(filepath)
     elif filetype == 'USER':
         peaklist = read_user(filepath)
     return(peaklist)
@@ -124,22 +129,27 @@ def read_user(filepath):
     this file."""
     try:
         with open(filepath, 'rU') as csv_file:
-            reader = unicodecsv.reader(csv_file, encoding='utf-8')
+            reader = csv.reader(csv_file, encoding='utf-8')
             peaklist = []
             for i, row in enumerate(reader):
-                print(row)
                 if i == 0:
                     continue
                 else:
                     if row[1]:
-                        if row[2]:
-                            peak = (float(row[0]), (float(row[1])), float(row[2]))
-                        else:
+                        try:
+                            if row[2]:
+                                peak = (float(row[0]), (float(row[1])), float(row[2]))
+                            else:
+                                peak = (float(row[0]), (float(row[1])))
+                        except:
                             peak = (float(row[0]), (float(row[1])))
                     else:
-                        if row[2]:
-                            peak = (float(row[0]), 1.0, float(row[2]))
-                        else:
+                        try:
+                            if row[2]:
+                                peak = (float(row[0]), 1.0, float(row[2]))
+                            else:
+                                peak = (float(row[0]), 1.0)
+                        except:
                             peak = (float(row[0]), 1.0)
                     peaklist.append(tuple(peak))
         return(peaklist)
@@ -158,7 +168,8 @@ def download_bmrb(bmrb_id, directory_path):
         try:
             urlretrieve(bmrb_url, bmrb_path)
             peaklist = read_nmrstar(bmrb_path)
-        except:
+        except Exception as e:
+            print(e)
             peaklist = []
     return(peaklist)
 
@@ -224,7 +235,7 @@ def download_hmdb(hmdb_id, directory_path):
             urlretrieve(str(link3['href']), hmdb_path)
             peaklist = read_hmdb(hmdb_path)
         except Exception as e:
-            #print(e)
+            print(e)
             peaklist = []
     return(peaklist)
 

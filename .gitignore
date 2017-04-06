@@ -1,17 +1,70 @@
-.idea
-tests/
+# Byte-compiled / optimized / DLL files
+__pycache__/
 .DS_Store
+*.py[cod]
+*$py.class
 
-.idea/.name
+# C extensions
+*.so
 
-.idea/vcs.xml
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
-.idea/NMRmix.iml
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
 
-.idea/modules.xml
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-.idea/misc.xml
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
 
-.idea/encodings.xml
+# Translations
+*.mo
+*.pot
 
-*.pyc
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+docs/build/
+
+# PyBuilder
+target/
+
+#Ipython Notebook
+.ipynb_checkpoints
+
+#PyCharm
+.idea/
+
+#Test Folder
+tests/

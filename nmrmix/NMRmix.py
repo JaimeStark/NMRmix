@@ -19,7 +19,7 @@ in the library and generates mixtures that minimize
 peak overlap.
 
 REFERENCE
-J.L. Stark, H. Eghbalnia, W.M. Westler, and J.L. Markley (2015). In preparation.
+J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016). Submitted.
 
 USAGE
 python NMRmix.py
@@ -28,33 +28,52 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from __future__ import division
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QSplashScreen
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
 import sys
 import os
-from core import parameters
-from gui import splash_screen, library_import
+import time
+import inspect
 
-__VERSION__ = "0.9 (Build 2015.11.18)"
+from core import parameters
+from gui import title_screen, library_import
+
+def get_script_dir(follow_symlinks = True):
+    if getattr(sys, 'frozen', False):
+        path = os.path.abspath(sys.executable)
+    else:
+        path = inspect.getabsfile(get_script_dir)
+    if follow_symlinks:
+        path = os.path.realpath(path)
+    return os.path.dirname(path)
+
 
 def startGUI(params_object):
     app = QApplication(sys.argv)
     app.setStyle('Fusion')
     params_object.initWindowSize(QApplication.desktop().availableGeometry())
+    resources_path = os.path.abspath(os.path.join(params_object.app_directory,'static'))
+    # if ".app" in str(__file__):
+    #     resources_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..', 'static'))
+    # else:
+    #     resources_path = os.path.abspath(os.path.join(os.path.dirname(__file__ ), '.', 'static'))
+    splash_pix = QPixmap(os.path.join(resources_path, 'nmrfam_splash.png'))
+    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+    splash.show()
+    time.sleep(2)
+    title_win = title_screen.Window(__VERSION__, params_object, resources_path)
+    title_win.resize(475, 750)
+    title_win.show()
+    splash.finish(title_win)
     window = library_import.MainWindow(params_object)
     window.resize(int(params_object.size.width() * 0.85), int(params_object.size.height() * 0.7))
-    splash_win = splash_screen.Window(__VERSION__)
-    splash_win.accepted.connect(window.show)
-    splash_win.show()
+    title_win.accepted.connect(window.show)
     sys.exit(app.exec_())
 
-
-pref_dir = os.path.expanduser("~/.nmrmix")
-pref_file = os.path.expanduser("~/.nmrmix/preferences.txt")
-if not os.path.exists(pref_dir):
-    os.mkdir(pref_dir)
-if not os.path.isfile(pref_file):
-    params = parameters.Parameters(False, pref_file)
-else:
-    params = parameters.Parameters(True, pref_file)
+nmrmix_directory = get_script_dir()
+os.chdir(nmrmix_directory)
+__VERSION__ = open('VERSION', 'rU').read()
+params = parameters.Parameters(nmrmix_directory)
 startGUI(params)

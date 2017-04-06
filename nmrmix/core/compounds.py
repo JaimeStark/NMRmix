@@ -10,6 +10,7 @@ from __future__ import division
 import os
 from operator import itemgetter
 
+
 from PIL import ImageQt
 
 import numpy as np
@@ -36,6 +37,9 @@ class Compound(object):
     """Requires the input of a list of rows from the library csv file."""
     def __init__(self, params_object, compound_list):
         self.params = params_object
+        self.modified = False
+        self.peaks_modified = False
+        self.descriptors_modified = False
         # Sets whether to include the compound in the mixtures
         if str(compound_list[0]).upper().strip() == 'YES':
             self.active = True
@@ -48,16 +52,20 @@ class Compound(object):
         self.hmdb_id = compound_list[4].lower().strip()
         self.user_file= compound_list[5].strip()
         self.format_choice = compound_list[6].upper().strip()
-        solvent = compound_list[7].upper().strip()
-        if solvent:
-            self.solvent = solvent
+        group = compound_list[7].upper().strip()
+        if group:
+            self.group = group
         else:
-            self.solvent = 'N/A'
+            self.group = 'N/A'
         self.pubchem_id = str(compound_list[8]).strip()
         self.kegg_id = str(compound_list[9]).upper().strip()
         self.smiles = str(compound_list[10]).strip()
         self.structure_image = False
         self.structure_data = False
+
+        self.original_data = {'id':self.id, 'name':self.name, 'bmrb':self.bmrb_id, 'hmdb':self.hmdb_id, 'file':self.user_file,
+                              'format':self.format_choice, 'group':self.group, 'pubchem':self.pubchem_id,
+                              'kegg':self.kegg_id, 'smiles':self.smiles}
 
         self.peak_range_list = []
         self.full_rois = []
@@ -75,10 +83,11 @@ class Compound(object):
     def __lt__(self, other):
         return(self.sortname, other.sortname)
 
+
+
     def importPeakList(self):
         """Based upon the contents of the column of database choice in the library file, read in a peak list.
         Calls the setPeakList method to store the peak lists."""
-        # TODO: Error handling
         format_options = ['USER', 'BMRB_ID', 'HMDB_ID', 'ACD', 'MNOVA', 'TOPSPIN', 'VNMR', 'NMRPIPE', 'NMRSTAR', 'HMDB']
         self.original_peaklist_path = os.path.join(self.params.peaklist_dir, '', self.user_file)
         if self.format_choice in format_options:
@@ -90,7 +99,6 @@ class Compound(object):
                 else:
                     return(False)
             else:
-                # TODO: Setup HMDB download from ID
                 if self.format_choice == 'BMRB_ID':
                     peaklist = readpeaks.download_bmrb(self.bmrb_id, self.params.peaklist_dir)
                     if peaklist:
@@ -106,7 +114,6 @@ class Compound(object):
                     else:
                         return(False)
         else:
-            # TODO: Error handling of incorrect format option
             # print("No t a valid format choice for %s" % self.id)
             return(False)
 
@@ -166,9 +173,13 @@ class Compound(object):
                 self.structure_qt = ImageQt.ImageQt(self.structure_image)
             except Exception as e:
                 print(e)
+                self.molwt = False
+                self.molformula = False
                 self.structure_image = False
                 self.structure_data = False
         else:
+            self.molwt = False
+            self.molformula = False
             self.structure_image = False
             self.structure_data = False
 
@@ -240,6 +251,7 @@ class Compound(object):
             peaklist = sorted(list(tmp_peaklist))
             self.mix_peaklist = list(peaklist)
 
+
         if ignoredlist:
             tmp_peaklist = []
             for peak in ignoredlist:
@@ -268,38 +280,58 @@ class Compound(object):
                 tmp_peaklist.append(new_peak)
             removedlist = sorted(list(tmp_peaklist))
             self.removed_peaklist = list(removedlist)
+        self.calculateIntensitySum()
+
+    def denormalizeIntensity(self, peak, peaklist):
+        peak_max = -9999999999
+        for aPeak in peaklist:
+            if aPeak[1] > peak_max:
+                peak_max = aPeak[1]
+        new_peak = peak[1] * peak_max
+        return(new_peak)
 
     def calculateIntensitySum(self):
-        intensity_sum = 0
-        for peak in self.mix_peaklist:
-            intensity_sum += pow(peak[1], self.params.score_power)
-        return(intensity_sum)
+        self.intensity_sum = 0
+        if self.mix_peaklist:
+            for peak in self.mix_peaklist:
+                self.intensity_sum += peak[1]
 
-    def determineIgnoredPeaks(self, ignored_regions, custom_peaks=[]):
+    def setIgnoredRegions(self, ignored_regions):
         self.ignored_regions = {}
+        for name in ignored_regions:
+            if (ignored_regions[name][2] == 'ALL') or (ignored_regions[name][2] == self.group):
+                self.ignored_regions[name] = ignored_regions[name]
+
+    def determineIgnoredPeaks(self, custom_peaks=[]):
         tmp_peaklist = list(self.mix_peaklist)
         tmp_peaklist.sort(key=itemgetter(1), reverse=True)
-        max_intensity = tmp_peaklist[0][1]
+        try:
+            max_intensity = tmp_peaklist[0][1]
+        except Exception as e:
+            return
         self.ignored_intense_count = 0
         for peak in tmp_peaklist:
-            for name in ignored_regions:
-                if (ignored_regions[name][2] == 'ALL') or (ignored_regions[name][2] == self.solvent):
-                    self.ignored_regions[name] = ignored_regions[name]
-                    if (peak[0] >= ignored_regions[name][0]) and (peak[0] <= ignored_regions[name][1]):
-                        self.ignorePeak(peak)
-                        if peak[1] >= (self.params.intense_peak_cutoff * max_intensity):
-                            self.ignored_intense_count += 1
-                        break
+            for name in self.ignored_regions:
+                if (peak[0] >= self.ignored_regions[name][0]) and (peak[0] <= self.ignored_regions[name][1]):
+                    self.ignorePeak(peak)
+                    if peak[1] >= (self.params.intense_peak_cutoff * max_intensity):
+                        self.ignored_intense_count += 1
+                    break
         self.normalizeIntensities()
         self.full_rois = self.generateROIs(self.mix_peaklist)
+        return
 
     def resetMixPeakList(self):
         self.mix_peaklist = list(self.peaklist)
         self.ignored_peaklist = []
+        self.ignored_regions = {}
+        # self.determineIgnoredPeaks()
         self.normalizeIntensities()
 
     def resetPeakList(self):
-        self.peaklist = list(self.original_peaklist)
+        self.setPeakList(self.original_peaklist)
+        self.determineIgnoredPeaks()
+        self.peaks_modified = False
 
     def ignorePeak(self, peak):
         """Removes a peak from the mix_peaklist and adds it to the ignored_peaklist."""
@@ -307,15 +339,117 @@ class Compound(object):
         self.ignored_peaklist.append(peak)
 
     def removePeak(self, peak):
-        self.mix_peaklist.remove(peak)
+        if peak in self.mix_peaklist:
+            self.mix_peaklist.remove(peak)
+        elif peak in self.ignored_peaklist:
+            self.ignored_peaklist.remove(peak)
         self.removed_peaklist.append(peak)
+        self.peaklist = self.mix_peaklist + self.ignored_peaklist
+        self.resetMixPeakList()
+        self.determineIgnoredPeaks()
+        self.peaks_modified = True
+
+    def editPeak(self, peak):
+        self.peaklist = self.mix_peaklist + self.ignored_peaklist + [peak]
+        self.resetMixPeakList()
+        self.determineIgnoredPeaks()
+
+    def addPeak(self, peak):
+        self.peaklist = self.mix_peaklist + self.ignored_peaklist + [peak]
+        self.resetMixPeakList()
+        self.determineIgnoredPeaks()
+        self.peaks_modified = True
+        # self.added_peaklist.append(peak)
+
+    def restoreOriginalDescriptors(self):
+        self.id = self.original_data['id']
+        self.sortname = self.original_data['id']
+        self.name = self.original_data['name']
+        self.bmrb_id = self.original_data['bmrb']
+        self.hmdb_id = self.original_data['hmdb']
+        self.user_file= self.original_data['file']
+        self.format_choice = self.original_data['format']
+        self.group = self.original_data['group']
+        self.pubchem_id = self.original_data['pubchem']
+        self.kegg_id = self.original_data['kegg']
+        self.smiles = self.original_data['smiles']
+        self.descriptors_modified = False
+
+    def editName(self, name):
+        try:
+            self.name = str(name)
+            self.descriptors_modified = True
+        except:
+            pass
+
+    def editBMRB(self, bmrb):
+        try:
+            # TODO: Add BMRB check
+            self.bmrb_id = str(bmrb)
+            self.descriptors_modified = True
+        except:
+            pass
+
+
+    def editHMDB(self, hmdb):
+        try:
+            # TODO: Add HMDB check
+            self.hmdb_id = str(hmdb)
+            self.descriptors_modified = True
+        except:
+            pass
+
+
+    def editGroup(self, group):
+        try:
+            self.group = str(group)
+            self.descriptors_modified = True
+        except:
+            pass
+
+    def editPubChem(self, pubchem):
+        try:
+            # TODO: Add PubChem check
+            self.pubchem_id = str(pubchem)
+            self.descriptors_modified = True
+        except:
+            pass
+
+    def editKEGG(self, kegg):
+        try:
+            # TODO: Add KEGG check
+            self.kegg_id = str(kegg)
+            self.descriptors_modified = True
+        except:
+            pass
+
+    def editSMILES(self, smiles):
+        try:
+            # TODO: Add SMILES check
+            self.smiles = str(smiles)
+            self.descriptors_modified = True
+        except:
+            pass
+
+
+    def updatefromBMRB(self):
+        pass
+
+    def updatefromHMDB(self):
+        pass
+
+    def updatefromPubChem(self):
+        pass
+
+    def updatefromKEGG(self):
+        pass
 
     def generateROIs(self, peaklist):
         range_list = []
         for peak in peaklist:
             if len(peak) == 3:
-                    peak_low = peak[0] - (peak[2] / 2)
-                    peak_high = peak[0] + (peak[2] / 2)
+                peak_low = peak[0] - (peak[2] / 2)
+                peak_high = peak[0] + (peak[2] / 2)
             else:
                 peak_low = peak[0] - (self.params.peak_range / 2)
                 peak_high = peak[0] + (self.params.peak_range / 2)

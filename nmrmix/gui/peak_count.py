@@ -20,24 +20,24 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar2
 
 class Window(QDialog):
-    def __init__(self, params_object, library_object, solvent, parent=None):
+    def __init__(self, params_object, library_object, group, parent=None):
         QDialog.__init__(self, parent)
         self.params = params_object
         self.library = library_object
-        self.solvent = solvent
+        self.group = group
         matplotlib.projections.register_projection(My_Axes)
         self.region_colors = {0:'gray', 1:'red', 2:'green', 3:'orange', 4:'teal', 5:'pink',
                               6:'cyan', 7:'magenta', 8:'gold'}
-        if self.solvent == 'ALL':
-            self.plural_solvent = "s"
+        if self.group == 'ALL':
+            self.plural_group = "s"
         else:
-            self.plural_solvent = ""
-        self.setWindowTitle("NMRmix: Peak Count Histogram for %s Solvent%s" % (self.solvent, self.plural_solvent))
+            self.plural_group = ""
+        self.setWindowTitle("NMRmix: Peak Count Histogram for %s Group%s" % (self.group, self.plural_group))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.scale = 1.05
-        self.mean = np.mean(self.library.stats[solvent]['Peak Count'])
-        self.stdev = np.std(self.library.stats[solvent]['Peak Count'])
-        self.median = np.median(self.library.stats[solvent]['Peak Count'])
+        self.mean = np.mean(self.library.stats[group]['Peak Count'])
+        self.stdev = np.std(self.library.stats[group]['Peak Count'])
+        self.median = np.median(self.library.stats[group]['Peak Count'])
         self.createMainFrame()
 
     def createMainFrame(self):
@@ -80,11 +80,11 @@ class Window(QDialog):
 
     def calculateHistogram(self):
         self.ax = self.fig.add_subplot(111, projection="My_Axes")
-        self.ax.set_title("Peak Count Histogram for %s Solvent%s" % (self.solvent, self.plural_solvent),
+        self.ax.set_title("Peak Count Histogram for %s Group%s" % (self.group, self.plural_group),
                           fontweight='bold')
         self.ax.set_xlabel("Number of Peaks", fontweight='bold')
         self.ax.set_ylabel("Number of Compounds", fontweight='bold')
-        data = list(self.library.stats[self.solvent]['Peak Count'])
+        data = list(self.library.stats[self.group]['Peak Count'])
         self.ax.hist(data, bins=range(0, max(data)+5, 5), color='red', alpha=0.75, rwidth=0.9)
         self.ax.xaxis.set_ticks_position('none')
         self.ax.yaxis.set_ticks_position('none')

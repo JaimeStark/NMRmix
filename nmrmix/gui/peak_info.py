@@ -13,8 +13,7 @@ from PyQt5.QtWidgets import *
 
 import sys
 
-from gui import mixtures_view
-from gui import peak_histogram, peak_count, peak_aromaticity, compounds_list
+from gui import mixtures_view, peak_histogram, peak_count, peak_aromaticity, compounds_list
 
 class Window(QDialog):
     def __init__(self, params_object, library_object, parent=None):
@@ -36,7 +35,7 @@ class Window(QDialog):
                                      'QTabBar::tab:selected {color: red;}')
 
         self.statstab1 = QWidget()
-        numcols = len(self.library.solvents) + 2
+        numcols = len(self.library.groups) + 2
         self.statstable = QTableWidget(10, numcols, self)
         self.statstable.setSelectionMode(QAbstractItemView.NoSelection)
         self.statstable.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -44,8 +43,8 @@ class Window(QDialog):
         self.statstable.verticalHeader().setDefaultSectionSize(60)
         self.statstable.setColumnWidth(0, 175)
         self.header = ["","ALL"]
-        for solvent in self.library.solvents:
-            self.header.append(solvent)
+        for group in self.library.groups:
+            self.header.append(group)
         self.statstable.setHorizontalHeaderLabels(self.header)
         self.statstable.horizontalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.statstable.horizontalHeader().setStretchLastSection(True)
@@ -138,8 +137,8 @@ class Window(QDialog):
         self.ignoreTabs = QTabWidget()
         self.ignoreTabs.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         self.ignoreTabs.setStyleSheet('QTabBar {font-weight: bold;}'
-                                     'QTabBar::tab {color: black;}'
-                                     'QTabBar::tab:selected {color: red;}')
+                                      'QTabBar::tab {color: black;}'
+                                      'QTabBar::tab:selected {color: red;}')
         self.ignoretab1 = QWidget()
 
         self.ignoretablelabel = QLabel('<b><center>Regions to Ignore for Peak Overlaps</center></b>')
@@ -158,7 +157,7 @@ class Window(QDialog):
         self.ignoretable.setColumnWidth(2, 90)
         self.ignoretable.setColumnWidth(3, 90)
         self.ignoretable.horizontalHeader().setStretchLastSection(True)
-        self.ignoreheader = ['Name', 'Lower Limit\n(ppm)', 'Upper Limit\n(ppm)', 'Solvent\nSpecificity']
+        self.ignoreheader = ['Name', 'Lower Limit\n(ppm)', 'Upper Limit\n(ppm)', 'Group\nSpecificity']
         self.ignoretable.setHorizontalHeaderLabels(self.ignoreheader)
         self.ignoretable.horizontalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.ignoretable.verticalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
@@ -167,9 +166,9 @@ class Window(QDialog):
         self.ignoretable.horizontalHeaderItem(1).setToolTip('The lower limit of the ignore range in ppm.')
         self.ignoretable.horizontalHeaderItem(2).setToolTip('The upper limit of the ignore range in ppm.')
         self.ignoretable.horizontalHeaderItem(3).setToolTip('This sets whether this ignore region should only\n'
-                                                            'be used for compounds dissolved in this solvent.\n'
+                                                            'be used for compounds in this group.\n'
                                                             'Default is set to use the ignore region for all\n'
-                                                            'compounds regardless of dissolving solvent.')
+                                                            'compounds regardless of group.')
         self.ignoretable.selectRow(0)
         #
         # # Ignored Regions Table Buttons and Parameters
@@ -180,6 +179,10 @@ class Window(QDialog):
         self.ignoretblbtnRemove.setToolTip('Remove the selected row/region from the table.')
         self.ignoretblbtnEdit = QPushButton("Edit Region")
         self.ignoretblbtnEdit.setToolTip('Allows for the selected row/region to be edited.')
+        self.ignoretblbtnClear = QPushButton("Clear Regions")
+        self.ignoretblbtnClear.setToolTip("Clears the table of all ignored regions")
+        self.ignoretblbtnImport = QPushButton("Import Regions")
+        self.ignoretblbtnImport.setToolTip("Clear table and import a csv containing the ignored regions")
 
         self.btnwidget = QWidget()
         self.buttonContinue = QPushButton("Continue to Mixture Generation")
@@ -223,6 +226,8 @@ class Window(QDialog):
         ignoreLayout.addWidget(self.ignoretblbtnAdd)
         ignoreLayout.addWidget(self.ignoretblbtnEdit)
         ignoreLayout.addWidget(self.ignoretblbtnRemove)
+        ignoreLayout.addWidget(self.ignoretblbtnClear)
+        ignoreLayout.addWidget(self.ignoretblbtnImport)
         winLayout.addLayout(ignoreLayout, 1, 2)
 
         buttonLayout = QHBoxLayout()
@@ -239,6 +244,8 @@ class Window(QDialog):
         self.ignoretblbtnAdd.clicked.connect(self.addRegion)
         self.ignoretblbtnRemove.clicked.connect(self.removeRegion)
         self.ignoretblbtnEdit.clicked.connect(self.editRegion)
+        self.ignoretblbtnClear.clicked.connect(self.clearRegions)
+        self.ignoretblbtnImport.clicked.connect(self.importRegions)
         self.buttonBack.clicked.connect(self.backToLibrary)
         self.buttonContinue.clicked.connect(self.continueToMixtures)
         self.statstable.itemClicked.connect(self.stat_clicked)
@@ -267,7 +274,7 @@ class Window(QDialog):
             error.exec_()
 
     def addRegion(self):
-        addregion_win = RegionWindow(self.library.solvents, self.ignored_regions)
+        addregion_win = RegionWindow(self.library.groups, self.ignored_regions)
         if addregion_win.exec_():
             self.acceptedRegion(addregion_win.table_values)
 
@@ -277,17 +284,17 @@ class Window(QDialog):
         self.ignoretable.insertRow(rows)
         name = QTableWidgetItem(table_values[0])
         name.setTextAlignment(Qt.AlignCenter)
-        lowerl = QTableWidgetItem("%.3f" % table_values[1])
+        lowerl = QTableWidgetItem("%.3f" % float(table_values[1]))
         lowerl.setTextAlignment(Qt.AlignCenter)
-        upperl = QTableWidgetItem("%.3f" % table_values[2])
+        upperl = QTableWidgetItem("%.3f" % float(table_values[2]))
         upperl.setTextAlignment(Qt.AlignCenter)
-        solvent = QTableWidgetItem(table_values[3])
-        solvent.setTextAlignment(Qt.AlignCenter)
+        group = QTableWidgetItem(table_values[3])
+        group.setTextAlignment(Qt.AlignCenter)
         self.ignoretable.setItem(rows, 0, name)
         self.ignoretable.setItem(rows, 1, lowerl)
         self.ignoretable.setItem(rows, 2, upperl)
-        self.ignoretable.setItem(rows, 3, solvent)
-        self.ignored_regions[table_values[0]] = (table_values[1], table_values[2], table_values[3])
+        self.ignoretable.setItem(rows, 3, group)
+        self.ignored_regions[table_values[0]] = (float(lowerl.text()), float(upperl.text()), table_values[3])
         self.ignoretable.scrollToItem(self.ignoretable.item(rows, 1))
         self.ignoretable.selectRow(rows)
         self.updateStats()
@@ -305,11 +312,35 @@ class Window(QDialog):
         name = self.ignoretable.item(selected, 0).text()
         lowerl = self.ignoretable.item(selected, 1).text()
         upperl = self.ignoretable.item(selected, 2).text()
-        solvent = self.ignoretable.item(selected, 3).text()
-        table_values = [name, lowerl, upperl, solvent]
-        editregion_win = RegionWindow(self.library.solvents, self.ignored_regions, table_values)
+        group = self.ignoretable.item(selected, 3).text()
+        table_values = [name, lowerl, upperl, group]
+        editregion_win = RegionWindow(self.library.groups, self.ignored_regions, table_values)
         if editregion_win.exec_():
             self.changeRegion(editregion_win.table_values)
+
+    def clearRegions(self):
+        while self.ignoretable.rowCount() > 0:
+            self.ignoretable.selectRow(0)
+            self.removeRegion()
+        self.ignored_regions = {}
+        self.updateStats()
+
+    def importRegions(self):
+        dir = self.params.work_dir
+        fileObj = QFileDialog.getOpenFileName(self, "Open Ignore Regions CSV", directory=dir,
+                                              filter = "CSV Files: (*.csv)")
+        if fileObj[0]:
+            ignore_regions, message_log = self.library.importIgnoreRegions(fileObj[0])
+            if not ignore_regions:
+                QMessageBox.critical(self, "Import Error!", message_log[0], QMessageBox.Ok)
+            else:
+                message_string = ''
+                for i in message_log:
+                    message_string = message_string + "\n" + i
+                QMessageBox.information(self, "Ignore Regions Imported", message_string)
+                self.clearRegions()
+                for region in ignore_regions:
+                    self.acceptedRegion(region)
 
     def changeRegion(self, table_values):
         selected = self.ignoretable.currentRow()
@@ -317,17 +348,17 @@ class Window(QDialog):
         del self.ignored_regions[oldname]
         name = QTableWidgetItem(table_values[0])
         name.setTextAlignment(Qt.AlignCenter)
-        lowerl = QTableWidgetItem("%.3f" % table_values[1])
+        lowerl = QTableWidgetItem("%.3f" % float(table_values[1]))
         lowerl.setTextAlignment(Qt.AlignCenter)
-        upperl = QTableWidgetItem("%.3f" % table_values[2])
+        upperl = QTableWidgetItem("%.3f" % float(table_values[2]))
         upperl.setTextAlignment(Qt.AlignCenter)
-        solvent = QTableWidgetItem(table_values[3])
-        solvent.setTextAlignment(Qt.AlignCenter)
+        group = QTableWidgetItem(table_values[3])
+        group.setTextAlignment(Qt.AlignCenter)
         self.ignoretable.setItem(selected, 0, name)
         self.ignoretable.setItem(selected, 1, lowerl)
         self.ignoretable.setItem(selected, 2, upperl)
-        self.ignoretable.setItem(selected, 3, solvent)
-        self.ignored_regions[table_values[0]] = (table_values[1], table_values[2], table_values[3])
+        self.ignoretable.setItem(selected, 3, group)
+        self.ignored_regions[table_values[0]] = (float(lowerl.text()), float(upperl.text()), table_values[3])
         self.ignoretable.scrollToItem(self.ignoretable.item(selected, 1))
         self.ignoretable.selectRow(selected)
         self.updateStats()
@@ -343,65 +374,73 @@ class Window(QDialog):
                 if col == 0:
                     continue
                 else:
-                    solvent = self.statstable.horizontalHeaderItem(col).text()
-                    text = self.library.stats[str(solvent)][row]
+                    group = self.statstable.horizontalHeaderItem(col).text()
+                    text = self.library.stats[str(group)][row]
                     item = QTableWidgetItem(text)
                     item.setForeground(QColor('%s' % row_colors[row]))
                     item.setTextAlignment(Qt.AlignCenter)
                     self.statstable.setItem(row, col, item)
 
     def stat_clicked(self, item):
-        solvent = self.statstable.horizontalHeaderItem(item.column()).text()
+        group = self.statstable.horizontalHeaderItem(item.column()).text()
         if item.column() == 0:
             pass
         elif item.row() == 0:
-            compound_list = self.library.stats[solvent]['Compound List']
-            if solvent == 'ALL':
-                title = 'All Compounds in All Solvents'
+            compound_list = self.library.stats[group]['Compound List']
+            if group == 'ALL':
+                title = 'All Compounds in All Groups'
             else:
-                title = 'All Compounds in %s Solvent' % solvent
+                title = 'All Compounds in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
         elif item.row() == 1:
-            histogram_win = peak_histogram.Window(self.params, self.library, solvent)
+            histogram_win = peak_histogram.Window(self.params, self.library, group)
             histogram_win.exec_()
         elif item.row() in [2, 3, 4]:
-            histogram_win = peak_count.Window(self.params, self.library, solvent)
+            histogram_win = peak_count.Window(self.params, self.library, group)
             histogram_win.exec_()
         elif item.row() in [5,6]:
-            aromaticity_win = peak_aromaticity.Window(self.params, self.library, solvent)
+            aromaticity_win = peak_aromaticity.Window(self.params, self.library, group)
             aromaticity_win.exec_()
         elif item.row() == 7:
-            compound_list = self.library.stats[solvent]['Ignored Peak Compounds']
-            if solvent == 'ALL':
-                title = 'Compounds with Ignored Peaks in All Solvents'
+            compound_list = self.library.stats[group]['Ignored Peak Compounds']
+            if group == 'ALL':
+                title = 'Compounds with Ignored Peaks in All Groups'
             else:
-                title = 'Compounds with Ignored Peaks in %s Solvent' % solvent
+                title = 'Compounds with Ignored Peaks in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
         elif item.row() == 8:
-            compound_list = self.library.stats[solvent]['Ignored Intense Peak Compounds']
-            if solvent == 'ALL':
-                title = 'Compounds with Ignored Intense Peaks in All Solvents'
+            compound_list = self.library.stats[group]['Ignored Intense Peak Compounds']
+            if group == 'ALL':
+                title = 'Compounds with Ignored Intense Peaks in All Groups'
             else:
-                title = 'Compounds with Ignored Intense Peaks in %s Solvent' % solvent
+                title = 'Compounds with Ignored Intense Peaks in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
         elif item.row() == 9:
-            compound_list = self.library.stats[solvent]['Ignored Compounds']
-            if solvent == 'ALL':
-                title = 'Completely Ignored Compounds in All Solvents'
+            compound_list = self.library.stats[group]['Ignored Compounds']
+            if group == 'ALL':
+                title = 'Completely Ignored Compounds in All Groups'
             else:
-                title = 'Completely Ignored Compounds in %s Solvent' % solvent
+                title = 'Completely Ignored Compounds in %s Group' % group
             compound_win = compounds_list.Window(self.params, self.library, compound_list, title)
             compound_win.resize(680, int(self.params.size.height() * 0.7))
-            compound_win.exec_()
+            if compound_win.exec_():
+                if compound_win.modified:
+                    self.updateStats()
 
     def showIgnoredCompounds(self):
-        ignored_win = IgnoredWindow(self.library)
+        ignored_win = RegionWindow(self.library)
         ignored_win.exec_()
 
     def backToLibrary(self):
@@ -412,11 +451,11 @@ class Window(QDialog):
         self.updateStats()
         # TODO: Export stats and histograms
         rows = self.ignoretable.rowCount()
-        self.params.solvent_specific_ignored_region = False
+        self.params.group_specific_ignored_region = False
         for row in range(rows):
             if self.ignoretable.item(row,3).text() != 'ALL':
-                self.params.useSolvent()
-                self.params.solvent_specific_ignored_region = True
+                self.params.useGroup()
+                self.params.group_specific_ignored_region = True
         self.hide()
         self.mixtures_win = mixtures_view.Window(self.params, self.library)
         self.mixtures_win.resize(int(self.params.size.width() * 0.85), int(self.params.size.height() * 0.7))
@@ -433,13 +472,13 @@ class Window(QDialog):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.backToLibrary()
+            event.ignore()
 
 
 class RegionWindow(QDialog):
-    def __init__(self, solvent_list, ignored_dict, table_values=[], parent=None):
+    def __init__(self, group_list, ignored_dict, table_values=[], parent=None):
         QDialog.__init__(self, parent)
-        self.solvent_list = list(solvent_list)
+        self.group_list = list(group_list)
         self.name_list = list(ignored_dict.keys())
         self.table_values = list(table_values)
         if self.table_values:
@@ -469,38 +508,39 @@ class RegionWindow(QDialog):
         self.upperLimit.setSingleStep(0.100)
         self.upperLimit.setDecimals(3)
 
-        self.solventLabel = QLabel("<b>Solvent Specificity</b>")
-        self.solventLabel.setToolTip("")
-        self.solvent = QComboBox()
-        self.solvent_list.insert(0, 'ALL')
-        self.solvent.addItems(self.solvent_list)
+        self.groupLabel = QLabel("<b>Group Specificity</b>")
+        self.groupLabel.setToolTip("")
+        self.group = QComboBox()
+        self.group_list.insert(0, 'ALL')
+        self.group.addItems(self.group_list)
 
         if self.table_values:
             self.name.setText(self.table_values[0])
             self.lowerLimit.setValue(float(self.table_values[1]))
             self.upperLimit.setValue(float(self.table_values[2]))
-            self.solvent.setCurrentIndex(self.solvent_list.index(self.table_values[3]))
+            self.group.setCurrentIndex(self.group_list.index(self.table_values[3]))
         else:
             self.name.setPlaceholderText("Unique Name")
             self.lowerLimit.setValue(4.500)
             self.upperLimit.setValue(5.000)
-            self.solvent.setCurrentIndex(self.solvent_list.index('ALL'))
+            self.group.setCurrentIndex(self.group_list.index('ALL'))
 
         self.cancelButton = QPushButton("Cancel")
         self.cancelButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
         self.okButton = QPushButton("Accept")
         self.okButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
+        self.okButton.setDefault(True)
 
     def layoutWidgets(self):
         layout = QGridLayout(self)
         layout.addWidget(self.nameLabel, 0, 0)
         layout.addWidget(self.lowerLimitLabel, 0, 1)
         layout.addWidget(self.upperLimitLabel, 0, 2)
-        layout.addWidget(self.solventLabel, 0, 3)
+        layout.addWidget(self.groupLabel, 0, 3)
         layout.addWidget(self.name, 1, 0)
         layout.addWidget(self.lowerLimit, 1, 1)
         layout.addWidget(self.upperLimit, 1, 2)
-        layout.addWidget(self.solvent, 1, 3)
+        layout.addWidget(self.group, 1, 3)
         layout.addWidget(self.cancelButton, 2, 1)
         layout.addWidget(self.okButton, 2, 2)
 
@@ -541,4 +581,4 @@ class RegionWindow(QDialog):
         self.table_values.append(self.name.text())
         self.table_values.append(float(self.lowerLimit.value()))
         self.table_values.append(float(self.upperLimit.value()))
-        self.table_values.append(self.solvent.currentText())
+        self.table_values.append(self.group.currentText())

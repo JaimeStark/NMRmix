@@ -20,15 +20,14 @@ import codecs
 if sys.version > '3':
     import csv
 else:
-    import unicodecsv as csv
+    try:
+        import unicodecsv as csv
+    except:
+        from core import unicodecsv as csv
 import copy
 
 from core import mixtures
-from gui import mixture_spectra
-from gui import compound_info
-from gui import optimize
-from gui import move_compounds
-from gui import compounds_ranked
+from gui import mixture_spectra, compound_info, optimize, move_compounds, compounds_ranked
 
 class Window(QDialog):
     def __init__(self, params_object, library_object, parent=None):
@@ -43,7 +42,7 @@ class Window(QDialog):
         self.createConnections()
 
     def createWidgets(self):
-        self.mixtures.generateSolventLists()
+        self.mixtures.generateGroupLists()
         self.mixtures.generateInitialMixtures()
         self.initTable()
         self.initScoreParams()
@@ -85,7 +84,7 @@ class Window(QDialog):
         self.mixtable.setColumnWidth(3, 90)
         self.mixtable.setColumnWidth(4, 75)
         self.mixtable.horizontalHeader().setStretchLastSection(True)
-        self.mixtable_header = ['Lock', 'Spectra', 'Mixture\nNumber', 'Total\nScore', 'Solvent',
+        self.mixtable_header = ['Lock', 'Spectra', 'Mixture\nNumber', 'Total\nScore', 'Group',
                                 'Compound 1', 'Compound 2', 'Compound 3', 'Compound 4', 'Compound 5',
                                 'Compound 6', 'Compound 7', 'Compound 8', 'Compound 9', 'Compound 10',
                                 'Compound 11', 'Compound 12', 'Compound 13', 'Compound 14', 'Compound 15',
@@ -103,7 +102,7 @@ class Window(QDialog):
         self.paramtab1 = QWidget()
         self.paramtab2 = QWidget()
         self.paramtab3 = QWidget()
-        self.paramtab4 = QWidget()
+        # self.paramtab4 = QWidget()
 
         self.lockCheckBox = QCheckBox()
         self.lockLabel = QLabel("Lock/Unlock All Mixtures")
@@ -140,13 +139,13 @@ class Window(QDialog):
         self.rangeSpinBox.setSingleStep(0.005)
         self.rangeSpinBox.setDecimals(3)
         self.rangeSpinBox.setValue(self.params.peak_range)
-        self.scorepowerLabel = QLabel("Score Exponent")
-        self.scorepowerLabel.setAlignment(Qt.AlignCenter)
-        self.scorepowerSpinBox = QSpinBoxScore()
-        self.scorepowerSpinBox.setKeyboardTracking(False)
-        self.scorepowerSpinBox.setAlignment(Qt.AlignCenter)
-        self.scorepowerSpinBox.setRange(1, 10)
-        self.scorepowerSpinBox.setValue(self.params.score_power)
+        # self.scorepowerLabel = QLabel("Score Exponent")
+        # self.scorepowerLabel.setAlignment(Qt.AlignCenter)
+        # self.scorepowerSpinBox = QSpinBoxScore()
+        # self.scorepowerSpinBox.setKeyboardTracking(False)
+        # self.scorepowerSpinBox.setAlignment(Qt.AlignCenter)
+        # self.scorepowerSpinBox.setRange(1, 10)
+        # self.scorepowerSpinBox.setValue(self.params.score_power)
         self.scorescaleLabel = QLabel("Score Scaling")
         self.scorescaleLabel.setAlignment(Qt.AlignCenter)
         self.scorescaleSpinBox = QSpinBoxScore()
@@ -183,7 +182,7 @@ class Window(QDialog):
         self.extramixSpinBox = QSpinBox()
         self.extramixSpinBox.setKeyboardTracking(False)
         self.extramixSpinBox.setAlignment(Qt.AlignCenter)
-        self.extramixSpinBox.setRange(0, 100)
+        self.extramixSpinBox.setRange(0, 1000)
         self.extramixSpinBox.setValue(self.params.extra_mixtures)
         self.coolingLabel = QLabel("Cooling Rate")
         self.coolingLabel.setAlignment(Qt.AlignCenter)
@@ -201,7 +200,7 @@ class Window(QDialog):
         self.starttempSpinBox = QSpinBox()
         self.starttempSpinBox.setKeyboardTracking(False)
         self.starttempSpinBox.setAlignment(Qt.AlignCenter)
-        self.starttempSpinBox.setRange(self.params.final_temp+1, 100000)
+        self.starttempSpinBox.setRange(self.params.final_temp+1, 500000)
         self.starttempSpinBox.setSingleStep(1)
         # self.starttempSpinBox.setDecimals(3)
         self.starttempSpinBox.setValue(self.params.start_temp)
@@ -219,7 +218,7 @@ class Window(QDialog):
         self.maxstepsSpinBox = QSpinBox()
         self.maxstepsSpinBox.setKeyboardTracking(False)
         self.maxstepsSpinBox.setAlignment(Qt.AlignCenter)
-        self.maxstepsSpinBox.setRange(1, 5000000)
+        self.maxstepsSpinBox.setRange(1, 10000000)
         self.maxstepsSpinBox.setValue(self.params.max_steps)
         self.maxstepsSpinBox.setSingleStep(self.params.max_steps)
         self.mixrateLabel = QLabel("Mix Rate")
@@ -236,15 +235,15 @@ class Window(QDialog):
         self.iterationsSpinBox.setAlignment(Qt.AlignCenter)
         self.iterationsSpinBox.setRange(1, 100)
         self.iterationsSpinBox.setValue(self.params.iterations)
-        self.usesolventLabel = QLabel("Restrict by Solvent")
-        self.usesolventLabel.setAlignment(Qt.AlignCenter)
-        self.usesolventCheckBox = QCheckBox()
-        if self.params.use_solvent:
-            self.usesolventCheckBox.setCheckState(Qt.Checked)
-            if self.params.solvent_specific_ignored_region:
-                self.usesolventCheckBox.setDisabled(True)
+        self.usegroupLabel = QLabel("Restrict by Group")
+        self.usegroupLabel.setAlignment(Qt.AlignCenter)
+        self.usegroupCheckBox = QCheckBox()
+        if self.params.use_group:
+            self.usegroupCheckBox.setCheckState(Qt.Checked)
+            if self.params.group_specific_ignored_region:
+                self.usegroupCheckBox.setDisabled(True)
         else:
-            self.usesolventCheckBox.setCheckState(Qt.Unchecked)
+            self.usegroupCheckBox.setCheckState(Qt.Unchecked)
         self.randomizeLabel = QLabel("Randomize Initial Mixtures")
         self.randomizeLabel.setAlignment(Qt.AlignCenter)
         self.randomizeCheckBox = QCheckBox()
@@ -286,7 +285,7 @@ class Window(QDialog):
         self.refinestarttempSpinBox = QSpinBox()
         self.refinestarttempSpinBox.setKeyboardTracking(False)
         self.refinestarttempSpinBox.setAlignment(Qt.AlignCenter)
-        self.refinestarttempSpinBox.setRange(self.params.refine_final_temp+1, 100000)
+        self.refinestarttempSpinBox.setRange(self.params.refine_final_temp+1, 500000)
         self.refinestarttempSpinBox.setSingleStep(1.0)
         # self.refinestarttempSpinBox.setDecimals(3)
         self.refinestarttempSpinBox.setValue(self.params.refine_start_temp)
@@ -308,7 +307,7 @@ class Window(QDialog):
         self.refinemaxstepsSpinBox = QSpinBox()
         self.refinemaxstepsSpinBox.setKeyboardTracking(False)
         self.refinemaxstepsSpinBox.setAlignment(Qt.AlignCenter)
-        self.refinemaxstepsSpinBox.setRange(1, 5000000)
+        self.refinemaxstepsSpinBox.setRange(1, 10000000)
         self.refinemaxstepsSpinBox.setValue(self.params.refine_max_steps)
         self.refinemaxstepsSpinBox.setSingleStep(self.params.refine_max_steps)
         self.refinemaxstepsSpinBox.setDisabled(disabled)
@@ -358,10 +357,21 @@ class Window(QDialog):
         self.searchButton = QPushButton("Search")
         self.searchResults = QLabel("")
         self.searchResults.setAlignment(Qt.AlignCenter)
-        self.statsHLine = QFrame()
-        self.statsHLine.setFrameShape(QFrame.HLine)
+        self.statsHLine1 = QFrame()
+        self.statsHLine1.setFrameShape(QFrame.HLine)
+        self.statsHLine2 = QFrame()
+        self.statsHLine2.setFrameShape(QFrame.HLine)
         #self.showmixturehist = QPushButton("Show Mixtures Peak Plot")
         self.showrankedcompounds = QPushButton("Show Compounds Ranked by Score")
+        self.useautosaveLabel = QLabel("Autosave Results")
+        self.useautosaveLabel.setAlignment(Qt.AlignCenter)
+        self.useautosaveLabel.setToolTip("Turns on/off the autosaving of results after optimizing mixtures.")
+        self.useautosaveCheckBox = QCheckBox()
+        self.useautosaveCheckBox.setToolTip("Turns on/off the autosaving of results after optimizing mixtures.")
+        if self.params.autosave:
+            self.useautosaveCheckBox.setCheckState(Qt.Checked)
+        else:
+            self.useautosaveCheckBox.setCheckState(Qt.Unchecked)
 
     def updateStats(self):
         self.mixtures.calcPeakStats()
@@ -376,22 +386,58 @@ class Window(QDialog):
     def layoutWidgets(self):
         winLayout = QGridLayout(self)
         winLayout.addWidget(self.mixtable, 1, 0)
-
         scoreLayout = QGridLayout()
-        scoreLayout.addWidget(self.rangeLabel, 2, 0)
-        scoreLayout.addWidget(self.rangeSpinBox, 2, 1)
-        scoreLayout.addWidget(self.scorepowerLabel, 3, 0)
-        scoreLayout.addWidget(self.scorepowerSpinBox, 3, 1)
-        scoreLayout.addWidget(self.scorescaleLabel, 4, 0)
-        scoreLayout.addWidget(self.scorescaleSpinBox, 4, 1)
-        scoreLayout.addWidget(self.useintensityLabel, 5, 0)
+        scoreLayout.addWidget(self.totalmixLabel, 2, 0)
+        scoreLayout.addWidget(self.totalmix, 2, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 3, 0)
+        scoreLayout.addWidget(self.totalcompoundsLabel, 4, 0)
+        scoreLayout.addWidget(self.totalcompounds, 4, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 5, 0)
+        scoreLayout.addWidget(self.totalpeaksLabel, 6, 0)
+        scoreLayout.addWidget(self.totalpeaks, 6, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 7, 0)
+        scoreLayout.addWidget(self.statsHLine1, 8, 0, 1, 2)
+        scoreLayout.addItem(QSpacerItem(0, 8), 9, 0)
+        scoreLayout.addWidget(self.totaloverlapLabel, 10, 0)
+        scoreLayout.addWidget(self.totaloverlap, 10, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 11, 0)
+        scoreLayout.addWidget(self.totalscoreLabel, 12, 0)
+        scoreLayout.addWidget(self.totalscore, 12, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 13, 0)
+        scoreLayout.addWidget(self.meanoverlapLabel, 14, 0)
+        scoreLayout.addWidget(self.meanoverlap, 14, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 15, 0)
+        scoreLayout.addWidget(self.meanscoreLabel, 16, 0)
+        scoreLayout.addWidget(self.meanscore, 16, 1)
+        scoreLayout.addItem(QSpacerItem(0, 8), 17, 0)
+        scoreLayout.addWidget(self.statsHLine2, 18, 0, 1, 2)
+        scoreLayout.addItem(QSpacerItem(0, 8), 19, 0)
+        scoreLayout.addWidget(self.rangeLabel, 20, 0)
+        scoreLayout.addWidget(self.rangeSpinBox, 20, 1)
+        #scoreLayout.addItem(QSpacerItem(0, 8), 21, 0)
+        scoreLayout.addWidget(self.scorescaleLabel, 22, 0)
+        scoreLayout.addWidget(self.scorescaleSpinBox, 22, 1)
+        #scoreLayout.addItem(QSpacerItem(0, 8), 23, 0)
+        scoreLayout.addWidget(self.useintensityLabel, 24, 0)
         checkbox1Layout = QHBoxLayout()
         checkbox1Layout.addWidget(self.useintensityCheckBox)
-        scoreLayout.addLayout(checkbox1Layout, 5, 1, Qt.AlignCenter)
-        scoreLayout.addItem(QSpacerItem(0,0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 6, 0)
-
+        scoreLayout.addLayout(checkbox1Layout, 24, 1, Qt.AlignCenter)
+        scoreLayout.addItem(QSpacerItem(0, 8), 25, 0)
+        scoreLayout.addWidget(self.scoreHLine, 26, 0, 1, 2)
+        scoreLayout.addItem(QSpacerItem(0, 8), 27, 0)
+        scoreLayout.addWidget(self.useautosaveLabel, 28, 0)
+        checkbox2Layout = QHBoxLayout()
+        checkbox2Layout.addWidget(self.useautosaveCheckBox)
+        scoreLayout.addLayout(checkbox2Layout, 28, 1, Qt.AlignCenter)
+        scoreLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 29, 0)
+        scoreLayout.addWidget(self.searchLineEdit, 30, 0)
+        scoreLayout.addWidget(self.searchButton, 30, 1)
+        scoreLayout.addWidget(self.searchResults, 31, 0, 1, 2)
+        #scoreLayout.addWidget(self.showmixturehist, 29, 0, 1, 2)
+        scoreLayout.addWidget(self.showrankedcompounds, 32, 0, 1, 2)
         self.paramtab1.setLayout(scoreLayout)
         self.paramTabs.addTab(self.paramtab1, "Scoring")
+
         mixLayout = QGridLayout()
         mixLayout.addWidget(self.startnumLabel, 2, 0)
         mixLayout.addWidget(self.startnumSpinBox, 2, 1)
@@ -411,9 +457,9 @@ class Window(QDialog):
         mixLayout.addWidget(self.mixrateSpinBox, 9, 1)
         mixLayout.addWidget(self.iterationsLabel, 10, 0)
         mixLayout.addWidget(self.iterationsSpinBox, 10, 1)
-        mixLayout.addWidget(self.usesolventLabel, 11, 0)
+        mixLayout.addWidget(self.usegroupLabel, 11, 0)
         checkbox3Layout = QHBoxLayout()
-        checkbox3Layout.addWidget(self.usesolventCheckBox)
+        checkbox3Layout.addWidget(self.usegroupCheckBox)
         mixLayout.addLayout(checkbox3Layout, 11, 1, Qt.AlignCenter)
         mixLayout.addWidget(self.randomizeLabel, 12, 0)
         checkbox4Layout = QHBoxLayout()
@@ -440,42 +486,8 @@ class Window(QDialog):
         refineLayout.addWidget(self.refinemixrateLabel, 6, 0)
         refineLayout.addWidget(self.refinemixrateSpinBox, 6, 1)
         refineLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 7, 0)
-        self.paramtab4.setLayout(refineLayout)
-        self.paramTabs.addTab(self.paramtab4, "Refining")
-
-        statsLayout = QGridLayout()
-        statsLayout.addItem(QSpacerItem(0, 15), 0, 0)
-        statsLayout.addWidget(self.totalmixLabel, 1, 0)
-        statsLayout.addWidget(self.totalmix, 1, 1)
-        statsLayout.addItem(QSpacerItem(0, 15), 2, 0)
-        statsLayout.addWidget(self.totalcompoundsLabel, 3, 0)
-        statsLayout.addWidget(self.totalcompounds, 3, 1)
-        statsLayout.addItem(QSpacerItem(0, 15), 4, 0)
-        statsLayout.addWidget(self.totalpeaksLabel, 5, 0)
-        statsLayout.addWidget(self.totalpeaks, 5, 1)
-        statsLayout.addItem(QSpacerItem(0, 10), 6, 0)
-        statsLayout.addWidget(self.statsHLine, 7, 0, 1, 2)
-        statsLayout.addItem(QSpacerItem(0, 10), 8, 0)
-        statsLayout.addWidget(self.totaloverlapLabel, 9, 0)
-        statsLayout.addWidget(self.totaloverlap, 9, 1)
-        statsLayout.addItem(QSpacerItem(0, 15), 10, 0)
-        statsLayout.addWidget(self.totalscoreLabel, 11, 0)
-        statsLayout.addWidget(self.totalscore, 11, 1)
-        statsLayout.addItem(QSpacerItem(0, 15), 12, 0)
-        statsLayout.addWidget(self.meanoverlapLabel, 13, 0)
-        statsLayout.addWidget(self.meanoverlap, 13, 1)
-        statsLayout.addItem(QSpacerItem(0, 15), 14, 0)
-        statsLayout.addWidget(self.meanscoreLabel, 15, 0)
-        statsLayout.addWidget(self.meanscore, 15, 1)
-        statsLayout.addItem(QSpacerItem(0, 15), 16, 0)
-        statsLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 17, 0)
-        statsLayout.addWidget(self.searchLineEdit, 18, 0)
-        statsLayout.addWidget(self.searchButton, 18, 1)
-        statsLayout.addWidget(self.searchResults, 19, 0, 1, 2)
-        #statsLayout.addWidget(self.showmixturehist, 16, 0, 1, 2)
-        statsLayout.addWidget(self.showrankedcompounds, 20, 0, 1, 2)
-        self.paramtab3.setLayout(statsLayout)
-        self.paramTabs.addTab(self.paramtab3, "Stats")
+        self.paramtab3.setLayout(refineLayout)
+        self.paramTabs.addTab(self.paramtab3, "Refining")
 
         tableinstructionLayout = QHBoxLayout()
         tableinstructionLayout.addItem(QSpacerItem(24,0))
@@ -507,9 +519,9 @@ class Window(QDialog):
 
     def createConnections(self):
         self.rangeSpinBox.valueChanged.connect(self.updateTable)
-        self.scorepowerSpinBox.valueChanged.connect(self.updateTable)
         self.scorescaleSpinBox.valueChanged.connect(self.updateTable)
         self.useintensityCheckBox.clicked.connect(self.updateTable)
+        self.useautosaveCheckBox.clicked.connect(self.updateAutosave)
 
         self.startnumSpinBox.valueChanged.connect(self.updateMixing)
         self.mixsizeSpinBox.valueChanged.connect(self.updateMixing)
@@ -519,7 +531,7 @@ class Window(QDialog):
         self.finaltempSpinbox.valueChanged.connect(self.updateMixing)
         self.maxstepsSpinBox.valueChanged.connect(self.updateMixing)
         self.mixrateSpinBox.valueChanged.connect(self.updateMixing)
-        self.usesolventCheckBox.clicked.connect(self.updateSolventMixing)
+        self.usegroupCheckBox.clicked.connect(self.updateGroupMixing)
         self.iterationsSpinBox.valueChanged.connect(self.updateMixing)
         self.randomizeCheckBox.clicked.connect(self.updateMixing)
 
@@ -570,13 +582,13 @@ class Window(QDialog):
             view_spectra = QPushButton("View")
             self.mixtable.setCellWidget(row, 1, view_spectra)
             view_spectra.clicked.connect(self.handleMixtureButton)
-            mixture_solvent = []
+            mixture_group = []
             self.compoundButtons = {}
             mix_state = 0
             for i, compound in enumerate(self.mixtures.mixtures[mixture]):
-                compound_solvent = self.library.library[compound].solvent
-                if compound_solvent not in mixture_solvent:
-                    mixture_solvent.append(compound_solvent)
+                compound_group = self.library.library[compound].group
+                if compound_group not in mixture_group:
+                    mixture_group.append(compound_group)
                 compound_id = str(compound)
                 compound_score = self.mixtures.compound_scores[compound][0]
                 peak_overlap = self.mixtures.compound_scores[compound][1]
@@ -621,20 +633,20 @@ class Window(QDialog):
             else:
                 score.setForeground(QColor('green'))
             self.mixtable.setItem(row, 3, score)
-            if len(mixture_solvent) >= 2:
-                solvent = QTableWidgetItem("Mixed")
-                if self.params.use_solvent:
-                    solvent.setForeground(QColor('red'))
-            elif not mixture_solvent:
-                if self.params.use_solvent:
-                    for solvent_type in self.mixtures.solvent_mixnum:
-                        if mixture in self.mixtures.solvent_mixnum[solvent_type]:
-                            solvent_text = str(solvent_type)
-                            solvent = QTableWidgetItem(solvent_text)
+            if len(mixture_group) >= 2:
+                group = QTableWidgetItem("Mixed")
+                if self.params.use_group:
+                    group.setForeground(QColor('red'))
+            elif not mixture_group:
+                if self.params.use_group:
+                    for group_type in self.mixtures.group_mixnum:
+                        if mixture in self.mixtures.group_mixnum[group_type]:
+                            group_text = str(group_type)
+                            group = QTableWidgetItem(group_text)
             else:
-                solvent = QTableWidgetItem(mixture_solvent[0])
-            solvent.setTextAlignment(Qt.AlignCenter)
-            self.mixtable.setItem(row, 4, solvent)
+                group = QTableWidgetItem(mixture_group[0])
+            group.setTextAlignment(Qt.AlignCenter)
+            self.mixtable.setItem(row, 4, group)
         self.mixtable.setSortingEnabled(True)
 
     def updateTable(self):
@@ -659,16 +671,20 @@ class Window(QDialog):
     def updateScoring(self):
         self.mixtures.resetScores()
         range = self.rangeSpinBox.value()
-        power = self.scorepowerSpinBox.value()
         scale = self.scorescaleSpinBox.value()
         self.params.setPeakRange(float(range))
-        self.params.setScorePower(int(power))
         self.params.setScoreScale(int(scale))
         if self.useintensityCheckBox.isChecked():
             self.params.useIntensity()
         else:
             self.params.noIntensity()
         self.mixtures.calculateTotalScore(self.mixtures.mixtures)
+
+    def updateAutosave(self):
+        if self.useautosaveCheckBox.isChecked():
+            self.params.useAutosave()
+        else:
+            self.params.noAutosave()
 
     def updateMixing(self):
         start_num = self.startnumSpinBox.value()
@@ -749,11 +765,11 @@ class Window(QDialog):
         elif cooling == 'Linear':
             self.params.useRefineLinearCooling()
 
-    def updateSolventMixing(self):
-        if self.usesolventCheckBox.isChecked():
-            self.params.useSolvent()
+    def updateGroupMixing(self):
+        if self.usegroupCheckBox.isChecked():
+            self.params.useGroup()
             self.mixtures.resetScores()
-            self.mixtures.generateSolventLists()
+            self.mixtures.generateGroupLists()
             self.mixtures.generateInitialMixtures()
             self.updateMixing()
             self.updateScoring()
@@ -761,7 +777,7 @@ class Window(QDialog):
             self.setTable()
             self.need_reset = False
         else:
-            self.params.noSolvent()
+            self.params.noGroup()
             self.updateMixing()
             self.updateScoring()
             self.updateStats()
@@ -771,7 +787,7 @@ class Window(QDialog):
         reply = QMessageBox.question(self, "Reset Mixtures?", reset_message, QMessageBox.Yes, QMessageBox.No)
         if reply == QMessageBox.Yes:
             self.mixtures.resetScores()
-            self.mixtures.generateSolventLists()
+            self.mixtures.generateGroupLists()
             self.mixtures.generateInitialMixtures()
             self.updateMixing()
             self.updateScoring()
@@ -784,20 +800,20 @@ class Window(QDialog):
         """Adds an new empty row at the end of the table."""
         mixnum_list = sorted(list(self.mixtures.mixtures))
         new_mixnum = int(mixnum_list[-1]) + 1
-        if self.params.use_solvent:
-            solvent = ""
-            newmix_win = NewMixtureSolvent(self.mixtures, new_mixnum)
+        if self.params.use_group:
+            group = ""
+            newmix_win = NewMixtureGroup(self.mixtures, new_mixnum)
             if newmix_win.exec_():
-                solvent = newmix_win.solvent
+                group = newmix_win.group
         else:
-            solvent = "Any"
-        if solvent:
-            if solvent == "Any":
-                solvent_name = ""
+            group = "Any"
+        if group:
+            if group == "Any":
+                group_name = ""
             else:
-                solvent_name = solvent
+                group_name = group
             self.mixtures.mixtures[new_mixnum] = []
-            self.mixtures.solvent_mixnum[solvent_name].append(new_mixnum)
+            self.mixtures.group_mixnum[group_name].append(new_mixnum)
             self.mixtures.num_mixtures += 1
             self.mixtures.resetScores()
             self.updateScoring()
@@ -844,16 +860,13 @@ class Window(QDialog):
     def searchTable(self):
         query = self.searchLineEdit.text()
         query_success = False
-        print(query, query_success)
         if query:
-            print("if query")
             for mixture in self.mixtures.mixtures:
                 for compound in self.mixtures.mixtures[mixture]:
                     name = self.library.library[compound].name
                     search_options = [compound, compound.upper(), compound.lower(),
                                       name, name.upper(), name.lower(), name.capitalize()]
                     if query in search_options:
-                        print("query in search_options")
                         self.searchResults.setText("%s Found in Mixture %d" % (query, mixture))
                         self.searchResults.setStyleSheet("QLabel {color: blue;}")
                         rows = self.mixtable.rowCount()
@@ -878,47 +891,61 @@ class Window(QDialog):
             if is_checked:
                 self.mixtures.mixtures_lock.append(int(self.mixtable.item(row,2).text()))
 
-    def saveResults(self):
-        results_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S')
-        results_folder = results_time + "_Results"
-        self.results_path = os.path.join(self.params.work_dir, results_folder)
-        if not os.path.exists(self.results_path):
-            os.mkdir(self.results_path)
-        self.mixtures.exportSimpleMixturesTXT(self.results_path)
-        self.mixtures.exportMixturesCSV(self.results_path)
-        self.mixtures.exportRoiCSV(self.results_path)
-        self.mixtures.exportFullRoiCSV(self.results_path)
-        self.mixtures.exportIgnoreRegion(self.results_path)
-        self.mixtures.exportScores(self.results_path)
-        self.mixtures.exportPeakListCSV(self.results_path)
-        self.library.exportLibraryCSV(self.results_path)
-        self.library.exportImportLog(self.results_path)
-        # self.library.exportPeaklistCSV(self.results_path)
-        self.params.exportScoringParams(self.results_path)
-        output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
-        QMessageBox.information(self, 'Results Saved', output_msg)
+    def saveResults(self, optimize_time=False):
+        try:
+            if optimize_time == False:
+                results_time = datetime.datetime.fromtimestamp(time.time()).strftime('%Y%m%d_%H%M%S')
+            else:
+                results_time = optimize_time
+            results_folder = results_time + "_Results"
+            self.results_path = os.path.join(self.params.work_dir, results_folder)
+            if not os.path.exists(self.results_path):
+                os.mkdir(self.results_path)
+            self.mixtures.exportSimpleMixturesTXT(self.results_path)
+            self.mixtures.exportMixturesCSV(self.results_path)
+            self.mixtures.exportRoiCSV(self.results_path)
+            self.mixtures.exportFullRoiCSV(self.results_path)
+            self.mixtures.exportScores(self.results_path)
+            self.mixtures.exportPeakListCSV(self.results_path)
+            self.library.exportLibraryCSV(self.results_path)
+            self.library.exportImportLog(self.results_path)
+            self.library.exportIgnoreRegions(self.results_path)
+            self.library.exportPeaklistCSV(self.results_path)
+            self.params.exportScoringParams(self.results_path)
+            output_msg = "Mixture results output to:<br><font color='blue'>%s</font>" % self.results_path
+            QMessageBox.information(self, 'Results Saved', output_msg)
+        except Exception as e:
+            #print(e)
+            QMessageBox.critical(self, 'Results NOT Saved!',
+                                 "Some mixture results files could not be saved. Please check folder permissions.")
 
     def importMixtures(self):
         dir = self.params.work_dir
 
 
-
-        fileObj = QFileDialog.getOpenFileName(self, "Open Mixtures CSV", directory=dir, filter="CSV Files: (*.csv)")
-        if fileObj[0]:
-            import_extras_win = ExtrasImport()
-            if import_extras_win.exec_():
-                use_extras = import_extras_win.checkbox.checkState()
-            import_win = MixtureImport(self.params, fileObj[0], self.library, self.mixtures, use_extras)
-            if import_win.exec_():
-                self.updateScoring()
-                self.updateStats()
-                self.setTable()
-                self.lockCheckBox.setChecked(True)
-                self.usesolventCheckBox.setChecked(self.params.use_solvent)
-                self.startnumSpinBox.setValue(self.params.start_num)
-                self.mixsizeSpinBox.setValue(self.params.mix_size)
-                self.lockAll()
-                # TODO: Determine how to lock only the mixtures in the imported file
+        dirObj = QFileDialog.getExistingDirectory(self, "Open Results Directory", directory=dir)
+        if dirObj:
+            fileObj = os.path.join(dirObj, "mixtures.csv")
+        # fileObj = QFileDialog.getOpenDir(self, "Open Mixtures CSV", directory=dir, filter="CSV Files: (*.csv)")
+        # if fileObj[0]:
+            if os.path.exists(fileObj):
+                import_extras_win = ExtrasImport()
+                if import_extras_win.exec_():
+                    use_extras = import_extras_win.checkbox.checkState()
+                import_win = MixtureImport(self.params, fileObj, self.library, self.mixtures, use_extras)
+                if import_win.exec_():
+                    self.updateScoring()
+                    self.updateStats()
+                    self.setTable()
+                    self.lockCheckBox.setChecked(True)
+                    self.usegroupCheckBox.setChecked(self.params.use_group)
+                    self.startnumSpinBox.setValue(self.params.start_num)
+                    self.mixsizeSpinBox.setValue(self.params.mix_size)
+                    self.lockAll()
+                    # TODO: Determine how to lock only the mixtures in the imported file
+            else:
+                QMessageBox.critical(self, 'Results Folder Missing Mixtures',
+                                 "This folder does not contain a mixtures.csv file. Please select a results folder previously output by NMRmix")
 
     def optimizeMixtures(self):
         self.updateLockMixtures()
@@ -927,20 +954,21 @@ class Window(QDialog):
         if reply == QMessageBox.Yes:
             if self.need_reset:
                 self.mixtures.resetScores()
-                self.mixtures.generateSolventLists()
+                self.mixtures.generateGroupLists()
                 self.mixtures.generateInitialMixtures()
             optimize_win = optimize.Window(self.params, self.library, self.mixtures)
             if optimize_win.exec_():
                 self.updateScoring()
                 self.updateStats()
                 self.setTable()
+                if self.params.autosave:
+                    self.saveResults(optimize_time=self.mixtures.optimize_time)
         # TODO: Check for value errors
 
     def openCompoundWindow(self, compound_id, mixture_id):
         compound_object = self.library.library[compound_id]
-        compound_win = compound_info.Window(self.params, compound_object)
-        if compound_win.exec_():
-            pass
+        compound_win = compound_info.Window(self.params, compound_object, self.library, editable=False)
+        compound_win.exec_()
 
     def openCompoundList(self):
         compoundlist_win = compounds_ranked.Window(self.params, self.library, self.mixtures)
@@ -966,7 +994,7 @@ class Window(QDialog):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
-            self.backToPeakInfo()
+            event.ignore()
 
 class QDoubleSpinBoxScore(QDoubleSpinBox):
     def __init__(self, parent=None):
@@ -996,21 +1024,21 @@ class QPushButtonRight(QPushButton):
         if event.button() == Qt.LeftButton:
             self.leftClicked.emit()
 
-class NewMixtureSolvent(QDialog):
+class NewMixtureGroup(QDialog):
     def __init__(self, mixtures_object, mixnum, parent=None):
         QDialog.__init__(self, parent)
         self.mixtures = mixtures_object
         self.mixnum = mixnum
-        self.setWindowTitle("Solvent for New Mixture")
+        self.setWindowTitle("Group for New Mixture")
         self.createWidgets()
         self.layoutWidgets()
         self.createConnections()
 
     def createWidgets(self):
-        self.questionLabel = QLabel("Select solvent type for mixture:")
-        self.solventComboBox = QComboBox()
-        for solvent in self.mixtures.solvent_dict:
-            self.solventComboBox.addItem(solvent)
+        self.questionLabel = QLabel("Select group type for mixture:")
+        self.groupComboBox = QComboBox()
+        for group in self.mixtures.group_dict:
+            self.groupComboBox.addItem(group)
         self.cancelButton = QPushButton("Cancel")
         self.acceptButton = QPushButton("Accept")
 
@@ -1021,15 +1049,15 @@ class NewMixtureSolvent(QDialog):
         hbox.addWidget(self.cancelButton)
         hbox.addWidget(self.acceptButton)
         vbox.addWidget(self.questionLabel)
-        vbox.addWidget(self.solventComboBox)
+        vbox.addWidget(self.groupComboBox)
         vbox.addLayout(hbox)
 
     def createConnections(self):
         self.cancelButton.clicked.connect(self.reject)
-        self.acceptButton.clicked.connect(self.acceptSolvent)
+        self.acceptButton.clicked.connect(self.acceptGroup)
 
-    def acceptSolvent(self):
-        self.solvent = str(self.solventComboBox.currentText())
+    def acceptGroup(self):
+        self.group = str(self.groupComboBox.currentText())
         QDialog.accept(self)
 
 class MixtureImport(QDialog):
@@ -1066,7 +1094,7 @@ class MixtureImport(QDialog):
     def importMixturesCSV(self):
         self.unused_list = []
         self.new_mixtures = {}
-        self.solvent_mixnum = {}
+        self.group_mixnum = {}
         for compound in list(self.library.library.keys()):
             self.unused_list.append(compound)
         random.shuffle(self.unused_list)
@@ -1075,34 +1103,34 @@ class MixtureImport(QDialog):
         with codecs.open(self.filepath, 'rU') as mixtures_csv:
             reader = csv.reader(mixtures_csv)
             try:
-                self.use_solvent = True
+                self.use_group = True
                 for i, row in enumerate(reader):
                     if i == 0:
                         continue
                     else:
                         if row[2] == "Mixed":
-                            self.use_solvent = False
+                            self.use_group = False
                             break
                         if row[2] is None or row[2] is False:
-                            self.use_solvent = False
+                            self.use_group = False
                             break
                 mixtures_csv.seek(0)
-                if not self.use_solvent:
-                    self.solvent_mixnum[""] = []
+                if not self.use_group:
+                    self.group_mixnum[""] = []
                 for i, row in enumerate(reader):
                     if i == 0:
                         continue
                     mixnum = int(row[0])
                     if mixnum not in self.new_mixtures:
                         self.new_mixtures[mixnum] = []
-                        if self.use_solvent:
-                            if row[2] not in self.solvent_mixnum:
-                                self.solvent_mixnum[row[2]] = []
-                                self.solvent_mixnum[row[2]].append(mixnum)
+                        if self.use_group:
+                            if row[2] not in self.group_mixnum:
+                                self.group_mixnum[row[2]] = []
+                                self.group_mixnum[row[2]].append(mixnum)
                             else:
-                                self.solvent_mixnum[row[2]].append(mixnum)
+                                self.group_mixnum[row[2]].append(mixnum)
                         else:
-                            self.solvent_mixnum[""].append(mixnum)
+                            self.group_mixnum[""].append(mixnum)
                         for compound in row[3:]:
                             if not compound:
                                 continue
@@ -1124,33 +1152,33 @@ class MixtureImport(QDialog):
                 self.importLog.append("No detected errors in mixture import.")
                 self.params.setStartingMixtureNum(min(list(self.new_mixtures.keys())))
                 self.params.setMixSize(mix_size)
-                self.params.use_solvent = self.use_solvent
+                self.params.use_group = self.use_group
                 if self.use_extras:
                     if len(self.unused_list) > 0:
-                        if self.use_solvent:
-                            solvent_dict = {}
+                        if self.use_group:
+                            group_dict = {}
                             for compound in self.unused_list:
-                                solvent = self.library.library[compound].solvent
-                                if solvent not in solvent_dict:
-                                    solvent_dict[solvent] = []
-                                    solvent_dict[solvent].append(compound)
+                                group = self.library.library[compound].group
+                                if group not in group_dict:
+                                    group_dict[group] = []
+                                    group_dict[group].append(compound)
                                 else:
-                                    solvent_dict[solvent].append(compound)
-                            for solvent in solvent_dict:
-                                self.assignUnused(solvent_dict[solvent], solvent)
+                                    group_dict[group].append(compound)
+                            for group in group_dict:
+                                self.assignUnused(group_dict[group], group)
                         else:
-                            self.assignUnused(self.unused_list, solvent="")
+                            self.assignUnused(self.unused_list, group="")
 
                 self.acceptButton.setDisabled(False)
 
-    def assignUnused(self, compound_list, solvent):
+    def assignUnused(self, compound_list, group):
         mix_numbers = list(self.new_mixtures.keys())
         mix_num = max(mix_numbers) + 1
         self.new_mixtures[mix_num] = []
         for compound in compound_list:
             if len(self.new_mixtures[mix_num]) >= self.params.mix_size:
                 self.new_mixtures[mix_num].sort()
-                self.solvent_mixnum[solvent].append(mix_num)
+                self.group_mixnum[group].append(mix_num)
                 mix_num += 1
                 self.new_mixtures[mix_num] = []
                 self.new_mixtures[mix_num].append(compound)
@@ -1160,7 +1188,7 @@ class MixtureImport(QDialog):
 
     def acceptMixtures(self):
         self.mixtures.mixtures = copy.deepcopy(self.new_mixtures)
-        self.mixtures.solvent_mixnum = copy.deepcopy(self.solvent_mixnum)
+        self.mixtures.group_mixnum = copy.deepcopy(self.group_mixnum)
         if not self.use_extras:
             if len(self.unused_list) > 0:
                 for compound in self.unused_list:

@@ -109,13 +109,20 @@ class Window(QDialog):
         self.progressbar.setValue(value+1)
 
     def finishedImport(self):
-        self.buttonAccept.setDisabled(False)
-        self.buttonAccept.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
-        self.buttonStart.setText('Finished Import')
-        self.buttonStart.setDisabled(True)
-        self.buttonStart.setStyleSheet('QPushButton {color: black;}')
-        self.buttonReject.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
-        self.buttonReject.setDisabled(False)
+        if len(self.library.library) > 1:
+            self.buttonAccept.setDisabled(False)
+            self.buttonAccept.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
+            self.buttonStart.setText('Finished Import')
+            self.buttonStart.setDisabled(True)
+            self.buttonStart.setStyleSheet('QPushButton {color: black;}')
+            self.buttonReject.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
+            self.buttonReject.setDisabled(False)
+        else:
+            self.buttonStart.setText('Finished Import')
+            self.buttonStart.setDisabled(True)
+            self.buttonStart.setStyleSheet('QPushButton {color: black;}')
+            self.buttonReject.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
+            self.buttonReject.setDisabled(False)
 
 
     def setForegroundColor(self, widget, color):
@@ -154,7 +161,7 @@ class PeakImportThread(QThread):
                     if success:
                         self.library.addLibraryCompound(i, compound)
                         #compound.set2DStructure()
-                        logtext = "%s peaklist import from %s succeeded" % (row[1], row[6])
+                        logtext = "<font color='blue'>%s peaklist import from %s succeeded</font>" % (row[1], row[6])
                         self.updatedLog.emit(logtext)
                         self.library.import_log.append(logtext)
                     else:

@@ -12,7 +12,15 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import os
+import sys
 import numpy as np
+if sys.version > '3':
+    import csv
+else:
+    try:
+        import unicodecsv as csv
+    except:
+        from core import unicodecsv as csv
 
 import matplotlib
 matplotlib.use('Qt5Agg')
@@ -21,11 +29,13 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar2
 
 class Window(QDialog):
-    def __init__(self, params_object, compound_object, editable_peaklist=False, parent=None):
+    def __init__(self, params_object, compound_object, library_object, editable=False, parent=None):
         QDialog.__init__(self, parent)
-
         self.params = params_object
         self.compound = compound_object
+        self.library = library_object
+        self.editable = editable
+        self.modified = False
         self.setWindowTitle("NMRmix: Information for Compound %s" % self.compound.id)
         self.createWidgets()
         self.layoutWidgets()
@@ -39,14 +49,24 @@ class Window(QDialog):
         self.compoundTabs.setStyleSheet('QTabBar {font-weight: bold;}'
                                      'QTabBar::tab {color: black;}'
                                      'QTabBar::tab:selected {color: red;}')
+        self.initInfo()
+        self.initSpectrum()
+        self.initPeaklistTable()
 
+    def initInfo(self):
         # Compound Info Tab
         self.compoundtab1 = QWidget()
         self.compoundtab1.setStyleSheet("QWidget{background-color: white;}")
         self.idLabel = QLabel("<h2><font color='red'>%s</font></h2>" % self.compound.id)
         self.idLabel.setAlignment(Qt.AlignCenter)
         self.nameLabel = QLabel("<b>Name:</b> %s" % self.compound.name)
-        self.solventLabel = QLabel("<b>Solvent:</b> %s" % self.compound.solvent)
+        self.groupLabel = QLabel("<b>Group:</b> %s" % self.compound.group)
+        self.bmrbLabel = QLabel("<b>BMRB ID:</b> %s" % self.compound.bmrb_id)
+        self.bmrbLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+        self.bmrbLabel.setOpenExternalLinks(True)
+        self.hmdbLabel = QLabel("<b>HMDB ID:</b> %s" % self.compound.hmdb_id)
+        self.hmdbLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+        self.hmdbLabel.setOpenExternalLinks(True)
         self.pubchemLabel = QLabel("<b>PubChem CID:</b> <a href='https://pubchem.ncbi.nlm.nih.gov/compound/%s'>%s</a>"
                                    % (self.compound.pubchem_id, self.compound.pubchem_id))
         self.pubchemLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
@@ -55,10 +75,12 @@ class Window(QDialog):
                                 % (self.compound.kegg_id, self.compound.kegg_id))
         self.keggLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
         self.keggLabel.setOpenExternalLinks(True)
-        self.savestructureButton = QPushButton('Save Structure Image')
-        self.savestructureButton.setToolTip("Tooltip") # TODO: Set tooltip
+        self.structureLabel = QLabel("<b>Structure: </b>")
+        self.structure = QLabel()
+
 
         if self.compound.smiles:
+            self.smilesLabel = QLabel("<b>SMILES:</b> %s" % self.compound.smiles)
             try:
                 self.compound.set2DStructure()
                 molformula = ""
@@ -77,30 +99,42 @@ class Window(QDialog):
                         else:
                             j = i
                     molformula += j
-                self.molformulaLabel = QLabel("<b>Mol. Formula:</b> %s" % molformula)
-                self.molwtLabel = QLabel("<b>Mol. Weight:</b> %0.3f" % self.compound.molwt)
+                if self.compound.molwt and self.compound.molformula:
+                    self.molformulaLabel = QLabel("<b>Mol. Formula:</b> %s" % molformula)
+                    self.molwtLabel = QLabel("<b>Mol. Weight:</b> %0.3f" % self.compound.molwt)
+                else:
+                    self.molformulaLabel = QLabel("<b>Mol. Formula:</b> Unknown")
+                    self.molwtLabel = QLabel("<b>Mol. Weight:</b> Unknown")
+                if self.compound.structure_image:
+                    self.pixmap = QPixmap.fromImage(self.compound.structure_qt)
+                    self.structure.setText("")
+                    self.structure.setPixmap(self.pixmap)
+                    self.structure.setAlignment(Qt.AlignCenter)
+                else:
+                    self.structure.setText("No Structure Available")
+                    self.structure.setAlignment(Qt.AlignCenter)
             except:
                 self.molformulaLabel = QLabel("<b>Mol. Formula:</b> Unknown")
                 self.molwtLabel = QLabel("<b>Mol. Weight:</b> Unknown")
+                self.structure.setText("No Structure Available")
+                self.structure.setAlignment(Qt.AlignCenter)
+
         else:
+            self.smilesLabel = QLabel("<b>SMILES:</b> Unknown")
             self.molformulaLabel = QLabel("<b>Mol. Formula:</b> Unknown")
             self.molwtLabel = QLabel("<b>Mol. Weight:</b> Unknown")
-        self.structureLabel = QLabel("<b>Structure: </b>")
-        if self.compound.structure_image:
-            # if not self.compound.structure_data:
-            #     self.compound.structure_data = self.compound.structure_image.make_blob()
-            #width, height = self.compound.structure_image.size
-            # qimg = QImage.fromData(self.compound.structure_image)
-            self.pixmap = QPixmap.fromImage(self.compound.structure_qt)
-            self.structure = QLabel()
-            self.structure.setPixmap(self.pixmap)
-            self.structure.setAlignment(Qt.AlignCenter)
-        else:
-            self.structure = QLabel("No Structure Available")
+            self.structure.setText("No Structure Available")
             self.structure.setAlignment(Qt.AlignCenter)
 
+        self.editinfoButton = QPushButton('Edit Compound Info')
+        self.editinfoButton.setToolTip("Opens a window to edit compound information") # TODO: Set tooltip
+        self.restoreinfoButton = QPushButton('Restore Compound Info')
+        self.restoreinfoButton.setToolTip("Resets compound information to original imported values") # TODO: Set tooltip
+        self.savestructureButton = QPushButton('Save Structure Image')
+        self.savestructureButton.setToolTip("Tooltip") # TODO: Set tooltip
 
 
+    def initSpectrum(self):
         # Compound Spectrum Tab
         matplotlib.projections.register_projection(My_Axes)
         self.scale = 1.05
@@ -124,18 +158,20 @@ class Window(QDialog):
         self.instructionLabel = QLabel(ins)
         self.instructionLabel.setStyleSheet('QLabel{qproperty-alignment: AlignCenter; font-size: 10px;}')
         self.showignoredregionsCheckBox = QCheckBox("Show Ignored Regions")
-        self.showignoredregionsCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showignoredregionsCheckBox.setToolTip("Shows the ranges set by the solvent/buffer ignore regions, if any.")
         self.showignoredregionsCheckBox.setLayoutDirection(Qt.RightToLeft)
         self.showignoredregionsCheckBox.setChecked(True)
         self.showignoredpeaksCheckBox = QCheckBox("Show Ignored Peaks")
-        self.showignoredpeaksCheckBox.setToolTip("Tooltip") # TODO: Tooltip
+        self.showignoredpeaksCheckBox.setToolTip("Shows any compound peaks that are in the solvent/buffer ignore regions, if any.\n"
+                                                 "These peaks are ignored and are not evaluated during mixing.")
         self.showignoredpeaksCheckBox.setLayoutDirection(Qt.RightToLeft)
         self.showignoredpeaksCheckBox.setChecked(True)
         self.resetviewButton = QPushButton("Reset View")
-        self.resetviewButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.resetviewButton.setToolTip("Resets the spectrum to the default view.")
         self.savespectrumButton = QPushButton("Save Spectrum")
-        self.savespectrumButton.setToolTip("Tooltip") # TODO: Tooltip
+        self.savespectrumButton.setToolTip("Saves the image in the spectrum window.")
 
+    def initPeaklistTable(self):
         # Compound Peaklist Tab
         self.compoundtab3 = QWidget()
         self.compoundtab3.setStyleSheet("QWidget{background-color: white;}")
@@ -152,28 +188,31 @@ class Window(QDialog):
         self.peakTable.setColumnWidth(2, 150)
         self.peakTable.setColumnWidth(3, 100)
         self.peakTable.horizontalHeader().setStretchLastSection(True)
-        self.tableheader = ['Active', 'Chemical Shift', 'Intensity', 'Width']
+        self.tableheader = ['Status', 'Chemical Shift', 'Intensity', 'Width']
         self.peakTable.setHorizontalHeaderLabels(self.tableheader)
         self.peakTable.horizontalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.peakTable.verticalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.addButton = QPushButton("Add")
         self.addButton.setToolTip("Opens a window to add a new peak to the table")
-        self.addButton.hide()
+
         self.editButton = QPushButton("Edit")
         self.editButton.setToolTip("Opens a window to edit the currently selected peak.")
-        self.editButton.hide()
+
         self.removeButton = QPushButton("Remove")
-        self.removeButton.setToolTip("Removes the currently select peak.")
-        self.removeButton.hide()
-        self.resetpeaklistButton = QPushButton("Reset")
-        self.resetpeaklistButton.setToolTip("Restores the original peak list.")
-        self.resetpeaklistButton.hide()
+        self.removeButton.setToolTip("Inactivates the currently selected peak.")
+
+        self.restorepeaklistButton = QPushButton("Restore")
+        self.restorepeaklistButton.setToolTip("Restores the original peak list.")
+
         self.savepeaksButton = QPushButton("Save")
         self.savepeaksButton.setToolTip("Saves the current peak list as a custom peak list file.\n"
                                         "This file can be used as the peak list for future library imports.")
-        self.savepeaksButton.hide()
-
-
+        if not self.editable:
+            self.removeButton.hide()
+            self.restorepeaklistButton.hide()
+            self.savepeaksButton.hide()
+            self.editButton.hide()
+            self.addButton.hide()
 
         self.closeButton = QPushButton("Close")
         self.closeButton.setStyleSheet("QPushButton{color: red; font-weight:bold;}")
@@ -185,16 +224,23 @@ class Window(QDialog):
         infoLayout = QVBoxLayout(self.compoundtab1)
         infoLayout.addWidget(self.idLabel)
         infoLayout.addWidget(self.nameLabel)
-        infoLayout.addWidget(self.solventLabel)
+        infoLayout.addWidget(self.groupLabel)
+        infoLayout.addWidget(self.bmrbLabel)
+        infoLayout.addWidget(self.hmdbLabel)
         infoLayout.addWidget(self.pubchemLabel)
         infoLayout.addWidget(self.keggLabel)
+        infoLayout.addWidget(self.smilesLabel)
         infoLayout.addWidget(self.molformulaLabel)
         infoLayout.addWidget(self.molwtLabel)
         infoLayout.addWidget(self.structureLabel)
         infoLayout.addItem(QSpacerItem(400, 20, QSizePolicy.Maximum, QSizePolicy.Maximum))
         infoLayout.addWidget(self.structure)
         infoLayout.addItem(QSpacerItem(400, 20, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding))
-        infoLayout.addWidget(self.savestructureButton)
+        infobuttonLayout = QHBoxLayout()
+        infobuttonLayout.addWidget(self.editinfoButton)
+        infobuttonLayout.addWidget(self.restoreinfoButton)
+        infobuttonLayout.addWidget(self.savestructureButton)
+        infoLayout.addLayout(infobuttonLayout)
         self.compoundtab1.setLayout(infoLayout)
         self.compoundTabs.addTab(self.compoundtab1, "Compound Info")
 
@@ -221,7 +267,7 @@ class Window(QDialog):
         tablebuttonLayout.addWidget(self.addButton)
         tablebuttonLayout.addWidget(self.editButton)
         tablebuttonLayout.addWidget(self.removeButton)
-        tablebuttonLayout.addWidget(self.resetpeaklistButton)
+        tablebuttonLayout.addWidget(self.restorepeaklistButton)
         tablebuttonLayout.addWidget(self.savepeaksButton)
         tableLayout.addLayout(tablebuttonLayout)
         self.compoundtab3.setLayout(tableLayout)
@@ -233,6 +279,8 @@ class Window(QDialog):
         winLayout.setAlignment(self.closeButton, Qt.AlignCenter)
 
     def createConnections(self):
+        self.editinfoButton.clicked.connect(self.editInfo)
+        self.restoreinfoButton.clicked.connect(self.restoreInfo)
         self.savestructureButton.clicked.connect(self.saveStructure)
 
         self.showignoredregionsCheckBox.stateChanged.connect(self.handleIgnored)
@@ -243,10 +291,21 @@ class Window(QDialog):
         self.addButton.clicked.connect(self.addPeak)
         self.removeButton.clicked.connect(self.removePeak)
         self.editButton.clicked.connect(self.editPeak)
-        self.resetpeaklistButton.clicked.connect(self.resetPeakList)
+        self.restorepeaklistButton.clicked.connect(self.resetPeakList)
         self.savepeaksButton.clicked.connect(self.savePeakList)
 
         self.closeButton.clicked.connect(self.closeEvent)
+
+    def editInfo(self):
+        editinfo_win = InfoWindow(self.params, self.compound)
+        if editinfo_win.exec_():
+            self.modified = True
+            self.updateInfo()
+
+    def restoreInfo(self):
+        self.compound.restoreOriginalDescriptors()
+        self.modified = True
+        self.updateInfo()
 
     def saveStructure(self):
         filename = "%s.png" % self.compound.id
@@ -287,19 +346,82 @@ class Window(QDialog):
             plt.savefig(fileObj[0], dpi=200)
 
     def addPeak(self):
-        pass
+        addpeak_win = PeakWindow(self.params, self.compound)
+        if addpeak_win.exec_():
+            self.compound.addPeak(tuple(addpeak_win.table_values))
+            self.setTable()
+            self.modified = True
+            self.drawData()
 
     def editPeak(self):
-        pass
+        selected = self.peakTable.currentRow()
+        # status = self.peakTable.item(selected, 0).text()
+        chemshift = float(self.peakTable.item(selected, 1).text())
+        intensity = float(self.peakTable.item(selected, 2).text())
+        width = self.peakTable.item(selected, 3).text()
+        if width != 'Default':
+            curr_peak = (chemshift, intensity, float(width))
+        else:
+            curr_peak = (chemshift, intensity)
+        editpeak_win = PeakWindow(self.params, self.compound, curr_peak)
+        if editpeak_win.exec_():
+            self.compound.editPeak(tuple(editpeak_win.table_values))
+            self.setTable()
+            self.modified = True
+            self.drawData()
 
     def removePeak(self):
-        pass
+        try:
+            selected = self.peakTable.currentRow()
+            # status = self.peakTable.item(selected, 0).text()
+            chemshift = float(self.peakTable.item(selected, 1).text())
+            intensity = float(self.peakTable.item(selected, 2).text())
+            width = self.peakTable.item(selected, 3).text()
+            peak_list = self.compound.mix_peaklist + self.compound.ignored_peaklist
+            if width != 'Default':
+                curr_peak = (chemshift, intensity, float(width))
+            else:
+                curr_peak = (chemshift, intensity)
+            min_diff = 9999999
+            min_i = 9999999
+            for i, peak in enumerate(peak_list):
+                diff = abs(float(peak[1]) - float(curr_peak[1]))
+                if diff < min_diff:
+                    min_diff = diff
+                    min_i = i
+            matched_peak = peak_list[min_i]
+            self.compound.removePeak(matched_peak)
+            self.setTable()
+            self.modified = True
+            self.drawData()
+        except Exception as e:
+            # print(e)
+            pass
 
     def resetPeakList(self):
-        pass
+        self.compound.resetPeakList()
+        self.setTable()
+        self.modified = True
+        self.drawData()
 
     def savePeakList(self):
-        pass
+        filename = "%s_custom.csv" % self.compound.id
+        filepath = os.path.join(self.params.peaklist_dir, filename)
+        filestype = "static (*.csv)"
+        fileObj = QFileDialog.getSaveFileName(self, caption="Save Custom Peak List", directory=filepath,
+                                              filter=filestype)
+        if fileObj[0]:
+            filename = os.path.basename(fileObj[0])
+            peak_list = self.compound.mix_peaklist + self.compound.ignored_peaklist
+            with open(fileObj[0], 'wb') as peaks_csv:
+                writer = csv.writer(peaks_csv)
+                header = ['ChemShift', 'Intensity', 'Width']
+                writer.writerow(header)
+                writer.writerows(peak_list)
+            for i, row in enumerate(self.library.library_csv):
+                if row[1] == self.compound.id:
+                    self.library.library_csv[i][5] = filename
+                    self.library.library_csv[i][6] = 'USER'
 
     def lorentzian(self, mu, hwhm, intensity):
         def f(x):
@@ -312,12 +434,11 @@ class Window(QDialog):
     def drawPeakData(self, peaks, color="red", alpha=1.0):
         for peak in peaks:
             if len(peak) == 3:
-                # hwhm = peak[2] / 10
                 width = peak[2] * 3
+                hwhm = peak[2] * self.params.peak_display_width
             else:
                 width = self.params.peak_range * 3
-                # hwhm = self.params.peak_range / 10
-            hwhm = self.params.peak_display_width / 2
+                hwhm = self.params.peak_range * self.params.peak_display_width
             mean = peak[0]
             intensity = peak[1]
             shifts = (np.arange(mean-width, mean+width, 0.001))
@@ -359,10 +480,15 @@ class Window(QDialog):
         self.fig.tight_layout()
         self.canvas.draw()
 
+    def clearTable(self):
+        """Deletes all rows in the table."""
+        while self.peakTable.rowCount() > 0:
+            self.peakTable.removeRow(0)
+
     def setTable(self):
         self.peakTable.setSortingEnabled(False)
+        self.clearTable()
         tablesize = len(self.compound.mix_peaklist) + len(self.compound.ignored_peaklist)
-
         self.peakTable.setRowCount(tablesize)
         for row, peak in enumerate(self.compound.mix_peaklist):
             self.peakTable.setRowHeight(row, 50)
@@ -371,17 +497,19 @@ class Window(QDialog):
             self.peakTable.setItem(row, 0, active)
             chemshift = QTableWidgetItem()
             chemshift.setTextAlignment(Qt.AlignCenter)
-            chemshift.setData(Qt.DisplayRole, float("%0.3f" % peak[0]))
+            chemshift.setData(Qt.DisplayRole, "%0.3f" % peak[0])
             self.peakTable.setItem(row, 1, chemshift)
             intensity = QTableWidgetItem()
             intensity.setTextAlignment(Qt.AlignCenter)
-            intensity.setData(Qt.DisplayRole, float("%0.3f" % peak[1]))
+            intensity.setData(Qt.DisplayRole, "%0.3f" % peak[1])
             self.peakTable.setItem(row, 2, intensity)
+            width = QTableWidgetItem()
+            width.setTextAlignment(Qt.AlignCenter)
             if len(peak) == 3:
-                width = QTableWidgetItem()
-                width.setTextAlignment(Qt.AlignCenter)
-                width.setData(Qt.DisplayRole, float("%0.3f" % peak[2]))
-                self.peakTable.setItem(row, 3, width)
+                width.setData(Qt.DisplayRole, "%0.3f" % peak[2])
+            else:
+                width.setText('Default')
+            self.peakTable.setItem(row, 3, width)
         if len(self.compound.mix_peaklist) > 0:
             next_row = len(self.compound.mix_peaklist)
         else:
@@ -389,6 +517,30 @@ class Window(QDialog):
         for row, peak in enumerate(self.compound.ignored_peaklist, start=next_row):
             self.peakTable.setRowHeight(row, 40)
             active = QTableWidgetItem("IGNORED")
+            active.setTextAlignment(Qt.AlignCenter)
+            self.peakTable.setItem(row, 0, active)
+            chemshift = QTableWidgetItem()
+            chemshift.setTextAlignment(Qt.AlignCenter)
+            chemshift.setData(Qt.DisplayRole, "%0.3f" % peak[0])
+            self.peakTable.setItem(row, 1, chemshift)
+            intensity = QTableWidgetItem()
+            intensity.setTextAlignment(Qt.AlignCenter)
+            intensity.setData(Qt.DisplayRole, "%0.3f" % peak[1])
+            self.peakTable.setItem(row, 2, intensity)
+            width = QTableWidgetItem()
+            width.setTextAlignment(Qt.AlignCenter)
+            if len(peak) == 3:
+                width.setData(Qt.DisplayRole, "%0.3f" % peak[2])
+            else:
+                width.setText('Default')
+            self.peakTable.setItem(row, 3, width)
+        if len(self.compound.mix_peaklist)+len(self.compound.ignored_peaklist) > 0:
+            next_row = len(self.compound.mix_peaklist)+len(self.compound.ignored_peaklist)
+        else:
+            next_row = 0
+        for row, peak in enumerate(self.compound.removed_peaklist, start=next_row):
+            self.peakTable.setRowHeight(row, 40)
+            active = QTableWidgetItem("REMOVED")
             active.setTextAlignment(Qt.AlignCenter)
             self.peakTable.setItem(row, 0, active)
             chemshift = QTableWidgetItem()
@@ -405,6 +557,69 @@ class Window(QDialog):
                 width.setData(Qt.DisplayRole, float("%0.3f" % peak[2]))
                 self.peakTable.setItem(row, 3, width)
         self.peakTable.setSortingEnabled(True)
+        self.peakTable.selectRow(0)
+
+    def updateInfo(self):
+        self.nameLabel.setText("<b>Name:</b> %s" % self.compound.name)
+        self.groupLabel.setText("<b>Group:</b> %s" % self.compound.group)
+        self.pubchemLabel.setText("<b>PubChem CID:</b> <a href='https://pubchem.ncbi.nlm.nih.gov/compound/%s'>%s</a>"
+                                   % (self.compound.pubchem_id, self.compound.pubchem_id))
+        self.pubchemLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+        self.pubchemLabel.setOpenExternalLinks(True)
+        self.keggLabel.setText("<b>KEGG ID:</b> <a href='http://www.genome.jp/dbget-bin/www_bget?cpd:%s'>%s</a>"
+                                % (self.compound.kegg_id, self.compound.kegg_id))
+        self.keggLabel.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
+        self.keggLabel.setOpenExternalLinks(True)
+
+        if self.compound.smiles:
+            self.smilesLabel.setText("<b>SMILES:</b> %s" % self.compound.smiles)
+            try:
+                self.compound.set2DStructure()
+                molformula = ""
+                for count, i in enumerate(self.compound.molformula):
+                    try:
+                        if count > 0:
+                            if self.compound.molformula[count-1] == "-" or self.compound.molformula[count-1] == "+":
+                                j = "<sup>%d</sup>" % int(i)
+                            else:
+                                j = "<sub>%d</sub>" % int(i)
+                        else:
+                            j = i
+                    except:
+                        if i == "-" or i == "+":
+                            j = "<sup>%s</sup>" % i
+                        else:
+                            j = i
+                    molformula += j
+                self.molformulaLabel.setText("<b>Mol. Formula:</b> %s" % molformula)
+                self.molwtLabel.setText("<b>Mol. Weight:</b> %0.3f" % self.compound.molwt)
+                if self.compound.structure_image:
+                    self.pixmap = QPixmap.fromImage(self.compound.structure_qt)
+                    self.structure.setText("")
+                    self.structure.setPixmap(self.pixmap)
+                    self.structure.setAlignment(Qt.AlignCenter)
+                else:
+                    self.structure.setText("No Structure Available")
+                    self.structure.setAlignment(Qt.AlignCenter)
+            except:
+                self.molformulaLabel.setText("<b>Mol. Formula:</b> Unknown")
+                self.molwtLabel.setText("<b>Mol. Weight:</b> Unknown")
+        else:
+            self.smilesLabel.setText("<b>SMILES:</b> Unknown")
+            self.molformulaLabel.setText("<b>Mol. Formula:</b> Unknown")
+            self.molwtLabel.setText("<b>Mol. Weight:</b> Unknown")
+            self.structure.setText("No Structure Available")
+            self.structure.setAlignment(Qt.AlignCenter)
+
+        for i, row in enumerate(self.library.library_csv):
+                if row[1] == self.compound.id:
+                    self.library.library_csv[i][2] = self.compound.name
+                    self.library.library_csv[i][3] = self.compound.bmrb_id
+                    self.library.library_csv[i][4] = self.compound.hmdb_id
+                    self.library.library_csv[i][8] = self.compound.pubchem_id
+                    self.library.library_csv[i][9] = self.compound.kegg_id
+                    self.library.library_csv[i][10] = self.compound.smiles
+
 
     def zooming(self, event):
         cur_ylim = self.ax.get_ylim()
@@ -424,7 +639,7 @@ class Window(QDialog):
 
     def closeEvent(self, event=False):
         self.fig.clear()
-        QDialog.reject(self)
+        QDialog.accept(self)
 
 
 class My_Axes(matplotlib.axes.Axes):
@@ -434,32 +649,47 @@ class My_Axes(matplotlib.axes.Axes):
 
 
 class PeakWindow(QDialog):
-    def __init__(self, params_object, table_values=[], parent=None):
+    def __init__(self, params_object, compound_object, table_values=[], parent=None):
         QDialog.__init__(self, parent)
         self.params = params_object
-        self.table_values = list(table_values)
-        if self.table_values:
-            self.peak_list.remove(self.table_values[0])
-        self.setWindowTitle("Add Ignore Region")
+        self.compound = compound_object
+        self.peak_list = self.compound.mix_peaklist + self.compound.ignored_peaklist
+        self.table_values = table_values
+        if table_values:
+            min_diff = 9999999
+            min_i = 9999999
+            for i, peak in enumerate(self.peak_list):
+                diff = abs(float(peak[1]) - float(self.table_values[1]))
+                if diff < min_diff:
+                    min_diff = diff
+                    min_i = i
+            self.matched_peak = self.peak_list[min_i]
+            self.peak_list.remove(self.matched_peak)
+            self.setWindowTitle("Edit Peak")
+        else:
+            self.matched_peak = None
+            self.setWindowTitle("Add New Peak")
         self.createWidgets()
         self.layoutWidgets()
         self.createConnections()
 
     def createWidgets(self):
-        self.activeLabel = QLabel("<b>Active</b>")
-        self.activeLabel.setToolTip("Tooltip")
+        # self.activeLabel = QLabel("<b>Active</b>")
+        # self.activeLabel.setToolTip("Tooltip")
 
         self.peakLabel = QLabel("<b>Chemical shift (ppm)</b>")
         self.peakLabel.setToolTip("Tooltip")
         self.peakSpinBox = QDoubleSpinBox()
         self.peakSpinBox.setRange(-5.000, 12.000)
         self.peakSpinBox.setSingleStep(0.100)
+        self.peakSpinBox.setDecimals(3)
 
         self.intensityLabel = QLabel("<b>Intensity</b>")
         self.intensityLabel.setToolTip("Tooltip")
         self.intensitySpinBox = QDoubleSpinBox()
-        self.intensitySpinBox.setRange(0.00001, 10)
+        self.intensitySpinBox.setRange(0.00001, 100)
         self.intensitySpinBox.setSingleStep(0.100)
+        self.intensitySpinBox.setDecimals(3)
 
         self.widthLabel = QLabel("<b>Custom Overlap Range (ppm)</b>")
         self.widthLabel.setToolTip("Enables the use of a custom overlap range for this peak instead of the default.")
@@ -468,19 +698,20 @@ class PeakWindow(QDialog):
         self.widthSpinBox = QDoubleSpinBox()
         self.widthSpinBox.setRange(0.001, 5.000)
         self.widthSpinBox.setSingleStep(0.005)
+        self.widthSpinBox.setDecimals(3)
         self.widthSpinBox.setEnabled(False)
 
         if self.table_values:
             self.peakSpinBox.setValue(float(self.table_values[0]))
             self.intensitySpinBox.setValue(float(self.table_values[1]))
-            if self.table_values[2]:
+            if len(self.table_values) >= 3:
                 self.widthCheckBox.setChecked(True)
                 self.widthSpinBox.setValue(float(self.table_values[2]))
-                self.widthSpinBox.isEnabled(True)
+                self.widthSpinBox.setEnabled(True)
             else:
                 self.widthCheckBox.setChecked(False)
                 self.widthSpinBox.setValue(self.params.peak_range)
-                self.widthSpinBox.isEnabled(False)
+                self.widthSpinBox.setEnabled(False)
         else:
             self.peakSpinBox.setValue(4.700)
             self.intensitySpinBox.setValue(1.000)
@@ -512,12 +743,19 @@ class PeakWindow(QDialog):
 
     def customWidth(self):
         if self.widthCheckBox.isChecked():
-            self.widthSpinBox.isEnabled(True)
+            self.widthSpinBox.setEnabled(True)
         else:
-            self.widthSpinBox.isEnabled(False)
+            self.widthSpinBox.setEnabled(False)
 
     def acceptRegion(self):
         if self.checkTableValues():
+            if self.matched_peak:
+                if self.matched_peak in self.compound.mix_peaklist:
+                    self.compound.mix_peaklist.remove(self.matched_peak)
+                elif self.matched_peak in self.compound.ignored_peaklist:
+                    self.compound.ignored_peaklist.remove(self.matched_peak)
+                elif self.matched_peak in self.compound.removed_peaklist:
+                    self.compound.removed_peaklist.remove(self.matched_peak)
             QDialog.accept(self)
 
     def checkTableValues(self):
@@ -539,3 +777,68 @@ class PeakWindow(QDialog):
         self.table_values.append(float(self.intensitySpinBox.value()))
         if self.widthCheckBox.isChecked():
             self.table_values.append(float(self.widthSpinBox.value()))
+
+class InfoWindow(QDialog):
+    def __init__(self, params_object, compound_object, parent=None):
+        QDialog.__init__(self, parent)
+        self.params = params_object
+        self.compound = compound_object
+        self.setWindowTitle("Edit Compound Information")
+        self.createWidgets()
+        self.layoutWidgets()
+        self.createConnections()
+
+    def createWidgets(self):
+        self.nameLabel = QLabel("<b>Name:</b>")
+        self.nameEdit = QLineEdit(self.compound.name)
+        # self.groupLabel = QLabel("<b>Group:</b>")
+        # self.groupEdit = QLineEdit(self.compound.group)
+        self.bmrbLabel = QLabel("<b>BMRB ID:</b>")
+        self.bmrbEdit = QLineEdit(self.compound.bmrb_id)
+        self.hmdbLabel = QLabel("<b>HMDB ID:</b>")
+        self.hmdbEdit = QLineEdit(self.compound.hmdb_id)
+        self.pubchemLabel = QLabel("<b>PubChem CID:</b>")
+        self.pubchemEdit = QLineEdit(self.compound.pubchem_id)
+        self.keggLabel = QLabel("<b>KEGG ID:</b>")
+        self.keggEdit = QLineEdit(self.compound.kegg_id)
+        self.smilesLabel = QLabel("<b>SMILES:</b>")
+        self.smilesEdit = QLineEdit(self.compound.smiles)
+        self.cancelButton = QPushButton("Cancel")
+        self.acceptButton = QPushButton("Accept")
+
+
+    def layoutWidgets(self):
+        winLayout = QFormLayout(self)
+        winLayout.addRow(self.nameLabel, self.nameEdit)
+        # winLayout.addRow(self.groupLabel, self.groupEdit)
+        winLayout.addRow(self.bmrbLabel, self.bmrbEdit)
+        winLayout.addRow(self.hmdbLabel, self.hmdbEdit)
+        winLayout.addRow(self.pubchemLabel, self.pubchemEdit)
+        winLayout.addRow(self.keggLabel, self.keggEdit)
+        winLayout.addRow(self.smilesLabel, self.smilesEdit)
+        winLayout.addRow(self.cancelButton, self.acceptButton)
+
+    def createConnections(self):
+        self.cancelButton.clicked.connect(self.reject)
+        self.acceptButton.clicked.connect(self.acceptChanges)
+
+    def acceptChanges(self):
+        if self.checkChanges():
+            self.accept()
+        else:
+            # TODO: Add message for failure
+            self.reject()
+
+    def checkChanges(self):
+        try:
+            self.compound.editName(self.nameEdit.text())
+            # self.compound.editGroup(self.groupEdit.text())
+            self.compound.editBMRB(self.bmrbEdit.text())
+            self.compound.editHMDB(self.hmdbEdit.text())
+            self.compound.editPubChem(self.pubchemEdit.text())
+            self.compound.editKEGG(self.keggEdit.text())
+            self.compound.editSMILES(self.smilesEdit.text())
+            return True
+        except Exception as e:
+            print("Failed", e)
+            return False

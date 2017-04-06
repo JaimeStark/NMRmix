@@ -12,25 +12,29 @@ import codecs
 import math
 
 class Parameters(object):
-    def __init__(self, exists, pref_file):
+    def __init__(self, app_directory):
         self.setDefaultParams()
-        if exists:
-            self.readPreferences(pref_file)
-        else:
-            self.writePreferences(pref_file)
+        self.app_directory = app_directory
+        self.param_dir = "~/.nmrmix"
+        self.param_file = "~/.nmrmix/parameters.txt"
+        if os.path.exists(os.path.expanduser(self.param_dir)):
+            if os.path.isfile(os.path.expanduser(self.param_file)):
+                self.readPreferences()
+
 
     def setDefaultParams(self):
         self.work_dir = os.path.expanduser("~/Desktop")
         self.peaklist_dir = os.path.expanduser("~/Desktop")
         self.library_path = os.path.expanduser("~/Desktop/library.csv")
+        self.autosave = True
         self.use_intensity = False
         self.extra_mixtures = 0
         self.peak_range = 0.025
-        self.use_solvent = False
+        self.use_group = False
         self.max_steps = 1000
         self.refine_max_steps = 1000
         self.start_temp = 10000
-        self.refine_start_temp = 2500
+        self.refine_start_temp = 50
         self.final_temp = 25
         self.refine_final_temp = 25
         self.alpha_temp = math.exp((math.log(self.final_temp/self.start_temp))/self.max_steps)
@@ -44,14 +48,13 @@ class Parameters(object):
         self.blind_regions = []
         self.aromatic_cutoff = 4.700
         self.intense_peak_cutoff = 0.900
-        self.score_power = 2
         self.score_scale = 10000
         self.iterations = 1
         self.randomize_initial = True
         self.use_refine = False
-        self.solvent_specific_ignored_region = False
+        self.group_specific_ignored_region = False
         self.print_step_size = 50
-        self.peak_display_width = 0.003
+        self.peak_display_width = 0.06
 
 
     def setLibraryPath(self, library_path):
@@ -71,6 +74,14 @@ class Parameters(object):
         if os.path.isdir(peaklist_dir):
             self.peaklist_dir = peaklist_dir
 
+    def useAutosave(self):
+        """Turns on the use of autosave after optimization is accepted."""
+        self.autosave = True
+
+    def noAutosave(self):
+        """Turns off the use of autosave after optimization is accepted."""
+        self.autosave = False
+
     def useIntensity(self):
         """Turns on the use of peak intensity for peak overlap scoring."""
         self.use_intensity = True
@@ -79,15 +90,15 @@ class Parameters(object):
         """Turns off the use of peak intensity for peak overlap scoring."""
         self.use_intensity = False
 
-    def useSolvent(self):
+    def useGroup(self):
         """Turns on the generation of mixtures so that each mixture only
-        contains compounds dissolved in the same solvent."""
-        self.use_solvent = True
+        contains compounds dissolved in the same group."""
+        self.use_group = True
 
-    def noSolvent(self):
+    def noGroup(self):
         """Turns off the generation of mixtures so that each mixture only
-        contains compounds dissolved in the same solvent."""
-        self.use_solvent = False
+        contains compounds dissolved in the same group."""
+        self.use_group = False
 
     def setPeakRange(self, peak_range):
         """Sets the range width (in ppm) of a peak that is used to
@@ -241,12 +252,6 @@ class Parameters(object):
         except:
             pass
 
-    def setScorePower(self, power):
-        try:
-            if int(power) >= 1:
-                self.score_power = int(power)
-        except:
-            pass
 
     def setScoreScale(self, scale):
         try:
@@ -262,6 +267,22 @@ class Parameters(object):
         except:
             pass
 
+    def setPrintStepSize(self, step_size):
+        """Sets how often the optimization progress bar updates"""
+        try:
+            if float(step_size) > 0:
+                self.print_step_size = float(step_size)
+        except:
+            pass
+
+    def setPeakDrawWidth(self, peak_width):
+        """Sets how often the optimization progress bar updates"""
+        try:
+            if float(peak_width) > 0 and float(peak_width) <= 1.0:
+                self.peak_display_width = float(peak_width)
+        except:
+            pass
+
     def initWindowSize(self, size):
         self.size = size
 
@@ -271,8 +292,6 @@ class Parameters(object):
             with codecs.open(path, 'w', encoding='utf-8') as scoreparams:
                 peak_range = "DefaultPeak Overlap Range: %0.3f" % self.peak_range
                 scoreparams.write(peak_range+'\n')
-                score_power = "Score Exponential: %d" % self.score_power
-                scoreparams.write(score_power+'\n')
                 score_scale = "Score Scaling Factor: %d" % self.score_scale
                 scoreparams.write(score_scale+'\n')
                 use_intensity = "Intensity Scoring: %s" % str(self.use_intensity)
@@ -282,13 +301,14 @@ class Parameters(object):
 
     def resetPreferences(self):
         self.setDefaultParams()
-        self.writePreferences("~/.nmrmix/preferences.txt")
+        self.writePreferences()
 
-    def readPreferences(self, preferences_path):
+    def readPreferences(self):
         try:
-            if os.path.isfile(preferences_path):
-                with codecs.open(preferences_path, 'r', encoding='utf-8') as pref_file:
-                    for line in pref_file:
+            param_path = os.path.expanduser(self.param_file)
+            if os.path.isfile(param_path):
+                with codecs.open(param_path, 'r', encoding='utf-8') as param_file:
+                    for line in param_file:
                         line_list = line.split('=')
                         parameter = line_list[0].strip()
                         param_value = line_list[1].strip()
@@ -298,6 +318,11 @@ class Parameters(object):
                             self.setPeakListDirectory(param_value)
                         elif parameter == "Library File Path":
                             self.setLibraryPath(param_value)
+                        elif parameter == "Use Autosave":
+                            if param_value.lower() == "true":
+                                self.useAutosave()
+                            else:
+                                self.noAutosave()
                         elif parameter == "Use Peak Intensity":
                             if param_value.lower() == "true":
                                 self.useIntensity()
@@ -307,11 +332,11 @@ class Parameters(object):
                             self.setExtraMixtures(param_value)
                         elif parameter == "Overlap Range":
                             self.setPeakRange(param_value)
-                        elif parameter == "Use Solvent":
+                        elif parameter == "Use Group":
                             if param_value.lower() == "true":
-                                self.useSolvent()
+                                self.useGroup()
                             else:
-                                self.noSolvent()
+                                self.noGroup()
                         elif parameter == "Max Optimizing Steps":
                             self.setMaxSteps(param_value)
                         elif parameter == "Max Refining Steps":
@@ -346,8 +371,6 @@ class Parameters(object):
                             self.setAromaticCutoff(param_value)
                         elif parameter == "Intense Peak Cutoff":
                             self.setIntensePeakCutoff(param_value)
-                        elif parameter == "Score Exponential":
-                            self.setScorePower(param_value)
                         elif parameter == "Score Scale":
                             self.setScoreScale(param_value)
                         elif parameter == "Iterations":
@@ -373,43 +396,48 @@ class Parameters(object):
                             except:
                                 pass
         except Exception as e:
-            print("Failed to read preferences")
-            print(e)
+            # print("Failed to read preferences")
+            # print(e)
+            pass
 
-    def writePreferences(self, preferences_path):
+    def writePreferences(self):
         try:
-            with codecs.open(preferences_path, 'w', encoding='utf-8') as pref_file:
-                pref_file.write("Working Directory" + " = " + str(self.work_dir) + "\n")
-                pref_file.write("Peaklist Directory" + " = " + str(self.peaklist_dir) + "\n")
-                pref_file.write("Library File Path" + " = " + str(self.library_path) + "\n")
-                pref_file.write("Use Peak Intensity" + " = " + str(self.use_intensity) + "\n")
-                pref_file.write("Extra Mixtures" + " = " + str(self.extra_mixtures) + "\n")
-                pref_file.write("Overlap Range" + " = " + str(self.peak_range) + "\n")
-                pref_file.write("Use Solvent" + " = " + str(self.use_solvent) + "\n")
-                pref_file.write("Max Optimizing Steps" + " = " + str(self.max_steps) + "\n")
-                pref_file.write("Max Refining Steps" + " = " + str(self.refine_max_steps) + "\n")
-                pref_file.write("Optimizing Start Temp" + " = " + str(self.start_temp) + "\n")
-                pref_file.write("Refining Start Temp" + " = " + str(self.refine_start_temp) + "\n")
-                pref_file.write("Optimizing Final Temp" + " = " + str(self.final_temp) + "\n")
-                pref_file.write("Refining Final Temp" + " = " + str(self.refine_final_temp) + "\n")
-                pref_file.write("Optimizing Cooling Rate" + " = " + str(self.cooling) + "\n")
-                pref_file.write("Refining Cooling Rate" + " = " + str(self.refine_cooling) + "\n")
-                pref_file.write("Optimizing Mix Rate" + " = " + str(self.mix_rate) + "\n")
-                pref_file.write("Refining Mix Rate" + " = " + str(self.refine_mix_rate) + "\n")
-                pref_file.write("Max Mixture Size" + " = " + str(self.mix_size) + "\n")
-                pref_file.write("Mixture Start Number" + " = " + str(self.start_num) + "\n")
-                # pref_file.write("Ignored Regions" + " = " + self.blind_regions + "\n")
-                pref_file.write("Aromatic/Aliphatic Cutoff" + " = " + str(self.aromatic_cutoff) + "\n")
-                pref_file.write("Intense Peak Cutoff" + " = " + str(self.intense_peak_cutoff) + "\n")
-                pref_file.write("Score Exponential" + " = " + str(self.score_power) + "\n")
-                pref_file.write("Score Scale" + " = " + str(self.score_scale) + "\n")
-                pref_file.write("Iterations" + " = " + str(self.iterations) + "\n")
-                pref_file.write("Randomize Initial Mixture State" + " = " + str(self.randomize_initial) + "\n")
-                pref_file.write("Use Refinement" + " = " + str(self.use_refine) + "\n")
-                pref_file.write("Step Size Print" + " = " + str(self.print_step_size) + "\n")
-                pref_file.write("Peak Display Width" + " = " + str(self.peak_display_width) + "\n")
+            if not os.path.exists(os.path.expanduser(self.param_dir)):
+                os.mkdir(os.path.expanduser(self.param_dir))
+            param_path = os.path.expanduser(self.param_file)
+            with codecs.open(param_path, 'w', encoding='utf-8') as param_file:
+                param_file.write("Working Directory" + " = " + str(self.work_dir) + "\n")
+                param_file.write("Peaklist Directory" + " = " + str(self.peaklist_dir) + "\n")
+                param_file.write("Library File Path" + " = " + str(self.library_path) + "\n")
+                param_file.write("Use Autosave" + " = " + str(self.autosave) + "\n")
+                param_file.write("Use Peak Intensity" + " = " + str(self.use_intensity) + "\n")
+                param_file.write("Extra Mixtures" + " = " + str(self.extra_mixtures) + "\n")
+                param_file.write("Overlap Range" + " = " + str(self.peak_range) + "\n")
+                param_file.write("Use Group" + " = " + str(self.use_group) + "\n")
+                param_file.write("Max Optimizing Steps" + " = " + str(self.max_steps) + "\n")
+                param_file.write("Max Refining Steps" + " = " + str(self.refine_max_steps) + "\n")
+                param_file.write("Optimizing Start Temp" + " = " + str(self.start_temp) + "\n")
+                param_file.write("Refining Start Temp" + " = " + str(self.refine_start_temp) + "\n")
+                param_file.write("Optimizing Final Temp" + " = " + str(self.final_temp) + "\n")
+                param_file.write("Refining Final Temp" + " = " + str(self.refine_final_temp) + "\n")
+                param_file.write("Optimizing Cooling Rate" + " = " + str(self.cooling) + "\n")
+                param_file.write("Refining Cooling Rate" + " = " + str(self.refine_cooling) + "\n")
+                param_file.write("Optimizing Mix Rate" + " = " + str(self.mix_rate) + "\n")
+                param_file.write("Refining Mix Rate" + " = " + str(self.refine_mix_rate) + "\n")
+                param_file.write("Max Mixture Size" + " = " + str(self.mix_size) + "\n")
+                param_file.write("Mixture Start Number" + " = " + str(self.start_num) + "\n")
+                # param_file.write("Ignored Regions" + " = " + self.blind_regions + "\n")
+                param_file.write("Aromatic/Aliphatic Cutoff" + " = " + str(self.aromatic_cutoff) + "\n")
+                param_file.write("Intense Peak Cutoff" + " = " + str(self.intense_peak_cutoff) + "\n")
+                param_file.write("Score Scale" + " = " + str(self.score_scale) + "\n")
+                param_file.write("Iterations" + " = " + str(self.iterations) + "\n")
+                param_file.write("Randomize Initial Mixture State" + " = " + str(self.randomize_initial) + "\n")
+                param_file.write("Use Refinement" + " = " + str(self.use_refine) + "\n")
+                param_file.write("Step Size Print" + " = " + str(self.print_step_size) + "\n")
+                param_file.write("Peak Display Width" + " = " + str(self.peak_display_width) + "\n")
         except Exception as e:
-            print("Failed to write preferences")
-            print(e)
+            # print("Failed to write preferences")
+            # print(e)
+            pass
 
     

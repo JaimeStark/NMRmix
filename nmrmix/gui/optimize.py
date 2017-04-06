@@ -38,35 +38,35 @@ class Window(QDialog):
         self.progressLabels2 = {}
         self.progressBars = {}
         vbox = QVBoxLayout(self)
-        for solvent in self.mixtures.solvent_mixnum:
-            if solvent == "":
-                solvent_name = "N/A"
+        for group in self.mixtures.group_mixnum:
+            if group == "":
+                group_name = "N/A"
             else:
-                solvent_name = solvent
-            self.progressLabels1[solvent] = QLabel("Solvent <font color='red'>%s</font>" % str(solvent_name))
-            self.progressLabels1[solvent].setStyleSheet("QLabel {font-weight: bold;}")
-            self.progressLabels1[solvent].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            self.progressLabels2[solvent] = QLabel("Iteration: <font color='blue'>1/%d</font>" % self.params.iterations)
-            self.progressLabels2[solvent].setStyleSheet("QLabel {font-weight: bold;}")
-            self.progressLabels2[solvent].setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            self.progressLabels3[solvent] = QLabel("Optimizing")
-            self.progressLabels3[solvent].setStyleSheet("QLabel {font-weight: bold; color: green;}")
-            self.progressLabels3[solvent].setAlignment(Qt.AlignCenter)
-            self.progressBars[solvent] = QProgressBar()
-            self.setForegroundColor(self.progressBars[solvent], QColor("red"))
-            self.progressBars[solvent].setMinimum(0)
-            self.progressBars[solvent].setMaximum(self.params.max_steps)
+                group_name = group
+            self.progressLabels1[group] = QLabel("Group <font color='red'>%s</font>" % str(group_name))
+            self.progressLabels1[group].setStyleSheet("QLabel {font-weight: bold;}")
+            self.progressLabels1[group].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.progressLabels2[group] = QLabel("Iteration: <font color='blue'>1/%d</font>" % self.params.iterations)
+            self.progressLabels2[group].setStyleSheet("QLabel {font-weight: bold;}")
+            self.progressLabels2[group].setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.progressLabels3[group] = QLabel("Optimizing")
+            self.progressLabels3[group].setStyleSheet("QLabel {font-weight: bold; color: green;}")
+            self.progressLabels3[group].setAlignment(Qt.AlignCenter)
+            self.progressBars[group] = QProgressBar()
+            self.setForegroundColor(self.progressBars[group], QColor("red"))
+            self.progressBars[group].setMinimum(0)
+            self.progressBars[group].setMaximum(self.params.max_steps)
             value = 0
-            self.progressBars[solvent].setValue(value)
-            self.progressBars[solvent].setFormat('%d / %d' % (value, self.params.max_steps))
+            self.progressBars[group].setValue(value)
+            self.progressBars[group].setFormat('%d / %d' % (value, self.params.max_steps))
             hbox1 = QHBoxLayout()
-            hbox1.addWidget(self.progressLabels1[solvent])
+            hbox1.addWidget(self.progressLabels1[group])
             hbox1.addItem(QSpacerItem(30, 0, QSizePolicy.Maximum))
-            hbox1.addWidget(self.progressLabels3[solvent])
+            hbox1.addWidget(self.progressLabels3[group])
             hbox1.addItem(QSpacerItem(30, 0, QSizePolicy.Maximum))
-            hbox1.addWidget(self.progressLabels2[solvent])
+            hbox1.addWidget(self.progressLabels2[group])
             vbox.addLayout(hbox1)
-            vbox.addWidget(self.progressBars[solvent])
+            vbox.addWidget(self.progressBars[group])
 
         vbox.addItem(QSpacerItem(0, 15, QSizePolicy.Maximum))
         self.durationLabel = QLabel()
@@ -89,6 +89,7 @@ class Window(QDialog):
         hbox2 = QHBoxLayout()
         self.stopButton = QPushButton("Stop Optimizing")
         self.stopButton.setStyleSheet("QPushButton{color: red; font-weight: bold;}")
+        self.stopButton.setDefault(True)
         hbox2.addWidget(self.stopButton)
         self.okButton = QPushButton("Accept Results")
         self.okButton.setStyleSheet("QPushButton{color: gray; font-weight: bold;}")
@@ -103,8 +104,8 @@ class Window(QDialog):
         self.refineResults.clicked.connect(lambda: self.viewScorePlots(refine=True))
 
     def optimizeMixtures(self):
-        solvents = list(self.mixtures.solvent_mixnum.keys())
-        self.solvent_count = len(solvents)
+        groups = list(self.mixtures.group_mixnum.keys())
+        self.group_count = len(groups)
         self.finished_threads = 0
         self.mixtures.calculateTotalScore(self.mixtures.mixtures)
         self.mixtures.anneal_results = {}
@@ -114,35 +115,35 @@ class Window(QDialog):
         self.thread_pool = {}
         self.mixtures.anneal_scores = {}
         self.start_time = time.time()
-        optimize_time = datetime.datetime.fromtimestamp(self.start_time).strftime('%Y%m%d_%H%M%S')
-        self.mixtures.optimize_folder =  optimize_time + "_Optimize"
-        for solvent in solvents:
-            mixnum_list = list(self.mixtures.solvent_mixnum[solvent])
-            self.thread_pool[solvent] = AnnealThread(self.params, self.library, self.mixtures, solvent, mixnum_list)
-            self.thread_pool[solvent].newIteration.connect(self.updateLabels)
-            self.thread_pool[solvent].newStep.connect(self.updateProgressBars)
-            self.thread_pool[solvent].startRefining.connect(self.updateLabels)
-            self.thread_pool[solvent].doneThread.connect(self.updateOkButton)
-            self.thread_pool[solvent].start()
+        self.mixtures.optimize_time = datetime.datetime.fromtimestamp(self.start_time).strftime('%Y%m%d_%H%M%S')
+        self.mixtures.optimize_folder =  self.mixtures.optimize_time + "_Optimize"
+        for group in groups:
+            mixnum_list = list(self.mixtures.group_mixnum[group])
+            self.thread_pool[group] = AnnealThread(self.params, self.library, self.mixtures, group, mixnum_list)
+            self.thread_pool[group].newIteration.connect(self.updateLabels)
+            self.thread_pool[group].newStep.connect(self.updateProgressBars)
+            self.thread_pool[group].startRefining.connect(self.updateLabels)
+            self.thread_pool[group].doneThread.connect(self.updateOkButton)
+            self.thread_pool[group].start()
 
-    def updateLabels(self, text, solvent, i):
-        self.progressLabels3[solvent].setText("%s" % (text))
-        self.progressLabels2[solvent].setText("Iteration: <font color='blue'>%d/%d</font>"
+    def updateLabels(self, text, group, i):
+        self.progressLabels3[group].setText("%s" % (text))
+        self.progressLabels2[group].setText("Iteration: <font color='blue'>%d/%d</font>"
                                                    % (i+1, self.params.iterations))
 
-    def updateProgressBars(self, solvent, i, score, refining=False):
+    def updateProgressBars(self, group, i, score, refining=False):
         if refining:
             max_steps = self.params.refine_max_steps
         else:
             max_steps = self.params.max_steps
         value = i
-        self.progressBars[solvent].setValue(value)
-        self.progressBars[solvent].setMaximum(max_steps)
-        self.progressBars[solvent].setFormat('%d / %d  (%0.1f)' % (value, max_steps, score))
+        self.progressBars[group].setValue(value)
+        self.progressBars[group].setMaximum(max_steps)
+        self.progressBars[group].setFormat('%d / %d  (%0.1f)' % (value, max_steps, score))
 
     def updateOkButton(self):
         self.finished_threads += 1
-        if self.finished_threads == self.solvent_count:
+        if self.finished_threads == self.group_count:
             self.finish_time = time.time()
             m, s = divmod(self.finish_time - self.start_time, 60)
             h, m = divmod(m, 60)
@@ -151,13 +152,14 @@ class Window(QDialog):
             self.okButton.setDisabled(False)
             self.okButton.setStyleSheet("QPushButton{color: green; font-weight: bold;}")
             self.optimizeResults.setDisabled(False)
+            self.optimizeResults.setDefault(True)
             self.stopButton.setText("Cancel Changes")
+            self.stopButton.setDefault(False)
             if self.params.use_refine:
                 self.refineResults.setDisabled(False)
 
     def viewScorePlots(self, refine):
         scoreplot_win = optimize_view.Window(self.params, self.mixtures, refine=refine)
-        scoreplot_win.resize(int(self.params.size.width() * 0.85), int(self.params.size.height() * 0.7))
         scoreplot_win.exec_()
 
     def setForegroundColor(self, widget, color):
@@ -166,8 +168,8 @@ class Window(QDialog):
         widget.setPalette(palette)
 
     def stopOptimization(self):
-        for solvent in self.mixtures.solvent_mixnum:
-            self.thread_pool[solvent].stop()
+        for group in self.mixtures.group_mixnum:
+            self.thread_pool[group].stop()
         QDialog.reject(self)
 
     def acceptMixtures(self):
@@ -180,15 +182,15 @@ class AnnealThread(QThread):
     startRefining = pyqtSignal(str, str, int)
     doneThread = pyqtSignal()
 
-    def __init__(self, params_object, library_object, mixtures_object, solvent, mixnum_list, parent=None):
+    def __init__(self, params_object, library_object, mixtures_object, group, mixnum_list, parent=None):
         QThread.__init__(self, parent)
         self.params = params_object
         self.library = library_object
         self.mixtures = mixtures_object
-        self.solvent = solvent
+        self.group = group
         self.mixnum_list = list(mixnum_list)
-        self.mixtures.anneal_scores[self.solvent] = {}
-        self.mixtures.refine_scores[self.solvent] = {}
+        self.mixtures.anneal_scores[self.group] = {}
+        self.mixtures.refine_scores[self.group] = {}
         self.exiting = False
 
     def stop(self):
@@ -200,7 +202,7 @@ class AnnealThread(QThread):
         time.sleep(0.5)
         i = 0
         while not self.exiting and i < self.params.iterations:
-            self.newIteration.emit("Optimizing", self.solvent, i)
+            self.newIteration.emit("Optimizing", self.group, i)
             if self.params.randomize_initial:
                 init_mixtures = self.randomizeMixtures()
             else:
@@ -209,10 +211,10 @@ class AnnealThread(QThread):
                     init_mixtures[mixnum] = list(self.mixtures.mixtures[mixnum])
             curr_score, mixtures, scores = self.annealMixtures(init_mixtures)
             if self.params.use_refine:
-                self.startRefining.emit("Refining", self.solvent, i)
+                self.startRefining.emit("Refining", self.group, i)
                 curr_score, mixtures, refine_scores = self.annealMixtures(mixtures, refining=True)
-                self.mixtures.refine_scores[self.solvent][i] = list(refine_scores)
-            self.mixtures.anneal_scores[self.solvent][i] = list(scores)
+                self.mixtures.refine_scores[self.group][i] = list(refine_scores)
+            self.mixtures.anneal_scores[self.group][i] = list(scores)
             if i == 0:
                 self.mixtures.curr_mixtures.update(mixtures)
                 previous_score = curr_score
@@ -269,7 +271,7 @@ class AnnealThread(QThread):
             cooling_schedule = self.mixtures.linearCooling(refining)
         for current_temp in cooling_schedule:
             if (step % self.params.print_step_size) == 0:
-                self.newStep.emit(self.solvent, step, curr_score, refining)
+                self.newStep.emit(self.group, step, curr_score, refining)
             if len(unlocked_list) >= 2:
                 new_mixtures, diff_score, diff_overlaps  = self.mixtures.mixMixtures(mixtures, unlocked_list, refining=refining)
             else:
@@ -288,13 +290,14 @@ class AnnealThread(QThread):
             # else:
             #     delta_median = self.mixtures.medianDeltaScore(delta_scores)
 
-            if new_score == 0:
+            if new_score <= 0.0001:
                 score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
                               num_peaks, max_score, 1, 'PASSED')
                 scores.append(score_step)
                 mixtures.update(new_mixtures)
                 curr_score = new_score
                 curr_overlap = new_overlap
+                self.newStep.emit(self.group, step, abs(curr_score), refining)
                 break
             elif new_score <= curr_score:
                 score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
@@ -304,29 +307,34 @@ class AnnealThread(QThread):
                 curr_score = new_score
                 curr_overlap = new_overlap
             else:
-                score_diff = new_score - curr_score
-                probability = math.exp(((-score_diff / max_score) / current_temp) * 25000)
-                if random.random() < probability:
-                    score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
-                                  num_peaks, max_score, probability, 'PASSED')
-                    scores.append(score_step)
-                    mixtures.update(new_mixtures)
-                    curr_score = new_score
-                    curr_overlap = new_overlap
+                if current_temp > 0.0:
+                    score_diff = new_score - curr_score
+                    probability = math.exp(((-score_diff / max_score) / current_temp) * 25000)
+                    if random.random() < probability:
+                        score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
+                                      num_peaks, max_score, probability, 'PASSED')
+                        scores.append(score_step)
+                        mixtures.update(new_mixtures)
+                        curr_score = new_score
+                        curr_overlap = new_overlap
+                    else:
+                        score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
+                                      num_peaks, max_score, probability, 'FAILED')
+                        scores.append(score_step)
                 else:
                     score_step = (step, current_temp, curr_score, new_score, curr_overlap, new_overlap,
-                                  num_peaks, max_score, probability, 'FAILED')
+                                      num_peaks, max_score, 0, 'FAILED')
                     scores.append(score_step)
-            # print(score_step)
-            # if score_diff > delta_max:
-            #     delta_max = score_diff
-            # test_score, test_overlap = self.mixtures.calculateTotalScore(mixtures)
-            # print(test_score, curr_score, test_overlap, curr_overlap)
+                # print(score_step)
+                # if score_diff > delta_max:
+                #     delta_max = score_diff
+                # test_score, test_overlap = self.mixtures.calculateTotalScore(mixtures)
+                # print(test_score, curr_score, test_overlap, curr_overlap)
             step += 1
             if step > max_steps:
-                self.newStep.emit(self.solvent, step-1, curr_score, refining)
+                self.newStep.emit(self.group, step-1, curr_score, refining)
                 break
             if self.exiting:
-                self.newStep.emit(self.solvent, step, curr_score, refining)
+                self.newStep.emit(self.group, step, curr_score, refining)
                 break
         return(curr_score, mixtures, scores)
