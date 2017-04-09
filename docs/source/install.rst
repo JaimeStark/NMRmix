@@ -150,7 +150,6 @@ in this order to install all of the necessary packages, for the Python 3 build::
     brew install python3
     brew install fontconfig
     brew install py3cairo
-    brew install pyqt5
     brew tap rdkit/rdkit
     brew install rdkit --with-pycairo --with-python3
 
@@ -176,6 +175,7 @@ Type the following commands into the terminal for the Python 3 build::
 
     pip3 install numpy
     pip3 install matplotlib
+    pip3 install PyQt5
     pip3 install cairocffi
     pip3 install beautifulsoup4
     pip3 install Pillow
