@@ -47,7 +47,7 @@ set independently for each peak in a compound, or a single global value for all 
 Scoring Overlaps
 ----------------
 
-.. figure:: _static/def_overlap.png
+.. figure:: _static/background/def_overlap.png
     :figwidth: 350px
     :align: right
 
@@ -108,7 +108,7 @@ which the total overlap score increases is evaluated according to a modified Bol
 
 :math:`P = \displaystyle e^\frac{-k_T|ΔS_T| }{MT k_S}`
 
-.. figure:: _static/temp_vs_accept.png
+.. figure:: _static/background/temp_vs_accept.png
     :figwidth: 350px
     :align: right
 

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList>
+  <PeakList1D>
+    <PeakList1DHeader creator="jstark" date="2015-04-21T13:36:11" expNo="2" name="TEMP" owner="" procNo="1" source="/home/jstark/data/Metabolite_Screening">
+      <PeakPickDetails>F1=8.719ppm, F2=5.632ppm, MI=0.09cm, MAXI=0.63cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="7.9733" intensity="0.21" type="0"/>
+    <Peak1D F1="7.9588" intensity="0.24" type="0"/>
+    <Peak1D F1="7.9515" intensity="0.24" type="0"/>
+    <Peak1D F1="7.9027" intensity="0.24" type="0"/>
+    <Peak1D F1="7.5802" intensity="0.14" type="0"/>
+    <Peak1D F1="7.5747" intensity="0.16" type="0"/>
+    <Peak1D F1="7.5597" intensity="0.14" type="0"/>
+    <Peak1D F1="7.5442" intensity="0.11" type="0"/>
+    <Peak1D F1="7.1644" intensity="0.47" type="0"/>
+    <Peak1D F1="7.0075" intensity="0.21" type="0"/>
+    <Peak1D F1="6.9933" intensity="0.29" type="0"/>
+    <Peak1D F1="6.9019" intensity="0.28" type="0"/>
+    <Peak1D F1="6.8885" intensity="0.20" type="0"/>
+    <Peak1D F1="6.5985" intensity="0.14" type="0"/>
+    <Peak1D F1="6.5691" intensity="0.20" type="0"/>
+    <Peak1D F1="6.3331" intensity="0.12" type="0"/>
+    <Peak1D F1="6.3229" intensity="0.17" type="0"/>
+    <Peak1D F1="6.2942" intensity="0.12" type="0"/>
+    <Peak1D F1="6.2838" intensity="0.09" type="0"/>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="jstark" date="2015-04-21T13:36:11" expNo="2" name="TEMP" owner="" procNo="1" source="/home/jstark/data/Metabolite_Screening">
+      <PeakPickDetails>F1=4.360ppm, F2=0.526ppm, MI=0.24cm, MAXI=1.48cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="4.2422" intensity="0.55" type="0"/>
+    <Peak1D F1="4.2315" intensity="0.54" type="0"/>
+    <Peak1D F1="4.1067" intensity="0.43" type="0"/>
+    <Peak1D F1="4.1003" intensity="0.43" type="0"/>
+    <Peak1D F1="4.0928" intensity="0.43" type="0"/>
+    <Peak1D F1="4.0858" intensity="0.46" type="0"/>
+    <Peak1D F1="3.8844" intensity="1.26" type="0"/>
+    <Peak1D F1="3.6558" intensity="0.38" type="0"/>
+    <Peak1D F1="3.5962" intensity="0.28" type="0"/>
+    <Peak1D F1="3.5881" intensity="0.31" type="0"/>
+    <Peak1D F1="3.3862" intensity="0.53" type="0"/>
+    <Peak1D F1="3.3801" intensity="0.50" type="0"/>
+    <Peak1D F1="3.3608" intensity="0.70" type="0"/>
+    <Peak1D F1="3.3542" intensity="0.85" type="0"/>
+    <Peak1D F1="3.1855" intensity="0.63" type="0"/>
+    <Peak1D F1="3.1707" intensity="0.59" type="0"/>
+    <Peak1D F1="3.1595" intensity="0.38" type="0"/>
+    <Peak1D F1="3.1453" intensity="0.32" type="0"/>
+    <Peak1D F1="2.9210" intensity="0.44" type="0"/>
+    <Peak1D F1="2.9068" intensity="0.57" type="0"/>
+    <Peak1D F1="2.8928" intensity="0.49" type="0"/>
+    <Peak1D F1="2.6803" intensity="0.93" type="0"/>
+    <Peak1D F1="1.7722" intensity="0.29" type="0"/>
+    <Peak1D F1="1.7577" intensity="0.47" type="0"/>
+    <Peak1D F1="1.7435" intensity="0.31" type="0"/>
+    <Peak1D F1="1.7047" intensity="0.48" type="0"/>
+    <Peak1D F1="1.6917" intensity="0.49" type="0"/>
+    <Peak1D F1="1.0358" intensity="0.95" type="0"/>
+    <Peak1D F1="1.0237" intensity="0.93" type="0"/>
+    <Peak1D F1="0.9821" intensity="0.95" type="0"/>
+    <Peak1D F1="0.9699" intensity="0.90" type="0"/>
+    <Peak1D F1="0.8805" intensity="0.57" type="0"/>
+    <Peak1D F1="0.8671" intensity="1.10" type="0"/>
+    <Peak1D F1="0.8544" intensity="0.54" type="0"/>
+    <Peak1D F1="0.6417" intensity="0.48" type="0"/>
+    <Peak1D F1="0.6261" intensity="0.41" type="0"/>
+    <Peak1D F1="0.6122" intensity="0.42" type="0"/>
+  </PeakList1D>
+</PeakList>

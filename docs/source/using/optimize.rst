@@ -1,14 +1,20 @@
+.. _optimizing-mixtures:
+
 Optimizing Mixtures
 ===================
 
 Make better mixtures.
 
 
-Optimization
-------------
+.. _optimization-process:
+
+Optimization Process
+--------------------
 
 Here we are optimizing/refining.
 
+
+.. _view-optimization-results:
 
 View Optimization Results
 -------------------------

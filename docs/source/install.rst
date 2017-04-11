@@ -122,13 +122,7 @@ For example to get information about installing Python 3, which is necessary for
 
 This command will show a short overview of the Python package, description, dependencies, and installation arguments.
 
-.. sidebar:: Why Install Python?
-
-    Python 2.7 is already preinstalled by Apple in Mac OS X. However, this version is not frequently updated,
-    and often utilizes outdated packages. The version installed by package managers like Homebrew are much easier to
-    update and manage.
-
-.. note:: Manual Installation
+.. note::
 
     Normally, you could install both of the Python 2 and Python 3 dependencies without much issue. However, this is not
     currently true for the RDKit package. It can only be install for either Python 2 or Python 3, not both. So for the
@@ -142,6 +136,11 @@ Or type the following to install Python 2::
 
     brew install python
 
+.. sidebar:: Why Install Python?
+
+    Python 2.7 is already preinstalled by Apple in Mac OS X. However, this version is not frequently updated,
+    and often utilizes outdated packages. The version installed by package managers like Homebrew are much easier to
+    update and manage.
 
 This will begin by installing all the software dependencies for python first, and then it will install python. Each
 package that is necessary for NMRMix can be installed in this way. Type the following commands into a terminal window

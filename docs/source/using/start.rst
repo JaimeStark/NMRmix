@@ -16,6 +16,9 @@ location of the NMRmix source files, and type::
 The NMRFAM splash screen should pop up, and NMRmix should start. On the resulting NMRmix title screen, press
 **Continue** to start using NMRmix.
 
+
+.. _setting-default-parameters:
+
 Setting Default Parameters
 --------------------------
 
@@ -28,6 +31,9 @@ necessary, for each execution of the NMRmix program.
 
 To set the default preferences, click the *Set Default Preferences* button on the NMRmix title window. The Default
 Preferences window should appear with four tabs: Directories/Scoring; Optimizing; Refining; and Display/Statistics.
+
+
+.. _directories-scoring-parameters:
 
 Directories/Scoring Parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,6 +55,9 @@ Use Intensity Scoring
 
 Autosave Results
     For a description of this parameter, see
+
+
+.. _optimizing-parameters:
 
 Optimizing Parameters
 ^^^^^^^^^^^^^^^^^^^^^
@@ -85,6 +94,9 @@ Restrict by Group
 
 Randomize Initial Mixture
     For a description of this parameter, see
+
+
+.. _refining-parameters:
 
 Refining Parameters
 ^^^^^^^^^^^^^^^^^^^
