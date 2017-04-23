@@ -1,6 +1,6 @@
 # NMRmix
 
-##Introduction
+## Introduction
 
 Ligand affinity screening by nuclear magnetic resonance (NMR) spectroscopy is a versatile tool that is routinely
 used to support drug discovery and functional genomics research. The real power of NMR ligand affinity screens arises
