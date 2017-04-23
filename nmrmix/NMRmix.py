@@ -4,7 +4,7 @@
 NMRmix.py
 
 Created by Jaime Stark on 2/12/14
-Copyright (C) 2014  Jaime Stark
+Copyright (C) 2016 National Magnetic Resonance Facilty At Madison (NMRFAM)
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to
 redistribute it under certain conditions.
@@ -19,7 +19,9 @@ in the library and generates mixtures that minimize
 peak overlap.
 
 REFERENCE
-J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley (2016). Submitted.
+J.L. Stark, H. Eghbalnia, W. Lee, W.M. Westler, and J.L. Markley.
+J. Proteome Research (2016), 15(4): 1360-1368.
+http://pubs.acs.org/doi/abs/10.1021/acs.jproteome.6b00121
 
 USAGE
 python NMRmix.py
