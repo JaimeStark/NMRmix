@@ -55,6 +55,7 @@ class Parameters(object):
         self.group_specific_ignored_region = False
         self.print_step_size = 50
         self.peak_display_width = 0.06
+        self.max_mix_size = 20
 
 
     def setLibraryPath(self, library_path):
@@ -283,6 +284,13 @@ class Parameters(object):
         except:
             pass
 
+    def setMaxMixSize(self, max_mix_size):
+        """Sets the max number of compounds to be placed in each mixture."""
+        try:
+            self.max_mix_size = int(max_mix_size)
+        except:
+            pass
+
     def initWindowSize(self, size):
         self.size = size
 
@@ -395,6 +403,8 @@ class Parameters(object):
                                 self.peak_display_width = float(param_value)
                             except:
                                 pass
+                        elif parameter == "Max Allowable Mixture Size":
+                            self.setMaxMixSize(param_value)
         except Exception as e:
             # print("Failed to read preferences")
             # print(e)
@@ -435,6 +445,7 @@ class Parameters(object):
                 param_file.write("Use Refinement" + " = " + str(self.use_refine) + "\n")
                 param_file.write("Step Size Print" + " = " + str(self.print_step_size) + "\n")
                 param_file.write("Peak Display Width" + " = " + str(self.peak_display_width) + "\n")
+                param_file.write("Max Allowable Mixture Size" + " = " + str(self.max_mix_size) + "\n")
         except Exception as e:
             # print("Failed to write preferences")
             # print(e)

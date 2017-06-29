@@ -30,9 +30,10 @@ class Window(QDialog):
         self.compounds = list(compound_list)
         self.mixture_id = mixture_id
         self.show_list = list(compound_list)
-        self.compound_colors = {0:'red', 1:'blue', 2:'green', 3:'orange', 4:'purple', 5:'teal', 6:'pink', 7:'gray',
-                                8:'cyan', 9:'magenta', 10:'gold', 11:'brown', 12:'olive', 13:'yellow', 14:'maroon',
-                                15: 'darkseagreen', 16:'darksalmon', 17:'turquoise', 18:'khaki', 19:'crimson'}
+        self.compound_colors_list = ['red', 'blue', 'green', 'orange', 'purple', 'teal', 'pink', 'gray',
+                                     'cyan', 'magenta', 'gold', 'brown', 'olive', 'yellow', 'maroon',
+                                     'darkseagreen', 'darksalmon', 'turquoise', 'khaki', 'crimson']
+        self.compound_colors = self.compound_colors_list * ((len(self.show_list) // 20) + 1)
         self.scale = 1.05
         self.show_rois = True
         self.show_full_rois = False

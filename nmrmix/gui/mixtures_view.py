@@ -69,7 +69,7 @@ class Window(QDialog):
         self.quitButton.setFixedWidth(350)
 
     def initTable(self):
-        self.mixtable = QTableWidget(0, 25, self)
+        self.mixtable = QTableWidget(0, self.params.max_mix_size+5, self)
         self.mixtable.setSelectionMode(QAbstractItemView.NoSelection)
         self.mixtable.setSortingEnabled(True)
 
@@ -84,11 +84,15 @@ class Window(QDialog):
         self.mixtable.setColumnWidth(3, 90)
         self.mixtable.setColumnWidth(4, 75)
         self.mixtable.horizontalHeader().setStretchLastSection(True)
-        self.mixtable_header = ['Lock', 'Spectra', 'Mixture\nNumber', 'Total\nScore', 'Group',
-                                'Compound 1', 'Compound 2', 'Compound 3', 'Compound 4', 'Compound 5',
-                                'Compound 6', 'Compound 7', 'Compound 8', 'Compound 9', 'Compound 10',
-                                'Compound 11', 'Compound 12', 'Compound 13', 'Compound 14', 'Compound 15',
-                                'Compound 16', 'Compound 17', 'Compound 18', 'Compound 19', 'Compound 20',]
+        self.mixtable_header = ['Lock', 'Spectra', 'Mixture\nNumber', 'Total\nScore', 'Group']
+        for i in range(self.params.max_mix_size):
+            header = 'Compound ' + str(i+1)
+            self.mixtable_header.append(header)
+        # self.mixtable_header = ['Lock', 'Spectra', 'Mixture\nNumber', 'Total\nScore', 'Group',
+        #                         'Compound 1', 'Compound 2', 'Compound 3', 'Compound 4', 'Compound 5',
+        #                         'Compound 6', 'Compound 7', 'Compound 8', 'Compound 9', 'Compound 10',
+        #                         'Compound 11', 'Compound 12', 'Compound 13', 'Compound 14', 'Compound 15',
+        #                         'Compound 16', 'Compound 17', 'Compound 18', 'Compound 19', 'Compound 20',]
         self.mixtable.setHorizontalHeaderLabels(self.mixtable_header)
         self.mixtable.horizontalHeader().setStyleSheet("QHeaderView {font-weight: bold;}")
         self.mixtable.verticalHeader().hide()
@@ -175,7 +179,7 @@ class Window(QDialog):
         self.mixsizeSpinBox = QSpinBox()
         self.mixsizeSpinBox.setKeyboardTracking(False)
         self.mixsizeSpinBox.setAlignment(Qt.AlignCenter)
-        self.mixsizeSpinBox.setRange(1, 20)
+        self.mixsizeSpinBox.setRange(1, self.params.max_mix_size)
         self.mixsizeSpinBox.setValue(self.params.mix_size)
         self.extramixLabel = QLabel("Extra Mixtures")
         self.extramixLabel.setAlignment(Qt.AlignCenter)
@@ -560,7 +564,7 @@ class Window(QDialog):
         self.clearTable()
         self.mixtable.setSortingEnabled(False)
         rows = len(self.mixtures.mixtures)
-        columns = 25
+        columns = self.params.max_mix_size + 5
         self.mixtable.setRowCount(rows)
         self.mixtable.setColumnCount(columns)
         self.lock_mixture = {}

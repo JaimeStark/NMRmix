@@ -180,8 +180,15 @@ class DefaultParameters(QDialog):
         self.mixsizeSpinBox = QSpinBox()
         self.mixsizeSpinBox.setKeyboardTracking(False)
         self.mixsizeSpinBox.setAlignment(Qt.AlignCenter)
-        self.mixsizeSpinBox.setRange(1, 20)
+        self.mixsizeSpinBox.setRange(1, self.params.max_mix_size)
         self.mixsizeSpinBox.setValue(self.params.mix_size)
+        self.maxmixsizeLabel = QLabel("Max Allowable Mixture Size")
+        self.maxmixsizeLabel.setAlignment(Qt.AlignCenter)
+        self.maxmixsizeSpinBox = QSpinBox()
+        self.maxmixsizeSpinBox.setKeyboardTracking(False)
+        self.maxmixsizeSpinBox.setAlignment(Qt.AlignCenter)
+        self.maxmixsizeSpinBox.setMinimum(1)
+        self.maxmixsizeSpinBox.setValue(self.params.max_mix_size)
         self.extramixLabel = QLabel("Extra Mixtures")
         self.extramixLabel.setAlignment(Qt.AlignCenter)
         self.extramixSpinBox = QSpinBox()
@@ -377,29 +384,31 @@ class DefaultParameters(QDialog):
         mixLayout.addWidget(self.startnumSpinBox, 2, 1)
         mixLayout.addWidget(self.mixsizeLabel, 3, 0)
         mixLayout.addWidget(self.mixsizeSpinBox, 3, 1)
-        mixLayout.addWidget(self.extramixLabel, 4, 0)
-        mixLayout.addWidget(self.extramixSpinBox, 4, 1)
-        mixLayout.addWidget(self.coolingLabel, 5, 0)
-        mixLayout.addWidget(self.coolingComboBox, 5, 1)
-        mixLayout.addWidget(self.starttempLabel, 6, 0)
-        mixLayout.addWidget(self.starttempSpinBox, 6, 1)
-        mixLayout.addWidget(self.finaltempLabel, 7, 0)
-        mixLayout.addWidget(self.finaltempSpinbox, 7, 1)
-        mixLayout.addWidget(self.maxstepsLabel, 8, 0)
-        mixLayout.addWidget(self.maxstepsSpinBox, 8, 1)
-        mixLayout.addWidget(self.mixrateLabel, 9, 0)
-        mixLayout.addWidget(self.mixrateSpinBox, 9, 1)
-        mixLayout.addWidget(self.iterationsLabel, 10, 0)
-        mixLayout.addWidget(self.iterationsSpinBox, 10, 1)
-        mixLayout.addWidget(self.usegroupLabel, 11, 0)
+        mixLayout.addWidget(self.maxmixsizeLabel, 4, 0)
+        mixLayout.addWidget(self.maxmixsizeSpinBox, 4, 1)
+        mixLayout.addWidget(self.extramixLabel, 5, 0)
+        mixLayout.addWidget(self.extramixSpinBox, 5, 1)
+        mixLayout.addWidget(self.coolingLabel, 6, 0)
+        mixLayout.addWidget(self.coolingComboBox, 6, 1)
+        mixLayout.addWidget(self.starttempLabel, 7, 0)
+        mixLayout.addWidget(self.starttempSpinBox, 7, 1)
+        mixLayout.addWidget(self.finaltempLabel, 8, 0)
+        mixLayout.addWidget(self.finaltempSpinbox, 8, 1)
+        mixLayout.addWidget(self.maxstepsLabel, 9, 0)
+        mixLayout.addWidget(self.maxstepsSpinBox, 9, 1)
+        mixLayout.addWidget(self.mixrateLabel, 10, 0)
+        mixLayout.addWidget(self.mixrateSpinBox, 10, 1)
+        mixLayout.addWidget(self.iterationsLabel, 11, 0)
+        mixLayout.addWidget(self.iterationsSpinBox, 11, 1)
+        mixLayout.addWidget(self.usegroupLabel, 12, 0)
         checkbox3Layout = QHBoxLayout()
         checkbox3Layout.addWidget(self.usegroupCheckBox)
-        mixLayout.addLayout(checkbox3Layout, 11, 1, Qt.AlignCenter)
-        mixLayout.addWidget(self.randomizeLabel, 12, 0)
+        mixLayout.addLayout(checkbox3Layout, 12, 1, Qt.AlignCenter)
+        mixLayout.addWidget(self.randomizeLabel, 13, 0)
         checkbox4Layout = QHBoxLayout()
         checkbox4Layout.addWidget(self.randomizeCheckBox)
-        mixLayout.addLayout(checkbox4Layout, 12, 1, Qt.AlignCenter)
-        mixLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 13, 0)
+        mixLayout.addLayout(checkbox4Layout, 13, 1, Qt.AlignCenter)
+        mixLayout.addItem(QSpacerItem(0, 0, QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding), 14, 0)
         self.paramtab2.setLayout(mixLayout)
         self.paramTabs.addTab(self.paramtab2, "Optimizing")
 
@@ -448,9 +457,9 @@ class DefaultParameters(QDialog):
         self.scorescaleSpinBox.valueChanged.connect(self.updateParams)
         self.useintensityCheckBox.clicked.connect(self.updateParams)
         self.useautosaveCheckBox.clicked.connect(self.updateParams)
-
         self.startnumSpinBox.valueChanged.connect(self.updateParams)
         self.mixsizeSpinBox.valueChanged.connect(self.updateParams)
+        self.maxmixsizeSpinBox.valueChanged.connect(self.updateParams)
         self.extramixSpinBox.valueChanged.connect(self.updateParams)
         self.coolingComboBox.currentTextChanged.connect(self.updateParams)
         self.starttempSpinBox.valueChanged.connect(self.updateParams)
@@ -492,7 +501,10 @@ class DefaultParameters(QDialog):
 
         ## Optimization
         self.params.setStartingMixtureNum(self.startnumSpinBox.value())
+        self.params.setMaxMixSize(self.maxmixsizeSpinBox.value())
+        self.mixsizeSpinBox.setRange(1, self.params.max_mix_size)
         self.params.setMixSize(self.mixsizeSpinBox.value())
+        print(self.maxmixsizeSpinBox.value(), self.mixsizeSpinBox.value())
         self.params.setExtraMixtures(self.extramixSpinBox.value())
         if self.coolingComboBox.currentText() == 'Linear':
             self.params.useLinearCooling()
@@ -544,6 +556,7 @@ class DefaultParameters(QDialog):
 
         self.startnumSpinBox.setValue(self.params.start_num)
         self.mixsizeSpinBox.setValue(self.params.mix_size)
+        self.maxmixsizeSpinBox.setValue(self.params.max_mix_size)
         self.extramixSpinBox.setValue(self.params.extra_mixtures)
         if self.params.cooling == "exponential":
             self.coolingComboBox.setCurrentIndex(0)
@@ -597,7 +610,7 @@ class DefaultParameters(QDialog):
 
 
     def closeWindow(self):
-        if os.path.isfile(os.path.expanduser(self.params.pref_file)):
+        if os.path.isfile(os.path.expanduser(self.params.param_file)):
             self.params.readPreferences()
         else:
             self.params.setDefaultParams()
@@ -608,7 +621,7 @@ class DefaultParameters(QDialog):
         self.updateValues()
 
     def restoreParams(self):
-        if os.path.isfile(os.path.expanduser(self.params.pref_file)):
+        if os.path.isfile(os.path.expanduser(self.params.param_file)):
             self.params.readPreferences()
         else:
             self.params.setDefaultParams()
@@ -617,13 +630,14 @@ class DefaultParameters(QDialog):
     def saveParams(self):
         try:
             self.params.writePreferences()
-            output_msg = "Preferences saved to:<br><font color='blue'>%s</font>" % os.path.expanduser(self.params.pref_file)
+            output_msg = "Preferences saved to:<br><font color='blue'>%s</font>" % os.path.expanduser(self.params.param_file)
             QMessageBox.information(self, 'Preferences Saved', output_msg)
-        except:
+        except Exception as e:
             QMessageBox.critical(self, 'Preferences NOT Saved!',
                                  "Saving preferences to file was unsuccessful.\n"
                                  "Please check folder permissions.\n"
                                  "Saved preferences will be lost when NMRmix is quit.")
+            # print(e)
         self.accept()
 
 
