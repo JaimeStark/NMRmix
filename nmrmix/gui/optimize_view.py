@@ -396,7 +396,7 @@ class Window(QDialog):
             for item in self.summary[group]:
                 summary.write("%s\n" % item)
         if self.fullResultsCheckbox.isChecked():
-            with open(scores_path, 'wb') as scoresfile:
+            with open(scores_path, 'w') as scoresfile:
                 writer = csv.writer(scoresfile)
                 header = ['Group', 'Iteration', 'Step', 'Current Temp', 'Current Score', 'New Score',
                           'Current Overlap', 'New Overlap', 'Total Peaks', 'Max Score', 'Probability', 'Result']

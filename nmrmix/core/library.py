@@ -66,7 +66,7 @@ class Library(object):
     def exportLibraryCSV(self, results_path):
         path = os.path.join(results_path, 'library.csv')
         try:
-            with open(path, 'wb') as newcsv:
+            with open(path, 'w') as newcsv:
                 writer = csv.writer(newcsv)
                 writer.writerows(self.library_header)
                 writer.writerows(self.library_csv)
@@ -86,7 +86,7 @@ class Library(object):
         path = os.path.join(results_path, 'peaks_all.csv')
         status = ['ACTIVE', 'IGNORED', 'REMOVED']
         try:
-            with open(path, 'wb') as newcsv:
+            with open(path, 'w') as newcsv:
                 writer = csv.writer(newcsv)
                 compound_list = list(self.library.keys())
                 writer.writerow(['Compound ID', 'Peak Number', 'PPM', 'Intensity', 'Width', 'Status'])
@@ -128,7 +128,7 @@ class Library(object):
     def exportLibraryStats(self, results_path):
         path = os.path.join(results_path, 'library_stats.csv')
         try:
-            with open(path, 'wb') as newcsv:
+            with open(path, 'w') as newcsv:
                 writer = csv.writer(newcsv)
                 num_groups = len(self.groups)
                 header_list = ["", 'All Groups']
@@ -207,7 +207,7 @@ class Library(object):
 
     def exportIgnoreRegions(self, results_directory):
             path = os.path.join(results_directory, "ignored.csv")
-            with open(path, 'wb') as ignore_csv:
+            with open(path, 'w') as ignore_csv:
                 writer = csv.writer(ignore_csv)
                 header = ['Name', 'Lower', 'Upper', 'Group']
                 writer.writerow(header)
@@ -217,7 +217,7 @@ class Library(object):
                     writer.writerow(region_list)
 
             path = os.path.join(results_directory, 'ignored_compounds.csv')
-            with open(path, 'wb') as ignored_compounds_csv:
+            with open(path, 'w') as ignored_compounds_csv:
                 writer = csv.writer(ignored_compounds_csv)
                 header = ['Compound ID', 'Compound Name', 'Compound Group']
                 writer.writerow(header)

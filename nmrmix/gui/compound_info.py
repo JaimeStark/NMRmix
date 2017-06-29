@@ -413,7 +413,7 @@ class Window(QDialog):
         if fileObj[0]:
             filename = os.path.basename(fileObj[0])
             peak_list = self.compound.mix_peaklist + self.compound.ignored_peaklist
-            with open(fileObj[0], 'wb') as peaks_csv:
+            with open(fileObj[0], 'w') as peaks_csv:
                 writer = csv.writer(peaks_csv)
                 header = ['ChemShift', 'Intensity', 'Width']
                 writer.writerow(header)
