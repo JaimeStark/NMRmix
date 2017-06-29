@@ -49,6 +49,10 @@ class MainWindow(QWidget):
         self.pdirLine.setToolTip(self.pdirTip)
         self.pdirLabel.setToolTip(self.pdirTip)
         self.pdirButton.setToolTip(self.pdirTip)
+        self.nucleiLabel = QLabel("<b>Nuclei</b>")
+        self.nucleiComboBox = QComboBox()
+        self.nucleiComboBox.addItems(["1H", "19F", "13C"])
+        self.nucleiComboBox.setMinimumWidth(30)
 
         # Table Widget and Parameters
         self.tblwidget = QWidget()
@@ -151,10 +155,13 @@ class MainWindow(QWidget):
         dirlayout.addWidget(self.wdirLabel, 0, 0)
         dirlayout.addWidget(self.wdirLine, 1, 0)
         dirlayout.addWidget(self.wdirButton, 1, 1)
-        dirlayout.addItem(QSpacerItem(50, 0, QSizePolicy.Maximum), 1, 2)
+        dirlayout.addItem(QSpacerItem(30, 0, QSizePolicy.Maximum), 1, 2)
         dirlayout.addWidget(self.pdirLabel, 0, 3)
         dirlayout.addWidget(self.pdirLine, 1, 3)
         dirlayout.addWidget(self.pdirButton, 1, 4)
+        dirlayout.addItem(QSpacerItem(30, 0, QSizePolicy.Maximum), 1, 5)
+        dirlayout.addWidget(self.nucleiLabel, 0, 6)
+        dirlayout.addWidget(self.nucleiComboBox, 1, 6)
         tblLayout = QVBoxLayout(self.tblwidget)
         tblbtnLayout = QHBoxLayout(self.tblbtnwidget)
         tblbtnLayout.addWidget(self.tblbtnImport)
@@ -179,6 +186,7 @@ class MainWindow(QWidget):
         self.tblbtnClear.clicked.connect(self.clearTable)
         self.importBtn.clicked.connect(self.importPeakLists)
         self.quitBtn.clicked.connect(self.close)
+        self.nucleiComboBox.currentTextChanged.connect(self.updateNuclei)
 
     def setWorkingDir(self):
         """Sets the directory where results files and logs will be placed."""
@@ -195,6 +203,11 @@ class MainWindow(QWidget):
         if dirObj:
             self.params.setPeakListDirectory(dirObj)
             self.pdirLine.setText(self.params.peaklist_dir)
+
+    def updateNuclei(self):
+        nuclei = self.nucleiComboBox.currentText()
+        self.params.setNuclei(nuclei)
+        print(self.params.nuclei)
 
     def importLibraryFile(self):
         """Opens a file dialog to select the library.csv file to import, and then populates the table widget with

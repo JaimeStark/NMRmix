@@ -473,7 +473,7 @@ class Window(QDialog):
         self.ax.spines['bottom'].set_position('zero')
         self.ax.get_xaxis().tick_bottom()
         self.ax.get_yaxis().tick_left()
-        self.ax.set_xlim([12, -0.5])
+        self.ax.set_xlim(self.params.shift_range[self.params.nuclei])
         self.ax.set_ylim([0, 1])
         self.ax.set_xlabel('Chemical Shift (ppm)', fontweight='bold')
         self.ax.set_ylabel('Intensity (Normalized)', fontweight='bold')

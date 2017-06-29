@@ -20,6 +20,9 @@ class Parameters(object):
         if os.path.exists(os.path.expanduser(self.param_dir)):
             if os.path.isfile(os.path.expanduser(self.param_file)):
                 self.readPreferences()
+        self.shift_range = {"1H": [10.5, -0.5],
+                            "19F": [270, -200],
+                            "13C": [210, -10]}
 
 
     def setDefaultParams(self):
@@ -56,6 +59,7 @@ class Parameters(object):
         self.print_step_size = 50
         self.peak_display_width = 0.06
         self.max_mix_size = 20
+        self.nuclei = '1H'
 
 
     def setLibraryPath(self, library_path):
@@ -291,6 +295,11 @@ class Parameters(object):
         except:
             pass
 
+    def setNuclei(self, nuclei):
+        if nuclei in ['1H', '19F', '13C']:
+            self.nuclei = nuclei
+
+
     def initWindowSize(self, size):
         self.size = size
 
@@ -405,6 +414,8 @@ class Parameters(object):
                                 pass
                         elif parameter == "Max Allowable Mixture Size":
                             self.setMaxMixSize(param_value)
+                        elif parameter == "Default Nuclei":
+                            self.setNuclei(param_value)
         except Exception as e:
             # print("Failed to read preferences")
             # print(e)
@@ -446,6 +457,7 @@ class Parameters(object):
                 param_file.write("Step Size Print" + " = " + str(self.print_step_size) + "\n")
                 param_file.write("Peak Display Width" + " = " + str(self.peak_display_width) + "\n")
                 param_file.write("Max Allowable Mixture Size" + " = " + str(self.max_mix_size) + "\n")
+                param_file.write("Default Nuclei" + " = " + str(self.nuclei) + "\n")
         except Exception as e:
             # print("Failed to write preferences")
             # print(e)

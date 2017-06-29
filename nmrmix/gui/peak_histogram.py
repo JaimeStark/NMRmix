@@ -94,7 +94,7 @@ class Window(QDialog):
         data = list(self.library.stats[self.group]['Peaklist'])
         y, binEdges = np.histogram(data, bins=np.arange(-1, 12, 0.02))
         bincenters = 0.5 * (binEdges[1:] + binEdges[:-1])
-        self.ax1.set_xlim([12, -1])
+        self.ax1.set_xlim(self.params.shift_range[self.params.nuclei])
         self.upper_ylim_all = max(y)+(math.ceil(max(y)*0.05))
         self.ax1.set_ylim([0, self.upper_ylim_all])
         self.ax1.plot(bincenters, y, '-', color='blue')

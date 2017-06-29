@@ -292,7 +292,7 @@ class Window(QDialog):
         self.ax.get_xaxis().tick_bottom()
         self.ax.get_yaxis().tick_left()
         self.ax.spines['top'].set_visible(False)
-        self.ax.set_xlim([10.5, -0.5])
+        self.ax.set_xlim(self.params.shift_range[self.params.nuclei])
         self.ax.set_ylim([-1, 1])
         self.ax.set_xlabel('Chemical Shift (ppm)', fontweight='bold')
         self.ax.xaxis.set_label_coords(0.5,0)
