@@ -129,7 +129,7 @@ def read_user(filepath):
     this file."""
     try:
         with open(filepath, 'rU') as csv_file:
-            reader = csv.reader(csv_file, encoding='utf-8')
+            reader = csv.reader(csv_file)
             peaklist = []
             for i, row in enumerate(reader):
                 if i == 0:
