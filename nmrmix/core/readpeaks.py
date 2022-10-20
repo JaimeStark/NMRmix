@@ -164,7 +164,7 @@ def download_bmrb(bmrb_id, directory_path):
     if os.path.exists(bmrb_path):
         peaklist = read_nmrstar(bmrb_path)
     else:
-        bmrb_url = 'http://www.bmrb.wisc.edu/ftp/pub/bmrb/metabolomics/NMR_STAR_experimental_entries/' + bmrb_file
+        bmrb_url = 'https://bmrb.io/ftp/pub/bmrb/metabolomics/entry_directories/' + bmrb_id + "/" + bmrb_file
         try:
             urlretrieve(bmrb_url, bmrb_path)
             peaklist = read_nmrstar(bmrb_path)
